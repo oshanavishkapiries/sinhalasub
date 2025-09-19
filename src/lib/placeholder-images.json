@@ -1,0 +1,112 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Background for hero section, movie 'In Her Wake'",
+      "imageUrl": "https://picsum.photos/seed/100/1280/720",
+      "imageHint": "dramatic landscape"
+    },
+    {
+      "id": "in-her-wake-poster",
+      "description": "Poster for 'In Her Wake'",
+      "imageUrl": "https://picsum.photos/seed/101/500/750",
+      "imageHint": "woman silhouette"
+    },
+    {
+      "id": "echoes-of-neptune-poster",
+      "description": "Poster for 'Echoes of Neptune'",
+      "imageUrl": "https://picsum.photos/seed/102/500/750",
+      "imageHint": "deep space"
+    },
+    {
+      "id": "the-last-voyager-poster",
+      "description": "Poster for 'The Last Voyager'",
+      "imageUrl": "https://picsum.photos/seed/103/500/750",
+      "imageHint": "spaceship cockpit"
+    },
+    {
+      "id": "cyber-chronicles-poster",
+      "description": "Poster for 'Cyber Chronicles'",
+      "imageUrl": "https://picsum.photos/seed/104/500/750",
+      "imageHint": "futuristic city"
+    },
+    {
+      "id": "kings-gambit-poster",
+      "description": "Poster for 'King's Gambit'",
+      "imageUrl": "https://picsum.photos/seed/105/500/750",
+      "imageHint": "medieval king"
+    },
+    {
+      "id": "symphony-of-shadows-poster",
+      "description": "Poster for 'Symphony of Shadows'",
+      "imageUrl": "https://picsum.photos/seed/106/500/750",
+      "imageHint": "haunted mansion"
+    },
+    {
+      "id": "forgotten-relic-poster",
+      "description": "Poster for 'Forgotten Relic'",
+      "imageUrl": "https://picsum.photos/seed/107/500/750",
+      "imageHint": "ancient ruins"
+    },
+    {
+      "id": "neon-dusk-poster",
+      "description": "Poster for 'Neon Dusk'",
+      "imageUrl": "https://picsum.photos/seed/108/500/750",
+      "imageHint": "noir detective"
+    },
+    {
+      "id": "whispers-in-the-wind-poster",
+      "description": "Poster for 'Whispers in the Wind'",
+      "imageUrl": "https://picsum.photos/seed/109/500/750",
+      "imageHint": "couple embrace"
+    },
+    {
+      "id": "concrete-jungle-poster",
+      "description": "Poster for 'Concrete Jungle'",
+      "imageUrl": "https://picsum.photos/seed/110/500/750",
+      "imageHint": "city skyline"
+    },
+    {
+      "id": "ocean-s-elegy-poster",
+      "description": "Poster for 'Ocean's Elegy'",
+      "imageUrl": "https://picsum.photos/seed/111/500/750",
+      "imageHint": "stormy sea"
+    },
+    {
+      "id": "the-heist-poster",
+      "description": "Poster for 'The Heist'",
+      "imageUrl": "https://picsum.photos/seed/112/500/750",
+      "imageHint": "bank vault"
+    },
+    {
+      "id": "lone-gunman-poster",
+      "description": "Poster for 'Lone Gunman'",
+      "imageUrl": "https://picsum.photos/seed/113/500/750",
+      "imageHint": "cowboy sunset"
+    },
+    {
+      "id": "culinary-chaos-poster",
+      "description": "Poster for 'Culinary Chaos'",
+      "imageUrl": "https://picsum.photos/seed/114/500/750",
+      "imageHint": "chaotic kitchen"
+    },
+    {
+      "id": "stand-up-special-poster",
+      "description": "Poster for 'Stand-Up Special'",
+      "imageUrl": "https://picsum.photos/seed/115/500/750",
+      "imageHint": "comedian stage"
+    },
+    {
+      "id": "wild-frontiers-poster",
+      "description": "Poster for 'Wild Frontiers'",
+      "imageUrl": "https://picsum.photos/seed/116/500/750",
+      "imageHint": "jungle animals"
+    },
+    {
+      "id": "user-avatar",
+      "description": "Placeholder for user avatar",
+      "imageUrl": "https://picsum.photos/seed/user1/40/40",
+      "imageHint": "profile portrait"
+    }
+  ]
+}
