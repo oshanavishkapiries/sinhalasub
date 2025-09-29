@@ -23,10 +23,14 @@ func (a *App) Start(ctx context.Context , port string) error {
 		Addr: ":" + port,
 		Handler: a.router,
 	}
+
+	utils.SuccessLog("starting server on port %s", port)
+
 	err := server.ListenAndServe()
 	if err != nil {
 		utils.ErrorLog("starting server : %s", err)
 		return err
 	}
+
 	return nil
 }
