@@ -18,9 +18,9 @@ func New() *App {
 	return app
 }
 
-func (a *App) Start(ctx context.Context , port string) error {
+func (a *App) Start(ctx context.Context, port string) error {
 	server := &http.Server{
-		Addr: ":" + port,
+		Addr:    ":" + port,
 		Handler: a.router,
 	}
 
