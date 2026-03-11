@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Loader2, Plus, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -62,6 +62,18 @@ export function Step1TMDBSearch({ data, onUpdate }: Step1Props) {
     }
   };
 
+  const updatePosterUrl = (index: number, value: string) => {
+    const newPosters = [...(data.poster_urls || ['', '', ''])];
+    newPosters[index] = value;
+    onUpdate({ ...data, poster_urls: newPosters });
+  };
+
+  const updateBackdropUrl = (index: number, value: string) => {
+    const newBackdrops = [...(data.backdrop_urls || ['', '', ''])];
+    newBackdrops[index] = value;
+    onUpdate({ ...data, backdrop_urls: newBackdrops });
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -103,7 +115,7 @@ export function Step1TMDBSearch({ data, onUpdate }: Step1Props) {
               >
                 {result.poster_path && (
                   <img
-                    src={`https://image.tmdb.org/t/p/w92${result.poster_path}`}
+                    src={result.poster_path}
                     alt={result.name}
                     className="w-16 h-24 object-cover rounded"
                   />
@@ -241,37 +253,63 @@ export function Step1TMDBSearch({ data, onUpdate }: Step1Props) {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-muted-foreground">Poster Path</Label>
-              <Input
-                value={data.poster_path || ''}
-                onChange={(e) => onUpdate({ ...data, poster_path: e.target.value })}
-                className="bg-card border-border text-foreground mt-1.5"
-              />
-              {data.poster_path && (
-                <img
-                  src={`https://image.tmdb.org/t/p/w185${data.poster_path}`}
-                  alt="Poster"
-                  className="mt-2 w-32 rounded"
-                />
-              )}
+          {/* Poster URLs */}
+          <div>
+            <Label className="text-muted-foreground">Poster Images (3 URLs)</Label>
+            <div className="space-y-3 mt-2">
+              {[0, 1, 2].map((index) => (
+                <div key={index}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs text-muted-foreground w-20">Poster {index + 1}</span>
+                  </div>
+                  <Input
+                    value={data.poster_urls?.[index] || ''}
+                    onChange={(e) => updatePosterUrl(index, e.target.value)}
+                    placeholder="https://example.com/poster.jpg"
+                    className="bg-card border-border text-foreground"
+                  />
+                  {data.poster_urls?.[index] && (
+                    <img
+                      src={data.poster_urls[index]}
+                      alt={`Poster ${index + 1}`}
+                      className="mt-2 w-32 rounded"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
             </div>
+          </div>
 
-            <div>
-              <Label className="text-muted-foreground">Backdrop Path</Label>
-              <Input
-                value={data.backdrop_path || ''}
-                onChange={(e) => onUpdate({ ...data, backdrop_path: e.target.value })}
-                className="bg-card border-border text-foreground mt-1.5"
-              />
-              {data.backdrop_path && (
-                <img
-                  src={`https://image.tmdb.org/t/p/w300${data.backdrop_path}`}
-                  alt="Backdrop"
-                  className="mt-2 w-full rounded"
-                />
-              )}
+          {/* Backdrop URLs */}
+          <div>
+            <Label className="text-muted-foreground">Backdrop Images (3 URLs)</Label>
+            <div className="space-y-3 mt-2">
+              {[0, 1, 2].map((index) => (
+                <div key={index}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs text-muted-foreground w-20">Backdrop {index + 1}</span>
+                  </div>
+                  <Input
+                    value={data.backdrop_urls?.[index] || ''}
+                    onChange={(e) => updateBackdropUrl(index, e.target.value)}
+                    placeholder="https://example.com/backdrop.jpg"
+                    className="bg-card border-border text-foreground"
+                  />
+                  {data.backdrop_urls?.[index] && (
+                    <img
+                      src={data.backdrop_urls[index]}
+                      alt={`Backdrop ${index + 1}`}
+                      className="mt-2 w-full max-w-md rounded"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 

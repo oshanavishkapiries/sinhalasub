@@ -27,6 +27,8 @@ export default function CreateTVSeriesPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [tvSeriesData, setTvSeriesData] = useState<Partial<TVSeries>>({
     seasons: [],
+    poster_urls: ['', '', ''],
+    backdrop_urls: ['', '', ''],
   });
   const [isSaving, setIsSaving] = useState(false);
 

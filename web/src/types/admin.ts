@@ -235,8 +235,8 @@ export interface TVSeries {
   overview: string;
   tagline?: string;
   homepage?: string;
-  poster_path: string;
-  backdrop_path: string;
+  poster_urls: string[]; // Array of 3 poster URLs
+  backdrop_urls: string[]; // Array of 3 backdrop URLs
   first_air_date: string;
   last_air_date?: string;
   status: string;

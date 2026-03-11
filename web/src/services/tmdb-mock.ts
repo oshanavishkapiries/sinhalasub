@@ -9,8 +9,8 @@ export interface TMDBTVSeries {
   overview: string;
   tagline: string;
   homepage: string;
-  poster_path: string;
-  backdrop_path: string;
+  poster_urls: string[];
+  backdrop_urls: string[];
   first_air_date: string;
   last_air_date: string;
   status: string;
@@ -70,8 +70,16 @@ const mockTVSeries: TMDBTVSeries[] = [
     overview: "A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine in order to secure his family's future.",
     tagline: "Change the Equation",
     homepage: "https://www.amc.com/shows/breaking-bad",
-    poster_path: "/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
-    backdrop_path: "/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+    poster_urls: [
+      "https://image.tmdb.org/t/p/original/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
+      "https://image.tmdb.org/t/p/original/1BP4xYv9ZG4ZVHkL7ocOziBbSYH.jpg",
+      "https://image.tmdb.org/t/p/original/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg"
+    ],
+    backdrop_urls: [
+      "https://image.tmdb.org/t/p/original/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+      "https://image.tmdb.org/t/p/original/eSzpy96DwBujGFj0xMbXBcGcfxX.jpg",
+      "https://image.tmdb.org/t/p/original/9faGSFi5jam6pDWGNd0p8JcJgXQ.jpg"
+    ],
     first_air_date: "2008-01-20",
     last_air_date: "2013-09-29",
     status: "Ended",
@@ -167,8 +175,16 @@ const mockTVSeries: TMDBTVSeries[] = [
     overview: "Seven noble families fight for control of the mythical land of Westeros. Friction between the houses leads to full-scale war.",
     tagline: "Winter Is Coming",
     homepage: "http://www.hbo.com/game-of-thrones",
-    poster_path: "/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg",
-    backdrop_path: "/suopoADq0k8YZr4dQXcU6pToj6s.jpg",
+    poster_urls: [
+      "https://image.tmdb.org/t/p/original/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg",
+      "https://image.tmdb.org/t/p/original/wgfKiqzuMrFIkU1M68DDDY8kGC1.jpg",
+      "https://image.tmdb.org/t/p/original/7WUHnWGx5OO145IRxPDUkQSh4C7.jpg"
+    ],
+    backdrop_urls: [
+      "https://image.tmdb.org/t/p/original/suopoADq0k8YZr4dQXcU6pToj6s.jpg",
+      "https://image.tmdb.org/t/p/original/mUkuc2wyV9dHLG0D0Loaw5pO2s8.jpg",
+      "https://image.tmdb.org/t/p/original/2OMB0ynKlyIenMJWI2Dy9IWT4c.jpg"
+    ],
     first_air_date: "2011-04-17",
     last_air_date: "2019-05-19",
     status: "Ended",
@@ -228,8 +244,16 @@ const mockTVSeries: TMDBTVSeries[] = [
     overview: "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war between magic technologies and clashing convictions.",
     tagline: "The hunt is on.",
     homepage: "https://www.netflix.com/title/81435684",
-    poster_path: "/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg",
-    backdrop_path: "/rkB4LyZHo1NHXFEDHl9vSD9r1lI.jpg",
+    poster_urls: [
+      "https://image.tmdb.org/t/p/original/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg",
+      "https://image.tmdb.org/t/p/original/abf8tHznhSvl9BAElD2cQeRr7do.jpg",
+      "https://image.tmdb.org/t/p/original/oMrgtLXs5bOPZDWPnIFz7bPUii.jpg"
+    ],
+    backdrop_urls: [
+      "https://image.tmdb.org/t/p/original/rkB4LyZHo1NHXFEDHl9vSD9r1lI.jpg",
+      "https://image.tmdb.org/t/p/original/fAWmVpcX9WyHJ7kKW3xgPJgWDmO.jpg",
+      "https://image.tmdb.org/t/p/original/rspq8FLMvGiw3Y6cCBJmBqjLqWP.jpg"
+    ],
     first_air_date: "2021-11-06",
     last_air_date: "2021-11-20",
     status: "Returning Series",
@@ -308,7 +332,7 @@ export async function searchTVSeries(query: string): Promise<TMDBSearchResult[]>
       name: series.name,
       original_name: series.original_name,
       overview: series.overview,
-      poster_path: series.poster_path,
+      poster_path: series.poster_urls[0], // Use first poster for search results
       first_air_date: series.first_air_date,
       vote_average: series.vote_average
     }));
