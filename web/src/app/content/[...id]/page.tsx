@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useContentDetails, useSimilarContent } from '@/services/hooks';
 import { getImageUrl, BACKDROP_SIZE } from '@/lib/images';
 import { Header } from '@/components/header';
@@ -7,8 +8,9 @@ import Image from 'next/image';
 import { ContentDetails } from '@/components/content-details';
 import { notFound } from 'next/navigation';
 
-export default function ContentDetailsPage({ params }: { params: { id: string[] } }) {
-  const [type, id] = params.id;
+export default function ContentDetailsPage({ params }: { params: Promise<{ id: string[] }> }) {
+  const resolvedParams = React.use(params);
+  const [type, id] = resolvedParams.id;
 
   if (type !== 'movie' && type !== 'tv') {
     notFound();
