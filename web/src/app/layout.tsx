@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { Footer } from '@/components/footer';
 import QueryProviders from './providers';
+import { LayoutClient } from './layout-client';
 
 export const metadata: Metadata = {
   title: 'sinhalasub',
@@ -27,10 +28,7 @@ export default function RootLayout({
       </head>
       <body className={cn('font-body antialiased min-h-screen bg-background flex flex-col')}>
         <QueryProviders>
-          <div className="flex-1">
-              {children}
-          </div>
-          <Footer />
+          <LayoutClient>{children}</LayoutClient>
           <Toaster />
         </QueryProviders>
       </body>
