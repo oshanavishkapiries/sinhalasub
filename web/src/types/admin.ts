@@ -169,3 +169,89 @@ export interface ApiResponse<T> {
   error?: string;
   message?: string;
 }
+
+/**
+ * TV Series Types
+ */
+export interface StreamProvider {
+  id: number;
+  name: string;
+  has_ads: boolean;
+}
+
+export interface DownloadProvider {
+  id: number;
+  name: string;
+}
+
+export interface EpisodeStreamLink {
+  id?: number;
+  episode_id?: number;
+  provider_id: number;
+  provider?: StreamProvider;
+  stream_url: string;
+  player_type: 'iframe' | 'video' | 'custom';
+}
+
+export interface EpisodeDownload {
+  id?: number;
+  episode_id?: number;
+  provider_id: number;
+  provider?: DownloadProvider;
+  quality: '360p' | '480p' | '720p' | '1080p' | '4K';
+  file_size: string;
+  download_url: string;
+}
+
+export interface TVEpisode {
+  id?: number;
+  season_id?: number;
+  episode_number: number;
+  title: string;
+  overview: string;
+  thumbnail: string;
+  air_date?: string;
+  runtime?: number;
+  stream_links: EpisodeStreamLink[];
+  downloads: EpisodeDownload[];
+}
+
+export interface TVSeason {
+  id?: number;
+  tv_show_id?: number;
+  season_number: number;
+  title: string;
+  episode_count: number;
+  poster: string;
+  air_date?: string;
+  episodes: TVEpisode[];
+}
+
+export interface TVSeries {
+  id?: number;
+  tmdb_id: number;
+  name: string;
+  original_name: string;
+  overview: string;
+  tagline?: string;
+  homepage?: string;
+  poster_path: string;
+  backdrop_path: string;
+  first_air_date: string;
+  last_air_date?: string;
+  status: string;
+  type: string;
+  original_language: string;
+  adult: boolean;
+  in_production: boolean;
+  popularity: number;
+  vote_average: number;
+  vote_count: number;
+  number_of_episodes: number;
+  number_of_seasons: number;
+  media_type: string;
+  trailer_link?: string;
+  imdb_id?: string;
+  genres: { id: number; name: string }[];
+  seasons: TVSeason[];
+}

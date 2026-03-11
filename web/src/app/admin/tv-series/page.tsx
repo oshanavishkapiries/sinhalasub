@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { DataTable, Column, RowAction } from '@/components/admin/data-table';
 import { Modal } from '@/components/admin/modal';
@@ -8,7 +9,7 @@ import { ContentForm } from '@/components/admin/content/content-form';
 import { AdminContent } from '@/types/admin';
 import adminContentService from '@/services/admin-content';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Clapperboard } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +21,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 
 export default function TvSeriesPage() {
+  const router = useRouter();
   const [content, setContent] = useState<AdminContent[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -274,16 +276,26 @@ export default function TvSeriesPage() {
           <h1 className="text-3xl font-bold text-foreground">TV Series Management</h1>
           <p className="text-muted-foreground mt-1">Manage TV series</p>
         </div>
-        <Button
-          onClick={() => {
-            setSelectedContent(undefined);
-            setIsDrawerOpen(true);
-          }}
-              className="bg-primary hover:bg-accent shadow-lg shadow-primary/20"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add TV Series
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            onClick={() => router.push('/admin/tv-series/create')}
+            className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 text-white"
+          >
+            <Clapperboard className="h-4 w-4 mr-2" />
+            Create TV Series
+          </Button>
+          <Button
+            onClick={() => {
+              setSelectedContent(undefined);
+              setIsDrawerOpen(true);
+            }}
+            variant="outline"
+            className="border-border text-foreground hover:bg-white/5"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Quick Add
+          </Button>
+        </div>
       </div>
 
       <DataTable<AdminContent>
