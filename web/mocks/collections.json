@@ -2,6 +2,11 @@
   {
     "id": "base",
     "routes": [
+      "login:success",
+      "signup:success",
+      "get-current-user:success",
+      "refresh-token:success",
+      "logout:success",
       "get-languages:success",
       "get-tv-genres:success",
       "get-movie-genres:success",
@@ -25,6 +30,11 @@
   {
     "id": "dynamic",
     "routes": [
+      "login:success",
+      "signup:success",
+      "get-current-user:success",
+      "refresh-token:success",
+      "logout:success",
       "get-languages:dynamic",
       "get-tv-genres:dynamic",
       "get-movie-genres:dynamic",

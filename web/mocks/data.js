@@ -157,8 +157,61 @@ const MOCK_TV_SHOWS = [
   },
 ];
 
+// Authentication mock data - Users
+const MOCK_USERS = [
+  {
+    id: '1',
+    email: 'admin@sinhalasub.lk',
+    password: 'test@123', // In production, this would be hashed
+    name: 'Admin User',
+    role: 'admin',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
+    isActive: true,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+  },
+  {
+    id: '2',
+    email: 'user@sinhalasub.lk',
+    password: 'test@123',
+    name: 'Regular User',
+    role: 'user',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user',
+    isActive: true,
+    createdAt: '2024-01-02T00:00:00Z',
+    updatedAt: '2024-01-02T00:00:00Z',
+  },
+];
+
+// Helper function to generate JWT-like token
+const generateToken = (userId, email, role) => {
+  // Mock token generation - in production, use proper JWT library
+  const payload = {
+    userId,
+    email,
+    role,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 86400, // 24 hours
+  };
+  return Buffer.from(JSON.stringify(payload)).toString('base64');
+};
+
+// Helper function to generate refresh token
+const generateRefreshToken = (userId) => {
+  const payload = {
+    userId,
+    type: 'refresh',
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 604800, // 7 days
+  };
+  return Buffer.from(JSON.stringify(payload)).toString('base64');
+};
+
 // Export for use in other route files
 module.exports = {
   MOCK_MOVIES,
   MOCK_TV_SHOWS,
+  MOCK_USERS,
+  generateToken,
+  generateRefreshToken,
 };

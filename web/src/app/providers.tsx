@@ -1,6 +1,6 @@
 /**
- * React Query Providers
- * Sets up QueryClientProvider for the entire application
+ * Application Providers
+ * Sets up QueryClientProvider and AuthProvider for the entire application
  */
 
 'use client';
@@ -8,6 +8,7 @@
 import { QueryClient, QueryClientProvider, isServer } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ReactNode } from 'react';
+import { AuthProvider } from '@/contexts/auth-context';
 
 function makeQueryClient() {
   return new QueryClient({
@@ -49,8 +50,11 @@ export default function QueryProviders({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
-      <ReactQueryDevtools initialIsOpen={false} />
+      <AuthProvider>
+        {children}
+        <ReactQueryDevtools initialIsOpen={false} />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
+

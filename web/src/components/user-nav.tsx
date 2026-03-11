@@ -14,47 +14,85 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
+import { useAuth, useAuthRole } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
 export function UserNav() {
-  const avatarImage = PlaceHolderImages.find(img => img.id === 'user-avatar');
+  const { user, logout, isAuthenticated } = useAuth();
+  const { isAdmin } = useAuthRole();
+  const router = useRouter();
+
+  if (!isAuthenticated || !user) {
+    return (
+      <Link href="/login">
+        <Button variant="outline" size="sm">
+          Sign in
+        </Button>
+      </Link>
+    );
+  }
+
+  const handleLogout = () => {
+    logout();
+    router.push('/');
+  };
+
+  const initials = user.name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={avatarImage?.imageUrl} alt="@shadcn" data-ai-hint={avatarImage?.imageHint} />
-            <AvatarFallback>U</AvatarFallback>
+            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">User</p>
+            <p className="text-sm font-medium leading-none">{user.name}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              user@example.com
+              {user.email}
+            </p>
+            <p className="text-xs leading-none text-yellow-500 font-semibold mt-1">
+              {user.role.toUpperCase()}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            Profile
+          <DropdownMenuItem asChild>
+            <Link href="/profile">Profile</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            Billing
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            Settings
+          <DropdownMenuItem asChild>
+            <Link href="/settings">Settings</Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link href="/admin" className="text-red-500">
+                  Admin Dashboard
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </>
+        )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-            <Link href="/login">Log out</Link>
+        <DropdownMenuItem onClick={handleLogout}>
+          Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
+

@@ -1,8 +1,5 @@
-
-
 'use client';
 
-import { useState } from 'react';
 import Image from 'next/image';
 import type { Content, TVSeason } from '@/types';
 import { getImageUrl, POSTER_SIZE } from '@/lib/images';
