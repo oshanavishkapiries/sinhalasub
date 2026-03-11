@@ -1,26 +1,68 @@
+'use client';
 
-import { fetchContentDetails, fetchSimilarContent } from '@/services/functions';
+import { useContentDetails, useSimilarContent } from '@/services/hooks';
 import { getImageUrl, BACKDROP_SIZE } from '@/lib/images';
-import { notFound } from 'next/navigation';
-import type { Content } from '@/types';
 import { Header } from '@/components/header';
 import Image from 'next/image';
 import { ContentDetails } from '@/components/content-details';
+import { notFound } from 'next/navigation';
 
-export default async function ContentDetailsPage({ params }: { params: { id: string[] } }) {
+export default function ContentDetailsPage({ params }: { params: { id: string[] } }) {
   const [type, id] = params.id;
 
   if (type !== 'movie' && type !== 'tv') {
     notFound();
   }
 
-  const item = await fetchContentDetails({ id, type: type as 'movie' | 'tv' });
+  // Fetch content details using API hook
+  const { data: item, isLoading: isLoadingDetails, error: detailsError } = useContentDetails({
+    id,
+    type: type as 'movie' | 'tv',
+  });
 
+  // Fetch similar content using API hook
+  const { data: similarContent = [], isLoading: isLoadingSimilar } = useSimilarContent({
+    id,
+    type: type as 'movie' | 'tv',
+  });
+
+  // Show loading state
+  if (isLoadingDetails) {
+    return (
+      <div className="relative flex min-h-screen w-full flex-col">
+        <Header />
+        <main className="flex-1">
+          <div className="flex items-center justify-center h-[50vh]">
+            <div className="text-center">
+              <div className="text-xl">Loading...</div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (detailsError) {
+    return (
+      <div className="relative flex min-h-screen w-full flex-col">
+        <Header />
+        <main className="flex-1">
+          <div className="flex items-center justify-center h-[50vh]">
+            <div className="text-center">
+              <div className="text-xl text-red-500">Error: {detailsError.message}</div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Show not found if no item
   if (!item) {
     notFound();
   }
   
-  const similarContent = await fetchSimilarContent({ id, type: type as 'movie' | 'tv' });
   const title = item.title || item.name;
 
   return (
@@ -37,7 +79,10 @@ export default async function ContentDetailsPage({ params }: { params: { id: str
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
         </div>
         <div className="container relative -mt-32 pb-24">
-          <ContentDetails item={item} similarContent={similarContent} />
+          <ContentDetails 
+            item={item} 
+            similarContent={similarContent}
+          />
         </div>
       </main>
     </div>

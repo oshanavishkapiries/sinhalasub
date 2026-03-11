@@ -64,12 +64,12 @@ export default function MoviesPage() {
                         ))}
                     </SelectContent>
                 </Select>
-                 <Select onValueChange={setSelectedLanguage} defaultValue={selectedLanguage}>
+                 <Select onValueChange={(value) => setSelectedLanguage(value === 'all' ? '' : value)} defaultValue={selectedLanguage}>
                     <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Select language" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="">All Languages</SelectItem>
+                        <SelectItem value="all">All Languages</SelectItem>
                         {languages.map(lang => (
                             <SelectItem key={lang.iso_639_1} value={lang.iso_639_1}>{lang.english_name}</SelectItem>
                         ))}
