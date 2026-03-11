@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { DataTable, Column, RowAction } from '@/components/admin/data-table';
-import { Drawer } from '@/components/admin/drawer';
+import { Modal } from '@/components/admin/modal';
 import { ContentForm } from '@/components/admin/content/content-form';
 import { AdminContent } from '@/types/admin';
 import adminContentService from '@/services/admin-content';
@@ -307,8 +307,8 @@ export default function MoviesPage() {
         }}
       />
 
-      {/* Drawer for create/edit */}
-      <Drawer
+      {/* Modal for create/edit */}
+      <Modal
         open={isDrawerOpen}
         onOpenChange={setIsDrawerOpen}
         title={selectedContent ? 'Edit Movie' : 'Add New Movie'}
@@ -326,7 +326,7 @@ export default function MoviesPage() {
           isSubmitting={isSubmitting}
           defaultType="movie"
         />
-      </Drawer>
+      </Modal>
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { DataTable, Column, RowAction } from '@/components/admin/data-table';
-import { Drawer } from '@/components/admin/drawer';
+import { Modal } from '@/components/admin/modal';
 import { UserForm } from '@/components/admin/users/user-form';
 import { AdminUser } from '@/types/admin';
 import adminUsersService from '@/services/admin-users';
@@ -292,8 +292,8 @@ export default function UsersPage() {
         }}
       />
 
-      {/* Drawer for create/edit */}
-      <Drawer
+      {/* Modal for create/edit */}
+      <Modal
         open={isDrawerOpen}
         onOpenChange={setIsDrawerOpen}
         title={selectedUser ? 'Edit User' : 'Create New User'}
@@ -310,7 +310,7 @@ export default function UsersPage() {
           onSubmit={selectedUser ? handleUpdateUser : handleCreateUser}
           isSubmitting={isSubmitting}
         />
-      </Drawer>
+      </Modal>
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
