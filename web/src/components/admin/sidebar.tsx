@@ -52,35 +52,35 @@ export function AdminSidebar() {
       <aside
         className={cn(
           'fixed left-0 top-0 h-screen bg-[#121212] border-r border-white/10 transition-all duration-300 z-40',
-          isOpen ? 'w-64' : 'w-20',
+          isOpen ? 'w-56' : 'w-16',
           'hidden md:block'
         )}
       >
         {/* Logo/Branding */}
-        <div className="h-16 flex items-center justify-center border-b border-white/10">
-          <div className={cn('font-bold text-[#E50914] transition-all', isOpen ? 'text-2xl' : 'text-lg')}>
+        <div className="h-16 flex items-center px-4 border-b border-white/10">
+          <div className={cn('font-bold text-[#E50914] transition-all', isOpen ? 'text-xl' : 'text-base')}>
             {isOpen ? 'SinhalaSub Admin' : 'SS'}
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-2">
+        <nav className="p-3 space-y-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.href || (pathname.startsWith(item.href + '/') && item.href !== '/admin');
             return (
               <Link key={item.href} href={item.href}>
                 <div
                   className={cn(
-                    'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all cursor-pointer',
+                    'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all cursor-pointer',
                     isActive 
                       ? 'bg-[#E50914] text-white shadow-lg shadow-[#E50914]/20' 
                       : 'text-gray-400 hover:bg-white/5 hover:text-white',
-                    !isOpen && 'justify-center'
+                    !isOpen && 'justify-center px-0'
                   )}
                   title={!isOpen ? item.label : ''}
                 >
                   {item.icon}
-                  {isOpen && <span className="font-medium">{item.label}</span>}
+                  {isOpen && <span className="font-medium text-sm">{item.label}</span>}
                 </div>
               </Link>
             );
@@ -88,19 +88,19 @@ export function AdminSidebar() {
         </nav>
 
         {/* Collapse Button */}
-        <div className="absolute bottom-4 left-0 right-0 px-4">
+        <div className="absolute bottom-4 left-0 right-0 px-3">
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={cn(
-              'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all',
+              'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all',
               'text-gray-400 hover:bg-white/5 hover:text-white border border-white/10',
-              !isOpen && 'justify-center'
+              !isOpen && 'justify-center px-0'
             )}
           >
             {isOpen ? (
               <>
                 <ChevronLeft className="w-4 h-4" />
-                <span className="font-medium">Collapse</span>
+                <span className="font-medium text-sm">Collapse</span>
               </>
             ) : (
               <ChevronRight className="w-4 h-4" />

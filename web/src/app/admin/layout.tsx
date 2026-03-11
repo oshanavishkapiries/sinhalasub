@@ -16,7 +16,8 @@ export default function AdminLayout({
       <div className="min-h-screen bg-[#0a0a0a]">
         <AdminSidebar />
         
-        <div className="md:ml-20 flex flex-col min-h-screen">
+        {/* Main content - responsive margin that matches sidebar width */}
+        <div className="md:ml-56 flex flex-col min-h-screen">
           {/* Header */}
           <AdminHeader />
           
