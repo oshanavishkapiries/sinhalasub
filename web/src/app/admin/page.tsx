@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/hooks/useAuth';
-import { Users, FileText, BarChart3, Settings } from 'lucide-react';
+import { Users, Film, Tv, BarChart3, Settings } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
@@ -16,17 +16,17 @@ export default function AdminDashboard() {
       color: 'from-blue-500 to-blue-600',
     },
     {
-      title: 'Content',
-      description: 'Manage movies & TV shows',
-      icon: <FileText className="h-8 w-8" />,
-      href: '/admin/content',
+      title: 'Movies',
+      description: 'Manage movies',
+      icon: <Film className="h-8 w-8" />,
+      href: '/admin/movies',
       color: 'from-primary to-accent',
     },
     {
-      title: 'Analytics',
-      description: 'View statistics',
-      icon: <BarChart3 className="h-8 w-8" />,
-      href: '#',
+      title: 'TV Series',
+      description: 'Manage TV series',
+      icon: <Tv className="h-8 w-8" />,
+      href: '/admin/tv-series',
       color: 'from-green-500 to-green-600',
     },
     {

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useAuthRole } from '@/hooks/useAuth';
-import { Menu, X, Users, FileText, Home, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Menu, X, Users, Home, ChevronLeft, ChevronRight, Film, Tv } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/contexts/sidebar-context';
 
@@ -31,9 +31,14 @@ export function AdminSidebar() {
       icon: <Users className="w-5 h-5" />,
     },
     {
-      href: '/admin/content',
-      label: 'Content',
-      icon: <FileText className="w-5 h-5" />,
+      href: '/admin/movies',
+      label: 'Movies',
+      icon: <Film className="w-5 h-5" />,
+    },
+    {
+      href: '/admin/tv-series',
+      label: 'TV Series',
+      icon: <Tv className="w-5 h-5" />,
     },
   ];
 

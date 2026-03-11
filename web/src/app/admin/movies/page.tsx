@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 
-export default function ContentPage() {
+export default function MoviesPage() {
   const [content, setContent] = useState<AdminContent[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -41,6 +41,7 @@ export default function ContentPage() {
         page,
         limit: pageSize,
         search: searchQuery || undefined,
+        type: 'movie',
       });
       if (response.data) {
         setContent(response.data.content);
@@ -49,7 +50,7 @@ export default function ContentPage() {
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to fetch content',
+        description: 'Failed to fetch movies',
         variant: 'destructive',
       });
     } finally {
@@ -66,7 +67,7 @@ export default function ContentPage() {
     try {
       await adminContentService.createContent({
         title: data.title!,
-        type: data.type || 'movie',
+        type: 'movie',
         overview: data.overview!,
         releaseDate: data.releaseDate!,
         genres: data.genres || [],
@@ -74,14 +75,14 @@ export default function ContentPage() {
       });
       toast({
         title: 'Success',
-        description: 'Content created successfully',
+        description: 'Movie created successfully',
       });
       setIsDrawerOpen(false);
       fetchContent();
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to create content',
+        description: error.message || 'Failed to create movie',
         variant: 'destructive',
       });
     } finally {
@@ -101,7 +102,7 @@ export default function ContentPage() {
       });
       toast({
         title: 'Success',
-        description: 'Content updated successfully',
+        description: 'Movie updated successfully',
       });
       setIsDrawerOpen(false);
       setSelectedContent(undefined);
@@ -109,7 +110,7 @@ export default function ContentPage() {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to update content',
+        description: error.message || 'Failed to update movie',
         variant: 'destructive',
       });
     } finally {
@@ -124,7 +125,7 @@ export default function ContentPage() {
       await adminContentService.deleteContent(contentToDelete.id);
       toast({
         title: 'Success',
-        description: 'Content deleted successfully',
+        description: 'Movie deleted successfully',
       });
       setDeleteDialogOpen(false);
       setContentToDelete(null);
@@ -132,7 +133,7 @@ export default function ContentPage() {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to delete content',
+        description: error.message || 'Failed to delete movie',
         variant: 'destructive',
       });
     } finally {
@@ -148,13 +149,13 @@ export default function ContentPage() {
       });
       toast({
         title: 'Success',
-        description: `Content ${item.status === 'published' ? 'unpublished' : 'published'} successfully`,
+        description: `Movie ${item.status === 'published' ? 'unpublished' : 'published'} successfully`,
       });
       fetchContent();
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to update content status',
+        description: error.message || 'Failed to update movie status',
         variant: 'destructive',
       });
     } finally {
@@ -163,7 +164,7 @@ export default function ContentPage() {
   };
 
   const handleBulkDelete = async (ids: (string | number)[]) => {
-    if (!confirm(`Delete ${ids.length} content items?`)) return;
+    if (!confirm(`Delete ${ids.length} movies?`)) return;
     setIsSubmitting(true);
     try {
       await adminContentService.bulkDeleteContent({
@@ -171,13 +172,13 @@ export default function ContentPage() {
       });
       toast({
         title: 'Success',
-        description: `${ids.length} content items deleted successfully`,
+        description: `${ids.length} movies deleted successfully`,
       });
       fetchContent();
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to delete content',
+        description: error.message || 'Failed to delete movies',
         variant: 'destructive',
       });
     } finally {
@@ -197,15 +198,6 @@ export default function ContentPage() {
       label: 'Title',
       sortable: true,
       render: (value) => <span className="font-medium text-foreground">{value}</span>,
-    },
-    {
-      key: 'type',
-      label: 'Type',
-      render: (value: string) => (
-        <Badge variant="secondary" className="bg-white/10 text-muted-foreground hover:bg-white/20">
-          {value.toUpperCase()}
-        </Badge>
-      ),
     },
     {
       key: 'status',
@@ -279,8 +271,8 @@ export default function ContentPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Content Management</h1>
-          <p className="text-muted-foreground mt-1">Manage movies and TV shows</p>
+          <h1 className="text-3xl font-bold text-foreground">Movies Management</h1>
+          <p className="text-muted-foreground mt-1">Manage movies</p>
         </div>
         <Button
           onClick={() => {
@@ -290,7 +282,7 @@ export default function ContentPage() {
               className="bg-primary hover:bg-accent shadow-lg shadow-primary/20"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Add Content
+          Add Movie
         </Button>
       </div>
 
@@ -319,8 +311,8 @@ export default function ContentPage() {
       <Drawer
         open={isDrawerOpen}
         onOpenChange={setIsDrawerOpen}
-        title={selectedContent ? 'Edit Content' : 'Add New Content'}
-        description={selectedContent ? 'Update content information' : 'Add a new movie or TV show'}
+        title={selectedContent ? 'Edit Movie' : 'Add New Movie'}
+        description={selectedContent ? 'Update movie information' : 'Add a new movie'}
         onSubmit={() => {
           const form = document.querySelector('form');
           form?.dispatchEvent(new Event('submit', { bubbles: true }));
@@ -332,13 +324,14 @@ export default function ContentPage() {
           content={selectedContent}
           onSubmit={selectedContent ? handleUpdateContent : handleCreateContent}
           isSubmitting={isSubmitting}
+          defaultType="movie"
         />
       </Drawer>
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="bg-card border-border text-foreground">
-          <AlertDialogTitle className="text-xl font-semibold">Delete Content</AlertDialogTitle>
+          <AlertDialogTitle className="text-xl font-semibold">Delete Movie</AlertDialogTitle>
           <AlertDialogDescription className="text-muted-foreground">
             Are you sure you want to delete <span className="text-foreground font-medium">"{contentToDelete?.title}"</span>? This action cannot be undone.
           </AlertDialogDescription>

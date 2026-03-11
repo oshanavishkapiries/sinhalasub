@@ -18,6 +18,7 @@ interface ContentFormProps {
   content?: AdminContent;
   onSubmit: (data: Partial<AdminContent>) => void;
   isSubmitting?: boolean;
+  defaultType?: 'movie' | 'tv';
 }
 
 const TYPES = ['movie', 'tv'];
@@ -32,11 +33,11 @@ const GENRES = [
   'Adventure',
 ];
 
-export function ContentForm({ content, onSubmit, isSubmitting = false }: ContentFormProps) {
+export function ContentForm({ content, onSubmit, isSubmitting = false, defaultType }: ContentFormProps) {
   const { register, handleSubmit, setValue, watch } = useForm<Partial<AdminContent>>({
     defaultValues: content || {
       title: '',
-      type: 'movie',
+      type: defaultType || 'movie',
       overview: '',
       releaseDate: new Date().toISOString().split('T')[0],
       genres: [],
@@ -71,6 +72,7 @@ export function ContentForm({ content, onSubmit, isSubmitting = false }: Content
         />
       </div>
 
+      {!defaultType && (
       <div>
         <Label htmlFor="type" className="text-muted-foreground">Type</Label>
         <Select value={type || 'movie'} onValueChange={(value) => setValue('type', value as any)}>
@@ -86,6 +88,7 @@ export function ContentForm({ content, onSubmit, isSubmitting = false }: Content
           </SelectContent>
         </Select>
       </div>
+      )}
 
       <div>
         <Label htmlFor="overview" className="text-muted-foreground">Overview</Label>
