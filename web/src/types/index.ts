@@ -2,7 +2,7 @@
 
 export interface Content {
   id: number;
-  title: string;
+  title?: string;
   original_title?: string;
   name?: string;
   original_name?: string;

@@ -1,0 +1,56 @@
+[
+  {
+    "id": "base",
+    "routes": [
+      "get-languages:success",
+      "get-tv-genres:success",
+      "get-movie-genres:success",
+      "get-trending:success",
+      "get-popular-movies:success",
+      "get-popular-tv:success",
+      "get-top-rated-movies:success",
+      "get-top-rated-tv:success",
+      "get-now-playing:success",
+      "get-movie-details:success",
+      "get-tv-details:success",
+      "get-similar-movies:success",
+      "get-similar-tv:success",
+      "search-content:success",
+      "discover-movies:success",
+      "discover-tv:success",
+      "discover-tv-category:success",
+      "get-tv-season:success"
+    ]
+  },
+  {
+    "id": "empty-data",
+    "from": "base",
+    "routes": [
+      "get-trending:empty",
+      "search-content:empty"
+    ]
+  },
+  {
+    "id": "all-errors",
+    "routes": [
+      "get-languages:error",
+      "get-tv-genres:error",
+      "get-movie-genres:error",
+      "get-trending:error",
+      "get-popular-movies:error",
+      "get-popular-tv:error",
+      "get-top-rated-movies:error",
+      "get-top-rated-tv:error",
+      "get-now-playing:error"
+    ]
+  },
+  {
+    "id": "not-found-scenarios",
+    "from": "base",
+    "routes": [
+      "get-movie-details:not-found",
+      "get-tv-details:not-found",
+      "get-tv-season:not-found"
+    ]
+  }
+]

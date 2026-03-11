@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { Footer } from '@/components/footer';
+import QueryProviders from './providers';
 
 export const metadata: Metadata = {
   title: 'sinhalasub',
@@ -25,11 +26,13 @@ export default function RootLayout({
         />
       </head>
       <body className={cn('font-body antialiased min-h-screen bg-background flex flex-col')}>
-        <div className="flex-1">
-            {children}
-        </div>
-        <Footer />
-        <Toaster />
+        <QueryProviders>
+          <div className="flex-1">
+              {children}
+          </div>
+          <Footer />
+          <Toaster />
+        </QueryProviders>
       </body>
     </html>
   );
