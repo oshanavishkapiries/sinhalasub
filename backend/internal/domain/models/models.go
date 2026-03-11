@@ -5,15 +5,17 @@ import "github.com/oshanavishkapiries/sinhalasub/backend/internal/domain/entitie
 // User represents a user in the system
 type User struct {
 	entities.BaseEntity
-	Name     string `json:"name"`
+	Name     string `json:"name" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"-"`      // Password should never be serialized
-	Status   string `json:"status"` // active, inactive, banned
+	Password string `json:"-"`    // Password should never be serialized
+	Role     string `json:"role"` // admin, user, translator, reviewer
+	Avatar   string `json:"avatar"`
+	IsActive bool   `json:"is_active"`
 }
 
-// IsActive checks if user is active
-func (u *User) IsActive() bool {
-	return u.Status == "active"
+// IsUserActive checks if user is active
+func (u *User) IsUserActive() bool {
+	return u.IsActive
 }
 
 // Video represents a video in the system

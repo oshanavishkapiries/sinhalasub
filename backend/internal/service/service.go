@@ -54,7 +54,8 @@ func (us *userServiceImpl) CreateUser(ctx context.Context, name, email, password
 		Name:     name,
 		Email:    email,
 		Password: password,
-		Status:   "active",
+		Role:     "user",
+		IsActive: true,
 	}
 	if err := us.repo.Create(ctx, user); err != nil {
 		return nil, err

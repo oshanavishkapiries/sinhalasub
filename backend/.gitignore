@@ -1,2 +1,19 @@
+# Environment
 .env
+.env.local
+
+# IDE & Settings
 .setting
+.vscode/
+.idea/
+
+# Build artifacts
+tmp/
+build/
+dist/
+*.exe
+*.out
+
+# Temporary files
+.tmp
+*.log
