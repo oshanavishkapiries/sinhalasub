@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useAuthRole } from '@/hooks/useAuth';
@@ -57,9 +58,15 @@ export function AdminSidebar() {
         )}
       >
         {/* Logo/Branding */}
-        <div className="h-16 flex items-center px-4 border-b border-white/10">
-          <div className={cn('font-bold text-[#E50914] transition-all', isOpen ? 'text-xl' : 'text-base')}>
-            {isOpen ? 'SinhalaSub Admin' : 'SS'}
+        <div className="h-16 flex items-center justify-center px-4 border-b border-white/10">
+          <div className={cn('transition-all', isOpen ? 'w-12 h-12' : 'w-10 h-10')}>
+            <Image
+              src="/logo.png"
+              alt="SinhalaSub Logo"
+              width={isOpen ? 48 : 40}
+              height={isOpen ? 48 : 40}
+              className="w-full h-full object-contain"
+            />
           </div>
         </div>
 
