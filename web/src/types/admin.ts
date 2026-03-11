@@ -212,6 +212,7 @@ export interface TVEpisode {
   thumbnail: string;
   air_date?: string;
   runtime?: number;
+  is_visible: boolean; // Frontend visibility flag
   stream_links: EpisodeStreamLink[];
   downloads: EpisodeDownload[];
 }
@@ -224,6 +225,7 @@ export interface TVSeason {
   episode_count: number;
   poster: string;
   air_date?: string;
+  is_visible: boolean; // Frontend visibility flag
   episodes: TVEpisode[];
 }
 

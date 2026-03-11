@@ -2,29 +2,15 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { TVSeries } from '@/types/admin';
-import { WizardStepper } from '@/components/admin/tv-series/wizard-stepper';
-import { Step1TMDBSearch } from '@/components/admin/tv-series/step1-tmdb-search';
-import { Step2Seasons } from '@/components/admin/tv-series/step2-seasons';
-import { Step3Episodes } from '@/components/admin/tv-series/step3-episodes';
-import { Step4StreamLinks } from '@/components/admin/tv-series/step4-stream-links';
-import { Step5DownloadLinks } from '@/components/admin/tv-series/step5-download-links';
-
-const WIZARD_STEPS = [
-  { id: 1, title: 'TMDB Search', description: 'Find & import series' },
-  { id: 2, title: 'Seasons', description: 'Manage seasons' },
-  { id: 3, title: 'Episodes', description: 'Manage episodes' },
-  { id: 4, title: 'Stream Links', description: 'Add streaming sources' },
-  { id: 5, title: 'Download Links', description: 'Add download sources' },
-];
+import { TVSeriesForm } from '@/components/admin/tv-series/tv-series-form';
 
 export default function CreateTVSeriesPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [currentStep, setCurrentStep] = useState(1);
   const [tvSeriesData, setTvSeriesData] = useState<Partial<TVSeries>>({
     seasons: [],
     poster_urls: ['', '', ''],
@@ -36,28 +22,6 @@ export default function CreateTVSeriesPage() {
     setTvSeriesData(data);
   };
 
-  const handleNext = () => {
-    // Validation before moving to next step
-    if (currentStep === 1 && !tvSeriesData.tmdb_id) {
-      toast({
-        title: 'Required',
-        description: 'Please search and select a TV series from TMDB first.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (currentStep < WIZARD_STEPS.length) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
   const handleCancel = () => {
     router.push('/admin/tv-series');
   };
@@ -67,7 +31,57 @@ export default function CreateTVSeriesPage() {
     if (!tvSeriesData.tmdb_id) {
       toast({
         title: 'Validation Error',
-        description: 'TV series data is incomplete.',
+        description: 'Please search and select a TV series from TMDB first.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!tvSeriesData.name || !tvSeriesData.original_name) {
+      toast({
+        title: 'Validation Error',
+        description: 'Series name is required.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!tvSeriesData.overview) {
+      toast({
+        title: 'Validation Error',
+        description: 'Series overview is required.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate at least one poster URL
+    const hasValidPoster = tvSeriesData.poster_urls?.some(url => url.trim() !== '');
+    if (!hasValidPoster) {
+      toast({
+        title: 'Validation Error',
+        description: 'At least one poster URL is required.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate seasons and episodes
+    if (!tvSeriesData.seasons || tvSeriesData.seasons.length === 0) {
+      toast({
+        title: 'Validation Error',
+        description: 'At least one season is required.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Check if at least one season has episodes
+    const hasEpisodes = tvSeriesData.seasons.some(season => season.episodes && season.episodes.length > 0);
+    if (!hasEpisodes) {
+      toast({
+        title: 'Validation Error',
+        description: 'At least one season must have episodes.',
         variant: 'destructive',
       });
       return;
@@ -99,23 +113,6 @@ export default function CreateTVSeriesPage() {
     }
   };
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return <Step1TMDBSearch data={tvSeriesData} onUpdate={handleUpdateData} />;
-      case 2:
-        return <Step2Seasons data={tvSeriesData} onUpdate={handleUpdateData} />;
-      case 3:
-        return <Step3Episodes data={tvSeriesData} onUpdate={handleUpdateData} />;
-      case 4:
-        return <Step4StreamLinks data={tvSeriesData} onUpdate={handleUpdateData} />;
-      case 5:
-        return <Step5DownloadLinks data={tvSeriesData} onUpdate={handleUpdateData} />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
@@ -132,11 +129,7 @@ export default function CreateTVSeriesPage() {
         </p>
       </div>
 
-      <WizardStepper steps={WIZARD_STEPS} currentStep={currentStep} />
-
-      <div className="bg-card border border-border rounded-lg p-6 min-h-[500px]">
-        {renderStep()}
-      </div>
+      <TVSeriesForm data={tvSeriesData} onUpdate={handleUpdateData} />
 
       <div className="flex items-center justify-between mt-6 pt-6 border-t border-border">
         <Button
@@ -147,46 +140,23 @@ export default function CreateTVSeriesPage() {
           Cancel
         </Button>
 
-        <div className="flex items-center gap-3">
-          {currentStep > 1 && (
-            <Button
-              onClick={handleBack}
-              variant="outline"
-              className="border-border text-foreground hover:bg-white/5"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Previous
-            </Button>
-          )}
-
-          {currentStep < WIZARD_STEPS.length ? (
-            <Button
-              onClick={handleNext}
-              className="bg-primary hover:bg-primary/90 text-white"
-            >
-              Next
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+        <Button
+          onClick={handleSave}
+          disabled={isSaving}
+          className="bg-primary hover:bg-primary/90 text-white"
+        >
+          {isSaving ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+              Saving...
+            </>
           ) : (
-            <Button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="bg-primary hover:bg-primary/90 text-white"
-            >
-              {isSaving ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Check className="w-4 h-4 mr-2" />
-                  Create TV Series
-                </>
-              )}
-            </Button>
+            <>
+              <Check className="w-4 h-4 mr-2" />
+              Create TV Series
+            </>
           )}
-        </div>
+        </Button>
       </div>
 
       {/* Data Summary Panel (for debugging) */}
