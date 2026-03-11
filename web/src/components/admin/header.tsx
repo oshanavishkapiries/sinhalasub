@@ -34,11 +34,11 @@ export function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
     .toUpperCase() || 'A';
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-white/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-30 border-b border-white/10 bg-[#121212]/95 backdrop-blur-sm">
       <div className="flex items-center justify-between h-16 px-6">
         {/* Left - Toggle Sidebar Mobile */}
         <div className="flex items-center gap-4 md:hidden">
-          <Button variant="ghost" size="icon" onClick={onToggleSidebar}>
+          <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="text-white hover:bg-white/10">
             <Menu className="h-5 w-5" />
           </Button>
         </div>
@@ -46,39 +46,39 @@ export function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
         {/* Right - User Menu & Notifications */}
         <div className="flex items-center gap-4 ml-auto">
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
+          <Button variant="ghost" size="icon" className="relative text-gray-400 hover:text-white hover:bg-white/10">
             <Bell className="h-5 w-5" />
-            <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full"></span>
+            <span className="absolute top-2 right-2 h-2 w-2 bg-[#E50914] rounded-full ring-2 ring-[#121212]"></span>
           </Button>
 
           {/* User Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 h-auto px-2 py-1">
-                <Avatar className="h-8 w-8">
+              <Button variant="ghost" className="flex items-center gap-3 h-auto px-3 py-2 hover:bg-white/10">
+                <Avatar className="h-9 w-9 ring-2 ring-[#E50914]/20">
                   <AvatarImage src={user?.avatar} alt={user?.name} />
-                  <AvatarFallback className="bg-red-100 text-red-700 text-xs font-medium">
+                  <AvatarFallback className="bg-[#E50914] text-white text-sm font-semibold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden md:block text-sm text-left">
-                  <p className="font-medium text-gray-900">{user?.name || 'Admin'}</p>
-                  <p className="text-xs text-gray-500">{user?.role}</p>
+                  <p className="font-semibold text-white">{user?.name || 'Admin'}</p>
+                  <p className="text-xs text-gray-400 capitalize">{user?.role}</p>
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-56 bg-[#1a1a1a] border-white/10 text-white">
               <div className="px-2 py-1.5">
-                <p className="font-medium text-sm text-gray-900">{user?.name || 'Admin'}</p>
-                <p className="text-xs text-gray-500">{user?.email}</p>
+                <p className="font-semibold text-sm text-white">{user?.name || 'Admin'}</p>
+                <p className="text-xs text-gray-400">{user?.email}</p>
               </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuItem className="hover:bg-white/10 focus:bg-white/10 cursor-pointer">
                 <Settings className="h-4 w-4 mr-2" />
                 Profile Settings
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuItem onClick={handleLogout} className="text-[#E50914] hover:bg-[#E50914]/10 focus:bg-[#E50914]/10 cursor-pointer">
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </DropdownMenuItem>

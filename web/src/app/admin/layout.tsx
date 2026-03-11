@@ -13,15 +13,15 @@ export default function AdminLayout({
 }) {
   return (
     <ProtectedRoute requiredRole={[UserRole.ADMIN, UserRole.SUPER_ADMIN]}>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[#0a0a0a]">
         <AdminSidebar />
         
-        <div className="md:ml-20 flex flex-col">
+        <div className="md:ml-20 flex flex-col min-h-screen">
           {/* Header */}
           <AdminHeader />
           
           {/* Page content */}
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1">
             {children}
           </main>
         </div>

@@ -17,7 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoreHorizontal, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 export interface Column<T> {
@@ -104,52 +104,57 @@ export function DataTable<T>({
     <div className="space-y-4">
       {/* Header with search and bulk actions */}
       <div className="flex items-center justify-between gap-4">
-        {title && <h2 className="text-lg font-semibold">{title}</h2>}
-        {onSearch && (
-          <Input
-            placeholder={searchPlaceholder}
-            value={searchValue}
-            onChange={(e) => onSearch(e.target.value)}
-            className="w-full max-w-xs"
-          />
-        )}
-        {selectedRows.size > 0 && onBulkDelete && (
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => onBulkDelete(Array.from(selectedRows))}
-          >
-            Delete {selectedRows.size}
-          </Button>
-        )}
+        {title && <h2 className="text-xl font-semibold text-white">{title}</h2>}
+        <div className="flex items-center gap-3 flex-1 justify-end">
+          {onSearch && (
+            <Input
+              placeholder={searchPlaceholder}
+              value={searchValue}
+              onChange={(e) => onSearch(e.target.value)}
+              className="w-full max-w-xs bg-[#1a1a1a] border-white/10 text-white placeholder:text-gray-500 focus:border-[#E50914] focus:ring-[#E50914]/20"
+            />
+          )}
+          {selectedRows.size > 0 && onBulkDelete && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => onBulkDelete(Array.from(selectedRows))}
+              className="bg-[#E50914] hover:bg-[#C42B1C] shadow-lg shadow-[#E50914]/20"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete ({selectedRows.size})
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Table */}
-      <div className="border rounded-lg overflow-hidden">
+      <div className="border border-white/10 rounded-lg overflow-hidden bg-[#1a1a1a]">
         <Table>
           <TableHeader>
-            <TableRow className="bg-gray-50">
+            <TableRow className="bg-[#121212] hover:bg-[#121212] border-white/10">
               {rowActions && (
                 <TableHead className="w-12">
                   <Checkbox
                     checked={selectedRows.size === data.length && data.length > 0}
                     onCheckedChange={toggleAllSelection}
+                    className="border-white/20 data-[state=checked]:bg-[#E50914] data-[state=checked]:border-[#E50914]"
                   />
                 </TableHead>
               )}
               {columns.map((column) => (
                 <TableHead
                   key={String(column.key)}
-                  className={`text-xs font-semibold uppercase text-gray-600 ${column.width || ''}`}
+                  className={`text-xs font-semibold uppercase text-gray-400 ${column.width || ''}`}
                 >
                   {column.sortable ? (
                     <button
                       onClick={() => handleSort(column.key)}
-                      className="flex items-center gap-1 hover:text-gray-900"
+                      className="flex items-center gap-1 hover:text-white transition-colors"
                     >
                       {column.label}
                       {sortKey === column.key && (
-                        <span>{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                        <span className="text-[#E50914]">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                       )}
                     </button>
                   ) : (
@@ -162,30 +167,34 @@ export function DataTable<T>({
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length + (rowActions ? 2 : 0)} className="text-center py-8">
-                  Loading...
+              <TableRow className="hover:bg-transparent border-white/10">
+                <TableCell colSpan={columns.length + (rowActions ? 2 : 0)} className="text-center py-12">
+                  <div className="flex items-center justify-center gap-2 text-gray-400">
+                    <div className="h-5 w-5 border-2 border-[#E50914] border-t-transparent rounded-full animate-spin" />
+                    Loading...
+                  </div>
                 </TableCell>
               </TableRow>
             ) : data.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={columns.length + (rowActions ? 2 : 0)} className="text-center py-8 text-gray-500">
+              <TableRow className="hover:bg-transparent border-white/10">
+                <TableCell colSpan={columns.length + (rowActions ? 2 : 0)} className="text-center py-12 text-gray-500">
                   No data found
                 </TableCell>
               </TableRow>
             ) : (
               data.map((item) => (
-                <TableRow key={String(item[keyField])} className="border-b hover:bg-gray-50">
+                <TableRow key={String(item[keyField])} className="border-white/10 hover:bg-white/5 transition-colors">
                   {rowActions && (
                     <TableCell>
                       <Checkbox
                         checked={selectedRows.has(item[keyField] as string | number)}
                         onCheckedChange={() => toggleRowSelection(item[keyField] as string | number)}
+                        className="border-white/20 data-[state=checked]:bg-[#E50914] data-[state=checked]:border-[#E50914]"
                       />
                     </TableCell>
                   )}
                   {columns.map((column) => (
-                    <TableCell key={String(column.key)} className={`text-sm ${column.width || ''}`}>
+                    <TableCell key={String(column.key)} className={`text-sm text-gray-300 ${column.width || ''}`}>
                       {column.render ? column.render(item[column.key], item) : String(item[column.key])}
                     </TableCell>
                   ))}
@@ -193,16 +202,18 @@ export function DataTable<T>({
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-white hover:bg-white/10">
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" className="bg-[#1a1a1a] border-white/10 text-white">
                           {rowActions.map((action, idx) => (
                             <DropdownMenuItem
                               key={idx}
                               onClick={() => action.onClick(item)}
-                              className={action.variant === 'destructive' ? 'text-red-600' : ''}
+                              className={`hover:bg-white/10 focus:bg-white/10 cursor-pointer ${
+                                action.variant === 'destructive' ? 'text-[#E50914]' : ''
+                              }`}
                             >
                               {action.icon && <span className="mr-2">{action.icon}</span>}
                               {action.label}
@@ -221,7 +232,7 @@ export function DataTable<T>({
 
       {/* Pagination */}
       {pagination && (
-        <div className="flex items-center justify-between text-sm text-gray-600">
+        <div className="flex items-center justify-between text-sm text-gray-400">
           <div>
             Showing {(pagination.page - 1) * pagination.pageSize + 1} to{' '}
             {Math.min(pagination.page * pagination.pageSize, pagination.total)} of{' '}
@@ -233,11 +244,12 @@ export function DataTable<T>({
               size="sm"
               onClick={() => pagination.onPageChange(pagination.page - 1)}
               disabled={pagination.page === 1}
+              className="bg-transparent border-white/10 text-white hover:bg-white/10 disabled:opacity-30"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4 mr-1" />
               Previous
             </Button>
-            <div className="text-sm font-medium">
+            <div className="text-sm font-medium text-white px-3">
               Page {pagination.page} of {totalPages}
             </div>
             <Button
@@ -245,9 +257,10 @@ export function DataTable<T>({
               size="sm"
               onClick={() => pagination.onPageChange(pagination.page + 1)}
               disabled={pagination.page === totalPages}
+              className="bg-transparent border-white/10 text-white hover:bg-white/10 disabled:opacity-30"
             >
               Next
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
         </div>
