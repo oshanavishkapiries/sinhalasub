@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { QUERY_KEYS } from '../endpoints';
-import type { Content } from '../../types';
-import * as api from '../api/topRated';
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import { QUERY_KEYS } from "../api/endpoints";
+import type { Content } from "../../types";
+import * as api from "../functions/topRated";
 
 export function useTopRated(): UseQueryResult<Content[], Error> {
   return useQuery({

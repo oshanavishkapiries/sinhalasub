@@ -1,16 +1,21 @@
-'use client';
+"use client";
 
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { QUERY_KEYS } from '../endpoints';
-import type { Content, ContentDetailsParams, SimilarContentParams } from '../types';
-import * as api from '../api/details';
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import { QUERY_KEYS } from "../api/endpoints";
+import type {
+  Content,
+  ContentDetailsParams,
+  SimilarContentParams,
+} from "../types";
+import * as api from "../functions/details";
 
 export function useContentDetails(
-  params: ContentDetailsParams
+  params: ContentDetailsParams,
 ): UseQueryResult<Content, Error> {
-  const queryKey = params.type === 'movie'
-    ? QUERY_KEYS.MOVIE_DETAILS(params.id)
-    : QUERY_KEYS.TV_DETAILS(params.id);
+  const queryKey =
+    params.type === "movie"
+      ? QUERY_KEYS.MOVIE_DETAILS(params.id)
+      : QUERY_KEYS.TV_DETAILS(params.id);
 
   return useQuery({
     queryKey,
@@ -21,11 +26,12 @@ export function useContentDetails(
 }
 
 export function useSimilarContent(
-  params: SimilarContentParams
+  params: SimilarContentParams,
 ): UseQueryResult<Content[], Error> {
-  const queryKey = params.type === 'movie'
-    ? QUERY_KEYS.SIMILAR_MOVIES(params.id)
-    : QUERY_KEYS.SIMILAR_TV(params.id);
+  const queryKey =
+    params.type === "movie"
+      ? QUERY_KEYS.SIMILAR_MOVIES(params.id)
+      : QUERY_KEYS.SIMILAR_TV(params.id);
 
   return useQuery({
     queryKey,

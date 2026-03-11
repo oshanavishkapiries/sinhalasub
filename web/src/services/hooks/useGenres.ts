@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { QUERY_KEYS } from '../endpoints';
-import type { Language, Genre } from '../types';
-import * as api from '../api/genres';
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import { QUERY_KEYS } from "../api/endpoints";
+import type { Language, Genre } from "../types";
+import * as api from "../functions/genres";
 
 export function useLanguages(): UseQueryResult<Language[], Error> {
   return useQuery({
