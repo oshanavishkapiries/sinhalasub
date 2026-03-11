@@ -1,4 +1,6 @@
-// Mock data for genres
+const { fetchTVGenres, fetchMovieGenres } = require('../tmdb-fetcher');
+
+// Static TV genres
 const TV_GENRES = [
   { id: 10759, name: "Action & Adventure" },
   { id: 16, name: "Animation" },
@@ -18,6 +20,7 @@ const TV_GENRES = [
   { id: 37, name: "Western" },
 ];
 
+// Static movie genres
 const MOVIE_GENRES = [
   { id: 28, name: "Action" },
   { id: 12, name: "Adventure" },
@@ -55,6 +58,16 @@ module.exports = [
         },
       },
       {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const data = await fetchTVGenres();
+            res.status(200).json(data);
+          },
+        },
+      },
+      {
         id: "error",
         type: "json",
         options: {
@@ -75,6 +88,16 @@ module.exports = [
         options: {
           status: 200,
           body: { genres: MOVIE_GENRES },
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const data = await fetchMovieGenres();
+            res.status(200).json(data);
+          },
         },
       },
       {

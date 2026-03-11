@@ -1,4 +1,6 @@
-// Mock data for languages configuration
+const { fetchLanguages } = require('../tmdb-fetcher');
+
+// Static mock data for languages configuration
 const LANGUAGES = [
   { english_name: "English", iso_639_1: "en", name: "English" },
   { english_name: "Sinhala", iso_639_1: "si", name: "සිංහල" },
@@ -23,6 +25,16 @@ module.exports = [
         options: {
           status: 200,
           body: LANGUAGES,
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const data = await fetchLanguages();
+            res.status(200).json(data || LANGUAGES);
+          },
         },
       },
       {

@@ -1,11 +1,10 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Header } from '@/components/header';
 import { ContentCard } from '@/components/content-card';
-import type { Content, Genre } from '@/types';
-import { fetchMovieGenres, fetchDiscoverMovies, fetchLanguages } from '@/lib/tmdb';
+import { useMovieGenres, useLanguages, useDiscoverMovies } from '@/services/hooks';
 import {
   Select,
   SelectContent,
@@ -14,7 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 
 const categories = [
     { value: 'popular', label: 'Popular' },
@@ -22,43 +20,21 @@ const categories = [
     { value: 'now_playing', label: 'Now Playing' },
 ];
 
-type Language = {
-    english_name: string;
-    iso_639_1: string;
-    name: string;
-}
-
 export default function MoviesPage() {
-  const [movies, setMovies] = useState<Content[]>([]);
-  const [genres, setGenres] = useState<Genre[]>([]);
-  const [languages, setLanguages] = useState<Language[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('popular');
   const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
-  const [selectedLanguage, setSelectedLanguage] = useState('all_languages');
-  const [isLoading, setIsLoading] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('');
 
-  useEffect(() => {
-    async function getInitialData() {
-      const [movieGenres, languages] = await Promise.all([
-          fetchMovieGenres(),
-          fetchLanguages()
-      ]);
-      setGenres(movieGenres || []);
-      setLanguages(languages || []);
-    }
-    getInitialData();
-  }, []);
-  
-  useEffect(() => {
-    async function getMovies() {
-        setIsLoading(true);
-        const languageToFetch = selectedLanguage === 'all_languages' ? '' : selectedLanguage;
-        const fetchedMovies = await fetchDiscoverMovies(selectedCategory, selectedGenres, languageToFetch);
-        setMovies(fetchedMovies || []);
-        setIsLoading(false);
-    }
-    getMovies();
-  }, [selectedCategory, selectedGenres, selectedLanguage]);
+  // Fetch genres and languages using TanStack Query
+  const { data: genres = [], isLoading: genresLoading } = useMovieGenres();
+  const { data: languages = [], isLoading: languagesLoading } = useLanguages();
+
+  // Fetch movies based on filters
+  const { data: movies = [], isLoading: moviesLoading } = useDiscoverMovies({
+    category: selectedCategory,
+    genres: selectedGenres,
+    language: selectedLanguage,
+  });
 
   const toggleGenre = (genreId: number) => {
     setSelectedGenres(prev => 
@@ -67,6 +43,8 @@ export default function MoviesPage() {
         : [...prev, genreId]
     );
   };
+
+  const isLoading = moviesLoading || genresLoading || languagesLoading;
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -91,7 +69,7 @@ export default function MoviesPage() {
                         <SelectValue placeholder="Select language" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all_languages">All Languages</SelectItem>
+                        <SelectItem value="">All Languages</SelectItem>
                         {languages.map(lang => (
                             <SelectItem key={lang.iso_639_1} value={lang.iso_639_1}>{lang.english_name}</SelectItem>
                         ))}
@@ -117,7 +95,7 @@ export default function MoviesPage() {
           ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {movies.map(item => (
-                <ContentCard key={item.id} item={item as Content} />
+                <ContentCard key={item.id} item={item} />
               ))}
             </div>
           )}

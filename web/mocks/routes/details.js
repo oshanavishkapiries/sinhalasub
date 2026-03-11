@@ -1,4 +1,9 @@
 const { MOCK_MOVIES, MOCK_TV_SHOWS } = require("../data");
+const { 
+  fetchContentDetails, 
+  fetchSimilarContent, 
+  searchContent 
+} = require('../tmdb-fetcher');
 
 module.exports = [
   {
@@ -17,6 +22,21 @@ module.exports = [
               res.status(200).send(movie);
             } else {
               res.status(404).send({ message: "Movie not found" });
+            }
+          },
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const movieId = req.params.id;
+            const movie = await fetchContentDetails(movieId, 'movie');
+            if (movie) {
+              res.status(200).json(movie);
+            } else {
+              res.status(404).json({ message: "Movie not found" });
             }
           },
         },
@@ -52,6 +72,21 @@ module.exports = [
         },
       },
       {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const tvId = req.params.id;
+            const tv = await fetchContentDetails(tvId, 'tv');
+            if (tv) {
+              res.status(200).json(tv);
+            } else {
+              res.status(404).json({ message: "TV show not found" });
+            }
+          },
+        },
+      },
+      {
         id: "not-found",
         type: "json",
         options: {
@@ -74,8 +109,17 @@ module.exports = [
           body: {
             page: 1,
             results: MOCK_MOVIES.slice(0, 2),
-            total_pages: 1,
-            total_results: 2,
+          },
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const movieId = req.params.id;
+            const data = await fetchSimilarContent(movieId, 'movie');
+            res.status(200).json(data);
           },
         },
       },
@@ -94,8 +138,17 @@ module.exports = [
           body: {
             page: 1,
             results: MOCK_TV_SHOWS.slice(0, 2),
-            total_pages: 1,
-            total_results: 2,
+          },
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const tvId = req.params.id;
+            const data = await fetchSimilarContent(tvId, 'tv');
+            res.status(200).json(data);
           },
         },
       },
@@ -120,9 +173,18 @@ module.exports = [
             res.status(200).send({
               page: 1,
               results: results,
-              total_pages: 1,
-              total_results: results.length,
             });
+          },
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const query = req.query.query || "";
+            const data = await searchContent(query);
+            res.status(200).json(data);
           },
         },
       },
@@ -134,8 +196,6 @@ module.exports = [
           body: {
             page: 1,
             results: [],
-            total_pages: 1,
-            total_results: 0,
           },
         },
       },

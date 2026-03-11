@@ -23,6 +23,29 @@
     ]
   },
   {
+    "id": "dynamic",
+    "routes": [
+      "get-languages:dynamic",
+      "get-tv-genres:dynamic",
+      "get-movie-genres:dynamic",
+      "get-trending:dynamic",
+      "get-popular-movies:dynamic",
+      "get-popular-tv:dynamic",
+      "get-top-rated-movies:dynamic",
+      "get-top-rated-tv:dynamic",
+      "get-now-playing:dynamic",
+      "get-movie-details:dynamic",
+      "get-tv-details:dynamic",
+      "get-similar-movies:dynamic",
+      "get-similar-tv:dynamic",
+      "search-content:dynamic",
+      "discover-movies:dynamic",
+      "discover-tv:dynamic",
+      "discover-tv-category:dynamic",
+      "get-tv-season:dynamic"
+    ]
+  },
+  {
     "id": "empty-data",
     "from": "base",
     "routes": [

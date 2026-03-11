@@ -1,6 +1,13 @@
 const { MOCK_MOVIES, MOCK_TV_SHOWS } = require("../data");
+const { 
+  fetchTrending, 
+  fetchPopular, 
+  fetchTopRated, 
+  fetchNowPlaying 
+} = require('../tmdb-fetcher');
 
 module.exports = [
+  // Trending content
   {
     id: "get-trending",
     url: "/api/trending/all/week",
@@ -14,8 +21,16 @@ module.exports = [
           body: {
             page: 1,
             results: [...MOCK_MOVIES.slice(0, 3), ...MOCK_TV_SHOWS.slice(0, 2)],
-            total_pages: 1,
-            total_results: 5,
+          },
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const data = await fetchTrending();
+            res.status(200).json(data);
           },
         },
       },
@@ -24,12 +39,7 @@ module.exports = [
         type: "json",
         options: {
           status: 200,
-          body: {
-            page: 1,
-            results: [],
-            total_pages: 1,
-            total_results: 0,
-          },
+          body: { page: 1, results: [] },
         },
       },
       {
@@ -42,6 +52,8 @@ module.exports = [
       },
     ],
   },
+
+  // Popular movies
   {
     id: "get-popular-movies",
     url: "/api/movie/popular",
@@ -52,11 +64,17 @@ module.exports = [
         type: "json",
         options: {
           status: 200,
-          body: {
-            page: 1,
-            results: MOCK_MOVIES,
-            total_pages: 1,
-            total_results: MOCK_MOVIES.length,
+          body: { page: 1, results: MOCK_MOVIES },
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const data = await fetchPopular();
+            const movies = data.results.filter(item => item.media_type === 'movie');
+            res.status(200).json({ page: 1, results: movies });
           },
         },
       },
@@ -70,6 +88,8 @@ module.exports = [
       },
     ],
   },
+
+  // Popular TV shows
   {
     id: "get-popular-tv",
     url: "/api/tv/popular",
@@ -80,11 +100,17 @@ module.exports = [
         type: "json",
         options: {
           status: 200,
-          body: {
-            page: 1,
-            results: MOCK_TV_SHOWS,
-            total_pages: 1,
-            total_results: MOCK_TV_SHOWS.length,
+          body: { page: 1, results: MOCK_TV_SHOWS },
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const data = await fetchPopular();
+            const tvShows = data.results.filter(item => item.media_type === 'tv');
+            res.status(200).json({ page: 1, results: tvShows });
           },
         },
       },
@@ -98,6 +124,8 @@ module.exports = [
       },
     ],
   },
+
+  // Top rated movies
   {
     id: "get-top-rated-movies",
     url: "/api/movie/top_rated",
@@ -108,11 +136,17 @@ module.exports = [
         type: "json",
         options: {
           status: 200,
-          body: {
-            page: 1,
-            results: MOCK_MOVIES.slice(0, 3),
-            total_pages: 1,
-            total_results: 3,
+          body: { page: 1, results: MOCK_MOVIES.slice(0, 3) },
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const data = await fetchTopRated();
+            const movies = data.results.filter(item => item.media_type === 'movie');
+            res.status(200).json({ page: 1, results: movies });
           },
         },
       },
@@ -126,6 +160,8 @@ module.exports = [
       },
     ],
   },
+
+  // Top rated TV shows
   {
     id: "get-top-rated-tv",
     url: "/api/tv/top_rated",
@@ -136,11 +172,17 @@ module.exports = [
         type: "json",
         options: {
           status: 200,
-          body: {
-            page: 1,
-            results: MOCK_TV_SHOWS.slice(0, 3),
-            total_pages: 1,
-            total_results: 3,
+          body: { page: 1, results: MOCK_TV_SHOWS.slice(0, 3) },
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const data = await fetchTopRated();
+            const tvShows = data.results.filter(item => item.media_type === 'tv');
+            res.status(200).json({ page: 1, results: tvShows });
           },
         },
       },
@@ -154,6 +196,8 @@ module.exports = [
       },
     ],
   },
+
+  // Now playing movies
   {
     id: "get-now-playing",
     url: "/api/movie/now_playing",
@@ -164,11 +208,16 @@ module.exports = [
         type: "json",
         options: {
           status: 200,
-          body: {
-            page: 1,
-            results: MOCK_MOVIES.slice(2, 5),
-            total_pages: 1,
-            total_results: 3,
+          body: { page: 1, results: MOCK_MOVIES.slice(2, 5) },
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const data = await fetchNowPlaying();
+            res.status(200).json(data);
           },
         },
       },

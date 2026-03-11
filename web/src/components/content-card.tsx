@@ -9,7 +9,7 @@ import { Button } from './ui/button';
 import { Play, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import React from 'react';
-import { getImageUrl } from '@/lib/tmdb';
+import { getImageUrl } from '@/lib/images';
 
 interface ContentCardProps {
   item: Content;

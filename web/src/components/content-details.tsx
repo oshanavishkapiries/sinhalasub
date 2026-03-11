@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import type { Content, TVSeason } from '@/types';
-import { getImageUrl, POSTER_SIZE } from '@/lib/tmdb';
+import { getImageUrl, POSTER_SIZE } from '@/lib/images';
 import { Star, Download, Send } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';

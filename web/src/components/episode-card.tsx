@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Download, Play } from 'lucide-react';
-import { getImageUrl } from '@/lib/tmdb';
+import { getImageUrl } from '@/lib/images';
 import { WatchProvidersDialog } from './watch-providers-dialog';
 import {
   Dialog,

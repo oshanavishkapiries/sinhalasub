@@ -1,5 +1,6 @@
 
-import { fetchContentDetails, getImageUrl, BACKDROP_SIZE, fetchSimilarContent } from '@/lib/tmdb';
+import { fetchContentDetails, fetchSimilarContent } from '@/services/functions';
+import { getImageUrl, BACKDROP_SIZE } from '@/lib/images';
 import { notFound } from 'next/navigation';
 import type { Content } from '@/types';
 import { Header } from '@/components/header';
@@ -13,13 +14,13 @@ export default async function ContentDetailsPage({ params }: { params: { id: str
     notFound();
   }
 
-  const item = await fetchContentDetails(id, type as 'movie' | 'tv');
+  const item = await fetchContentDetails({ id, type: type as 'movie' | 'tv' });
 
   if (!item) {
     notFound();
   }
   
-  const similarContent = await fetchSimilarContent(id, type as 'movie' | 'tv');
+  const similarContent = await fetchSimilarContent({ id, type: type as 'movie' | 'tv' });
   const title = item.title || item.name;
 
   return (

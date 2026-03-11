@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { Button } from './ui/button';
 import { Play, Info } from 'lucide-react';
 import Link from 'next/link';
-import { getImageUrl, BACKDROP_SIZE } from '@/lib/tmdb';
+import { getImageUrl, BACKDROP_SIZE } from '@/lib/images';
 
 interface HeroSectionProps {
   item: Content;

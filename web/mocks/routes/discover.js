@@ -1,4 +1,9 @@
 const { MOCK_MOVIES, MOCK_TV_SHOWS } = require("../data");
+const { 
+  fetchDiscoverMovies, 
+  fetchDiscoverTV, 
+  fetchTVSeason 
+} = require('../tmdb-fetcher');
 
 module.exports = [
   {
@@ -32,9 +37,23 @@ module.exports = [
             res.status(200).send({
               page: 1,
               results: results,
-              total_pages: 1,
-              total_results: results.length,
             });
+          },
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const { category } = req.params;
+            const { with_genres, with_original_language } = req.query;
+            const data = await fetchDiscoverMovies(
+              category,
+              with_genres || '',
+              with_original_language || ''
+            );
+            res.status(200).json(data);
           },
         },
       },
@@ -70,9 +89,22 @@ module.exports = [
             res.status(200).send({
               page: 1,
               results: results,
-              total_pages: 1,
-              total_results: results.length,
             });
+          },
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const { with_genres, with_original_language } = req.query;
+            const data = await fetchDiscoverTV(
+              'discover',
+              with_genres || '',
+              with_original_language || ''
+            );
+            res.status(200).json(data);
           },
         },
       },
@@ -109,9 +141,23 @@ module.exports = [
             res.status(200).send({
               page: 1,
               results: results,
-              total_pages: 1,
-              total_results: results.length,
             });
+          },
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const { category } = req.params;
+            const { with_genres, with_original_language } = req.query;
+            const data = await fetchDiscoverTV(
+              category,
+              with_genres || '',
+              with_original_language || ''
+            );
+            res.status(200).json(data);
           },
         },
       },
@@ -163,6 +209,21 @@ module.exports = [
               }
             } else {
               res.status(404).send({ message: "TV show not found" });
+            }
+          },
+        },
+      },
+      {
+        id: "dynamic",
+        type: "middleware",
+        options: {
+          middleware: async (req, res) => {
+            const { tvId, seasonNumber } = req.params;
+            const data = await fetchTVSeason(tvId, seasonNumber);
+            if (data) {
+              res.status(200).json(data);
+            } else {
+              res.status(404).json({ message: "Season not found" });
             }
           },
         },

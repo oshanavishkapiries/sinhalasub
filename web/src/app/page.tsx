@@ -2,17 +2,20 @@
 import { Header } from '@/components/header';
 import { HeroSection } from '@/components/hero-section';
 import { ContentCarousel } from '@/components/content-carousel';
-import { getContent } from '@/lib/data';
+import { fetchTrending, fetchPopular, fetchTopRated, fetchNowPlaying } from '@/services/functions';
 import type { Content } from '@/types';
 
 export default async function Home() {
-  const allContent: Content[] = await getContent();
-  const featuredContent = allContent.find(c => c.backdrop_path);
+  // Fetch all content in parallel
+  const [trending, popular, topRated, continueWatching] = await Promise.all([
+    fetchTrending(),
+    fetchPopular(),
+    fetchTopRated(),
+    fetchNowPlaying(),
+  ]);
 
-  const trending = allContent.filter(c => c.category === 'trending');
-  const popular = allContent.filter(c => c.category === 'popular');
-  const topRated = allContent.filter(c => c.category === 'top-rated');
-  const continueWatching = allContent.filter(c => c.category === 'continue-watching');
+  // Pick featured content from trending
+  const featuredContent = trending.find(c => c.backdrop_path);
 
   return (
     <div className="relative flex min-h-screen w-full flex-col">

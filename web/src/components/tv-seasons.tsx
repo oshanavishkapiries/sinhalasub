@@ -1,7 +1,7 @@
 
 'use client'
-import { useState, useEffect } from 'react';
-import type { TVSeason, Episode } from '@/types';
+import { useState } from 'react';
+import type { TVSeason } from '@/types';
 import {
   Select,
   SelectContent,
@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { fetchTVSeason } from '@/lib/tmdb';
+import { useTVSeason } from '@/services/hooks';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
 import { EpisodeCard } from './episode-card';
 
@@ -21,25 +21,19 @@ interface TVSeasonsProps {
 
 
 export function TVSeasons({ seasons, tvShowId }: TVSeasonsProps) {
-    const [selectedSeason, setSelectedSeason] = useState<TVSeason | null>(seasons[0] || null);
-    const [episodes, setEpisodes] = useState<Episode[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [selectedSeasonNumber, setSelectedSeasonNumber] = useState<number>(seasons[0]?.season_number || 1);
 
-    useEffect(() => {
-        if (selectedSeason) {
-            const getSeasonData = async () => {
-                setIsLoading(true);
-                const seasonDetails = await fetchTVSeason(tvShowId, selectedSeason.season_number);
-                setEpisodes(seasonDetails?.episodes || []);
-                setIsLoading(false);
-            };
-            getSeasonData();
-        }
-    }, [selectedSeason, tvShowId]);
+    // Fetch episodes for selected season
+    const { data: seasonData, isLoading } = useTVSeason({ 
+        tvId: tvShowId, 
+        seasonNumber: selectedSeasonNumber 
+    });
+
+    const episodes = seasonData?.episodes || [];
+    const selectedSeason = seasons.find(s => s.season_number === selectedSeasonNumber);
 
     const handleSeasonChange = (seasonNumber: string) => {
-        const season = seasons.find(s => s.season_number.toString() === seasonNumber);
-        setSelectedSeason(season || null);
+        setSelectedSeasonNumber(parseInt(seasonNumber));
     };
 
     if (!selectedSeason) {
@@ -48,7 +42,7 @@ export function TVSeasons({ seasons, tvShowId }: TVSeasonsProps) {
 
     return (
         <div>
-            <Select onValueChange={handleSeasonChange} defaultValue={selectedSeason.season_number.toString()}>
+            <Select onValueChange={handleSeasonChange} defaultValue={selectedSeasonNumber.toString()}>
                 <SelectTrigger className="w-[280px] text-lg mb-6">
                     <SelectValue placeholder="Select a season" />
                 </SelectTrigger>

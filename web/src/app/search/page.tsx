@@ -3,31 +3,19 @@
 import { Header } from '@/components/header';
 import { Input } from '@/components/ui/input';
 import { Search as SearchIcon } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { searchContent } from '@/lib/tmdb';
+import { useState } from 'react';
 import { ContentCard } from '@/components/content-card';
-import type { Content } from '@/types';
 import { useDebounce } from 'use-debounce';
+import { useSearchContent } from '@/services/hooks';
 
 export default function SearchPage() {
     const [query, setQuery] = useState('');
-    const [results, setResults] = useState<Content[]>([]);
     const [debouncedQuery] = useDebounce(query, 500);
-    const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        async function performSearch() {
-            if (debouncedQuery) {
-                setIsLoading(true);
-                const searchResults = await searchContent(debouncedQuery);
-                setResults(searchResults);
-                setIsLoading(false);
-            } else {
-                setResults([]);
-            }
-        }
-        performSearch();
-    }, [debouncedQuery]);
+    // Fetch search results with TanStack Query
+    const { data: results = [], isLoading } = useSearchContent({ 
+        query: debouncedQuery 
+    });
 
   return (
     <div className="flex min-h-screen w-full flex-col">

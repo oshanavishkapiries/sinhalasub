@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Header } from '@/components/header';
 import { ContentCard } from '@/components/content-card';
-import type { Content, Genre } from '@/types';
-import { fetchTVGenres, fetchDiscoverTV, fetchLanguages } from '@/lib/tmdb';
+import type { Content } from '@/types';
+import { useTVGenres, useLanguages, useDiscoverTV } from '@/services/hooks';
 import {
   Select,
   SelectContent,
@@ -14,7 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 
 const categories = [
     { value: 'popular', label: 'Popular' },
@@ -22,43 +21,22 @@ const categories = [
     { value: 'on_the_air', label: 'On The Air' },
 ];
 
-type Language = {
-    english_name: string;
-    iso_639_1: string;
-    name: string;
-}
-
 export default function TvShowsPage() {
-  const [tvShows, setTvShows] = useState<Content[]>([]);
-  const [genres, setGenres] = useState<Genre[]>([]);
-  const [languages, setLanguages] = useState<Language[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('popular');
   const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState('all_languages');
-  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    async function getInitialData() {
-      const [tvGenres, languages] = await Promise.all([
-          fetchTVGenres(),
-          fetchLanguages()
-      ]);
-      setGenres(tvGenres || []);
-      setLanguages(languages || []);
-    }
-    getInitialData();
-  }, []);
-  
-  useEffect(() => {
-    async function getShows() {
-        setIsLoading(true);
-        const languageToFetch = selectedLanguage === 'all_languages' ? '' : selectedLanguage;
-        const shows = await fetchDiscoverTV(selectedCategory, selectedGenres, languageToFetch);
-        setTvShows(shows || []);
-        setIsLoading(false);
-    }
-    getShows();
-  }, [selectedCategory, selectedGenres, selectedLanguage]);
+  // Fetch genres and languages
+  const { data: genres = [] } = useTVGenres();
+  const { data: languages = [] } = useLanguages();
+
+  // Fetch TV shows based on filters
+  const languageToFetch = selectedLanguage === 'all_languages' ? '' : selectedLanguage;
+  const { data: tvShows = [], isLoading } = useDiscoverTV({
+    category: selectedCategory,
+    genres: selectedGenres,
+    language: languageToFetch,
+  });
 
   const toggleGenre = (genreId: number) => {
     setSelectedGenres(prev => 
