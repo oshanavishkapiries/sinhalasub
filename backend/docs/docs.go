@@ -282,8 +282,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "This is the API for Sinhala Subtitle Backend service",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
 }
 
 func init() {

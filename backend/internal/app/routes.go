@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	_ "github.com/oshanavishkapiries/sinhalasub/backend/docs/swagger"
+	_ "github.com/oshanavishkapiries/sinhalasub/backend/docs"
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/config"
 	customMiddleware "github.com/oshanavishkapiries/sinhalasub/backend/internal/middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
