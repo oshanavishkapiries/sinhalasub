@@ -1,4 +1,4 @@
-import { fetchAPI } from './client';
+import { fetchAPI } from '../api/client';
 import { ENDPOINTS } from '../endpoints';
 import type { Content, DiscoverParams, PaginatedResponse } from '../types';
 
