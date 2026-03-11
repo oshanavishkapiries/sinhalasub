@@ -1,5 +1,5 @@
 import { fetchAPI } from '../api/client'; 
-import { ENDPOINTS } from '../endpoints';
+import { ENDPOINTS } from '../api/endpoints';
 import type { Content, ContentDetailsParams, SimilarContentParams, PaginatedResponse } from '../types';
 
 export async function fetchContentDetails({ id, type }: ContentDetailsParams): Promise<Content> {

@@ -1,5 +1,5 @@
 import { fetchAPI } from '../api/client';
-import { ENDPOINTS } from '../endpoints';
+import { ENDPOINTS } from '../api/endpoints';
 import type { Language, Genre } from '../types';
 
 export async function fetchLanguages(): Promise<Language[]> {

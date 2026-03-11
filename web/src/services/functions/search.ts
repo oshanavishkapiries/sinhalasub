@@ -1,5 +1,5 @@
 import { fetchAPI } from '../api/client';
-import { ENDPOINTS } from '../endpoints';
+import { ENDPOINTS } from '../api/endpoints';
 import type { Content, SearchParams, PaginatedResponse } from '../types';
 
 export async function searchContent({ query }: SearchParams): Promise<Content[]> {
