@@ -30,7 +30,7 @@ export function Drawer({
 }: DrawerProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:w-[500px] overflow-y-auto bg-background border-l border-border text-foreground">
+      <SheetContent side="right" className="w-full sm:w-[500px] overflow-y-auto scrollbar-hide bg-background border-l border-border text-foreground">
         <SheetHeader className="flex flex-row items-center justify-between mb-6 pb-4 border-b border-border">
           <div className="flex-1">
             <SheetTitle className="text-xl font-semibold text-foreground">{title}</SheetTitle>

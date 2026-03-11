@@ -36,7 +36,7 @@ export function Modal({
 }: ModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-background border-border text-foreground">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto scrollbar-hide bg-background border-border text-foreground">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-foreground">{title}</DialogTitle>
           {description && <DialogDescription className="text-muted-foreground">{description}</DialogDescription>}
