@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useAuthRole } from '@/hooks/useAuth';
 import { Menu, X, Users, FileText, Home, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useSidebar } from '@/contexts/sidebar-context';
 
 interface SidebarItem {
   href: string;
@@ -15,7 +15,7 @@ interface SidebarItem {
 }
 
 export function AdminSidebar() {
-  const [isOpen, setIsOpen] = useState(true);
+  const { isOpen, toggle } = useSidebar();
   const pathname = usePathname();
 
   const menuItems: SidebarItem[] = [
@@ -43,7 +43,7 @@ export function AdminSidebar() {
         variant="ghost"
         size="icon"
         className="md:hidden fixed top-4 left-4 z-50 text-white hover:bg-white/10"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggle}
       >
         {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </Button>
@@ -90,7 +90,7 @@ export function AdminSidebar() {
         {/* Collapse Button */}
         <div className="absolute bottom-4 left-0 right-0 px-3">
           <button
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={toggle}
             className={cn(
               'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all',
               'text-gray-400 hover:bg-white/5 hover:text-white border border-white/10',
@@ -113,7 +113,7 @@ export function AdminSidebar() {
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/80 md:hidden z-30"
-          onClick={() => setIsOpen(false)}
+          onClick={toggle}
         />
       )}
     </>
