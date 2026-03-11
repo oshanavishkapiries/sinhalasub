@@ -190,19 +190,19 @@ export default function ContentPage() {
       key: 'id',
       label: 'ID',
       width: 'w-20',
-      render: (value) => <span className="text-xs font-mono text-gray-500">{value}</span>,
+      render: (value) => <span className="text-xs font-mono text-muted-foreground">{value}</span>,
     },
     {
       key: 'title',
       label: 'Title',
       sortable: true,
-      render: (value) => <span className="font-medium text-white">{value}</span>,
+      render: (value) => <span className="font-medium text-foreground">{value}</span>,
     },
     {
       key: 'type',
       label: 'Type',
       render: (value: string) => (
-        <Badge variant="secondary" className="bg-white/10 text-gray-300 hover:bg-white/20">
+        <Badge variant="secondary" className="bg-white/10 text-muted-foreground hover:bg-white/20">
           {value.toUpperCase()}
         </Badge>
       ),
@@ -222,7 +222,7 @@ export default function ContentPage() {
     {
       key: 'releaseDate',
       label: 'Release Date',
-      render: (value: string) => <span className="text-gray-400">{new Date(value).toLocaleDateString()}</span>,
+      render: (value: string) => <span className="text-muted-foreground">{new Date(value).toLocaleDateString()}</span>,
     },
     {
       key: 'rating',
@@ -232,7 +232,7 @@ export default function ContentPage() {
     {
       key: 'views',
       label: 'Views',
-      render: (value: number) => <span className="text-gray-400">{value.toLocaleString()}</span>,
+      render: (value: number) => <span className="text-muted-foreground">{value.toLocaleString()}</span>,
     },
     {
       key: 'genres',
@@ -240,11 +240,11 @@ export default function ContentPage() {
       render: (value: string[]) => (
         <div className="flex flex-wrap gap-1">
           {value.slice(0, 2).map((g) => (
-            <Badge key={g} variant="outline" className="text-xs bg-white/5 border-white/10 text-gray-400">
+              <Badge key={g} variant="outline" className="text-xs bg-white/5 border-border text-muted-foreground">
               {g}
             </Badge>
           ))}
-          {value.length > 2 && <Badge variant="outline" className="text-xs bg-white/5 border-white/10 text-gray-400">+{value.length - 2}</Badge>}
+          {value.length > 2 && <Badge variant="outline" className="text-xs bg-white/5 border-border text-muted-foreground">+{value.length - 2}</Badge>}
         </div>
       ),
     },
@@ -279,15 +279,15 @@ export default function ContentPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Content Management</h1>
-          <p className="text-gray-400 mt-1">Manage movies and TV shows</p>
+          <h1 className="text-3xl font-bold text-foreground">Content Management</h1>
+          <p className="text-muted-foreground mt-1">Manage movies and TV shows</p>
         </div>
         <Button
           onClick={() => {
             setSelectedContent(undefined);
             setIsDrawerOpen(true);
           }}
-          className="bg-[#E50914] hover:bg-[#C42B1C] shadow-lg shadow-[#E50914]/20"
+              className="bg-primary hover:bg-accent shadow-lg shadow-primary/20"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Content
@@ -337,18 +337,18 @@ export default function ContentPage() {
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-[#1a1a1a] border border-white/10 text-white">
+        <AlertDialogContent className="bg-card border-border text-foreground">
           <AlertDialogTitle className="text-xl font-semibold">Delete Content</AlertDialogTitle>
-          <AlertDialogDescription className="text-gray-400">
-            Are you sure you want to delete <span className="text-white font-medium">"{contentToDelete?.title}"</span>? This action cannot be undone.
+          <AlertDialogDescription className="text-muted-foreground">
+            Are you sure you want to delete <span className="text-foreground font-medium">"{contentToDelete?.title}"</span>? This action cannot be undone.
           </AlertDialogDescription>
           <div className="flex gap-3 justify-end mt-4">
-            <AlertDialogCancel className="bg-transparent border-white/10 text-white hover:bg-white/10">
+            <AlertDialogCancel className="bg-transparent border-border text-foreground hover:bg-white/10">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteContent}
-              className="bg-[#E50914] hover:bg-[#C42B1C] shadow-lg shadow-[#E50914]/20"
+          className="bg-primary hover:bg-accent shadow-lg shadow-primary/20"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Deleting...' : 'Delete'}

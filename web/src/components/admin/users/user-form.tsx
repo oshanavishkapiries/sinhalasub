@@ -45,33 +45,33 @@ export function UserForm({ user, onSubmit, isSubmitting = false }: UserFormProps
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <Label htmlFor="email" className="text-gray-300">Email</Label>
+        <Label htmlFor="email" className="text-muted-foreground">Email</Label>
         <Input
           id="email"
           type="email"
           placeholder="user@example.com"
           {...register('email', { required: 'Email is required' })}
-          className="bg-[#1a1a1a] border-white/10 text-white placeholder:text-gray-500 focus:border-[#E50914] focus:ring-[#E50914]/20 mt-1.5"
+          className="bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 mt-1.5"
         />
       </div>
 
       <div>
-        <Label htmlFor="name" className="text-gray-300">Name</Label>
+        <Label htmlFor="name" className="text-muted-foreground">Name</Label>
         <Input
           id="name"
           placeholder="Full name"
           {...register('name', { required: 'Name is required' })}
-          className="bg-[#1a1a1a] border-white/10 text-white placeholder:text-gray-500 focus:border-[#E50914] focus:ring-[#E50914]/20 mt-1.5"
+          className="bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 mt-1.5"
         />
       </div>
 
       <div>
-        <Label htmlFor="role" className="text-gray-300">Role</Label>
+        <Label htmlFor="role" className="text-muted-foreground">Role</Label>
         <Select value={role || UserRole.USER} onValueChange={(value) => setValue('role', value as UserRole)}>
-          <SelectTrigger id="role" className="bg-[#1a1a1a] border-white/10 text-white focus:border-[#E50914] focus:ring-[#E50914]/20 mt-1.5">
+          <SelectTrigger id="role" className="bg-card border-border text-foreground focus:border-primary focus:ring-primary/20 mt-1.5">
             <SelectValue placeholder="Select a role" />
           </SelectTrigger>
-          <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
+          <SelectContent className="bg-card border-border text-foreground">
             {ROLES.map((r) => (
               <SelectItem key={r.value} value={r.value} className="hover:bg-white/10 focus:bg-white/10">
                 {r.label}
@@ -82,12 +82,12 @@ export function UserForm({ user, onSubmit, isSubmitting = false }: UserFormProps
       </div>
 
       <div>
-        <Label htmlFor="status" className="text-gray-300">Status</Label>
+        <Label htmlFor="status" className="text-muted-foreground">Status</Label>
         <Select value={status || 'active'} onValueChange={(value) => setValue('status', value as any)}>
-          <SelectTrigger id="status" className="bg-[#1a1a1a] border-white/10 text-white focus:border-[#E50914] focus:ring-[#E50914]/20 mt-1.5">
+          <SelectTrigger id="status" className="bg-card border-border text-foreground focus:border-primary focus:ring-primary/20 mt-1.5">
             <SelectValue placeholder="Select a status" />
           </SelectTrigger>
-          <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
+          <SelectContent className="bg-card border-border text-foreground">
             {STATUSES.map((s) => (
               <SelectItem key={s} value={s} className="hover:bg-white/10 focus:bg-white/10">
                 {s.charAt(0).toUpperCase() + s.slice(1)}

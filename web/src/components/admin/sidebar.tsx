@@ -43,7 +43,7 @@ export function AdminSidebar() {
       <Button
         variant="ghost"
         size="icon"
-        className="md:hidden fixed top-4 left-4 z-50 text-white hover:bg-white/10"
+        className="md:hidden fixed top-4 left-4 z-50 text-foreground hover:bg-white/10"
         onClick={toggle}
       >
         {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -52,18 +52,18 @@ export function AdminSidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 h-screen bg-[#121212] border-r border-white/10 transition-all duration-300 z-40',
+          'fixed left-0 top-0 h-screen bg-background border-r border-border transition-all duration-300 z-40',
           isOpen ? 'w-56' : 'w-16',
           'hidden md:block'
         )}
       >
         {/* Logo/Branding */}
-        <div className="h-16 flex items-center justify-center px-4 border-b border-white/10">
-          <div className={cn('transition-all', isOpen ? 'w-12 h-12' : 'w-10 h-10')}>
+        <div className="h-16 flex items-center justify-center px-4 border-b border-border">
+          <div className={cn('transition-all', isOpen ? 'w-[120px] h-12' : 'w-[100px] h-10')}>
             <Image
               src="/logo.png"
               alt="SinhalaSub Logo"
-              width={isOpen ? 48 : 40}
+              width={isOpen ? 120 : 100}
               height={isOpen ? 48 : 40}
               className="w-full h-full object-contain"
             />
@@ -80,8 +80,8 @@ export function AdminSidebar() {
                   className={cn(
                     'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all cursor-pointer',
                     isActive 
-                      ? 'bg-[#E50914] text-white shadow-lg shadow-[#E50914]/20' 
-                      : 'text-gray-400 hover:bg-white/5 hover:text-white',
+                      ? 'bg-primary text-foreground shadow-lg shadow-primary/20' 
+                      : 'text-muted-foreground hover:bg-white/5 hover:text-foreground',
                     !isOpen && 'justify-center px-0'
                   )}
                   title={!isOpen ? item.label : ''}
@@ -100,7 +100,7 @@ export function AdminSidebar() {
             onClick={toggle}
             className={cn(
               'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all',
-              'text-gray-400 hover:bg-white/5 hover:text-white border border-white/10',
+              'text-muted-foreground hover:bg-white/5 hover:text-foreground border border-border',
               !isOpen && 'justify-center px-0'
             )}
           >

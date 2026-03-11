@@ -30,13 +30,13 @@ export function Drawer({
 }: DrawerProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:w-[500px] overflow-y-auto bg-[#121212] border-l border-white/10 text-white">
-        <SheetHeader className="flex flex-row items-center justify-between mb-6 pb-4 border-b border-white/10">
+      <SheetContent side="right" className="w-full sm:w-[500px] overflow-y-auto bg-background border-l border-border text-foreground">
+        <SheetHeader className="flex flex-row items-center justify-between mb-6 pb-4 border-b border-border">
           <div className="flex-1">
-            <SheetTitle className="text-xl font-semibold text-white">{title}</SheetTitle>
-            {description && <p className="text-sm text-gray-400 mt-1">{description}</p>}
+            <SheetTitle className="text-xl font-semibold text-foreground">{title}</SheetTitle>
+            {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
           </div>
-          <SheetClose className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 hover:bg-white/10 p-2 disabled:pointer-events-none text-gray-400 hover:text-white">
+          <SheetClose className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 hover:bg-white/10 p-2 disabled:pointer-events-none text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
             <span className="sr-only">Close</span>
           </SheetClose>
@@ -45,9 +45,9 @@ export function Drawer({
         <div className="space-y-6">{children}</div>
 
         {onSubmit && (
-          <div className="flex gap-3 mt-8 pt-6 border-t border-white/10">
+          <div className="flex gap-3 mt-8 pt-6 border-t border-border">
             <SheetClose asChild>
-              <Button variant="outline" className="flex-1 bg-transparent border-white/10 text-white hover:bg-white/10">
+              <Button variant="outline" className="flex-1 bg-transparent border-border text-foreground hover:bg-white/10">
                 Cancel
               </Button>
             </SheetClose>
@@ -57,7 +57,7 @@ export function Drawer({
               variant={submitVariant}
               className={`flex-1 ${
                 submitVariant === 'default' 
-                  ? 'bg-[#E50914] hover:bg-[#C42B1C] shadow-lg shadow-[#E50914]/20' 
+                  ? 'bg-primary hover:bg-accent shadow-lg shadow-primary/20' 
                   : ''
               }`}
             >

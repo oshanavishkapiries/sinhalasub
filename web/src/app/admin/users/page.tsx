@@ -166,19 +166,19 @@ export default function UsersPage() {
       key: 'id',
       label: 'ID',
       width: 'w-20',
-      render: (value) => <span className="text-xs font-mono text-gray-500">{value}</span>,
+      render: (value) => <span className="text-xs font-mono text-muted-foreground">{value}</span>,
     },
     {
       key: 'name',
       label: 'Name',
       sortable: true,
-      render: (value) => <span className="font-medium text-white">{value}</span>,
+      render: (value) => <span className="font-medium text-foreground">{value}</span>,
     },
     {
       key: 'email',
       label: 'Email',
       sortable: true,
-      render: (value) => <span className="text-gray-400">{value}</span>,
+      render: (value) => <span className="text-muted-foreground">{value}</span>,
     },
     {
       key: 'role',
@@ -188,8 +188,8 @@ export default function UsersPage() {
           variant={value === UserRole.SUPER_ADMIN ? 'default' : 'secondary'}
           className={
             value === UserRole.SUPER_ADMIN 
-              ? 'bg-[#E50914] hover:bg-[#C42B1C]' 
-              : 'bg-white/10 text-gray-300 hover:bg-white/20'
+              ? 'bg-primary hover:bg-accent' 
+              : 'bg-white/10 text-muted-foreground hover:bg-white/20'
           }
         >
           {value}
@@ -223,12 +223,12 @@ export default function UsersPage() {
     {
       key: 'createdAt',
       label: 'Created At',
-      render: (value: string) => <span className="text-gray-400">{new Date(value).toLocaleDateString()}</span>,
+      render: (value: string) => <span className="text-muted-foreground">{new Date(value).toLocaleDateString()}</span>,
     },
     {
       key: 'lastActivity',
       label: 'Last Activity',
-      render: (value?: string) => <span className="text-gray-400">{value ? new Date(value).toLocaleDateString() : 'N/A'}</span>,
+      render: (value?: string) => <span className="text-muted-foreground">{value ? new Date(value).toLocaleDateString() : 'N/A'}</span>,
     },
   ];
 
@@ -256,15 +256,15 @@ export default function UsersPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Users Management</h1>
-          <p className="text-gray-400 mt-1">Manage system users and their permissions</p>
+          <h1 className="text-3xl font-bold text-foreground">Users Management</h1>
+          <p className="text-muted-foreground mt-1">Manage system users and their permissions</p>
         </div>
         <Button
           onClick={() => {
             setSelectedUser(undefined);
             setIsDrawerOpen(true);
           }}
-          className="bg-[#E50914] hover:bg-[#C42B1C] shadow-lg shadow-[#E50914]/20"
+              className="bg-primary hover:bg-accent shadow-lg shadow-primary/20"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add User
@@ -314,18 +314,18 @@ export default function UsersPage() {
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-[#1a1a1a] border border-white/10 text-white">
+        <AlertDialogContent className="bg-card border-border text-foreground">
           <AlertDialogTitle className="text-xl font-semibold">Delete User</AlertDialogTitle>
-          <AlertDialogDescription className="text-gray-400">
-            Are you sure you want to delete <span className="text-white font-medium">{userToDelete?.name}</span>? This action cannot be undone.
+          <AlertDialogDescription className="text-muted-foreground">
+            Are you sure you want to delete <span className="text-foreground font-medium">{userToDelete?.name}</span>? This action cannot be undone.
           </AlertDialogDescription>
           <div className="flex gap-3 justify-end mt-4">
-            <AlertDialogCancel className="bg-transparent border-white/10 text-white hover:bg-white/10">
+            <AlertDialogCancel className="bg-transparent border-border text-foreground hover:bg-white/10">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteUser}
-              className="bg-[#E50914] hover:bg-[#C42B1C] shadow-lg shadow-[#E50914]/20"
+          className="bg-primary hover:bg-accent shadow-lg shadow-primary/20"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Deleting...' : 'Delete'}
