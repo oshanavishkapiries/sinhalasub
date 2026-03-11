@@ -4,12 +4,10 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { DataTable, Column, RowAction } from '@/components/admin/data-table';
-import { Modal } from '@/components/admin/modal';
-import { ContentForm } from '@/components/admin/content/content-form';
 import { AdminContent } from '@/types/admin';
 import adminContentService from '@/services/admin-content';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Eye, EyeOff, Clapperboard } from 'lucide-react';
+import { Edit, Trash2, Eye, EyeOff, Plus } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,11 +26,9 @@ export default function TvSeriesPage() {
   const [pageSize] = useState(25);
   const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedContent, setSelectedContent] = useState<AdminContent | undefined>(undefined);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [contentToDelete, setContentToDelete] = useState<AdminContent | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { toast } = useToast();
 
@@ -49,10 +45,10 @@ export default function TvSeriesPage() {
         setContent(response.data.content);
         setTotal(response.data.total);
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Error',
-        description: 'Failed to fetch TV series',
+        description: error.message || 'Failed to fetch TV series',
         variant: 'destructive',
       });
     } finally {
@@ -64,65 +60,9 @@ export default function TvSeriesPage() {
     fetchContent();
   }, [fetchContent]);
 
-  const handleCreateContent = async (data: Partial<AdminContent>) => {
-    setIsSubmitting(true);
-    try {
-      await adminContentService.createContent({
-        title: data.title!,
-        type: 'tv',
-        overview: data.overview!,
-        releaseDate: data.releaseDate!,
-        genres: data.genres || [],
-        rating: data.rating || 0,
-      });
-      toast({
-        title: 'Success',
-        description: 'TV series created successfully',
-      });
-      setIsDrawerOpen(false);
-      fetchContent();
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to create TV series',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleUpdateContent = async (data: Partial<AdminContent>) => {
-    if (!selectedContent) return;
-    setIsSubmitting(true);
-    try {
-      await adminContentService.updateContent(selectedContent.id, {
-        title: data.title,
-        overview: data.overview,
-        genres: data.genres,
-        releaseDate: data.releaseDate,
-      });
-      toast({
-        title: 'Success',
-        description: 'TV series updated successfully',
-      });
-      setIsDrawerOpen(false);
-      setSelectedContent(undefined);
-      fetchContent();
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to update TV series',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const handleDeleteContent = async () => {
     if (!contentToDelete) return;
-    setIsSubmitting(true);
+    setIsDeleting(true);
     try {
       await adminContentService.deleteContent(contentToDelete.id);
       toast({
@@ -139,12 +79,11 @@ export default function TvSeriesPage() {
         variant: 'destructive',
       });
     } finally {
-      setIsSubmitting(false);
+      setIsDeleting(false);
     }
   };
 
   const handlePublishContent = async (item: AdminContent) => {
-    setIsSubmitting(true);
     try {
       await adminContentService.publishContent(item.id, {
         status: item.status === 'published' ? 'unpublished' : 'published',
@@ -160,14 +99,11 @@ export default function TvSeriesPage() {
         description: error.message || 'Failed to update TV series status',
         variant: 'destructive',
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const handleBulkDelete = async (ids: (string | number)[]) => {
     if (!confirm(`Delete ${ids.length} TV series?`)) return;
-    setIsSubmitting(true);
     try {
       await adminContentService.bulkDeleteContent({
         ids: ids as string[],
@@ -183,8 +119,6 @@ export default function TvSeriesPage() {
         description: error.message || 'Failed to delete TV series',
         variant: 'destructive',
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -246,16 +180,16 @@ export default function TvSeriesPage() {
 
   const rowActions: RowAction<AdminContent>[] = [
     {
-      label: selectedContent?.status === 'published' ? 'Unpublish' : 'Publish',
-      icon: selectedContent?.status === 'published' ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />,
+      label: 'Publish/Unpublish',
+      icon: <Eye className="h-4 w-4" />,
       onClick: handlePublishContent,
     },
     {
       label: 'Edit',
       icon: <Edit className="h-4 w-4" />,
       onClick: (item) => {
-        setSelectedContent(item);
-        setIsDrawerOpen(true);
+        // TODO: Navigate to edit page when created
+        router.push(`/admin/tv-series/edit/${item.id}`);
       },
     },
     {
@@ -276,26 +210,13 @@ export default function TvSeriesPage() {
           <h1 className="text-3xl font-bold text-foreground">TV Series Management</h1>
           <p className="text-muted-foreground mt-1">Manage TV series</p>
         </div>
-        <div className="flex gap-3">
-          <Button
-            onClick={() => router.push('/admin/tv-series/create')}
-            className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 text-white"
-          >
-            <Clapperboard className="h-4 w-4 mr-2" />
-            Create TV Series
-          </Button>
-          <Button
-            onClick={() => {
-              setSelectedContent(undefined);
-              setIsDrawerOpen(true);
-            }}
-            variant="outline"
-            className="border-border text-foreground hover:bg-white/5"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Quick Add
-          </Button>
-        </div>
+        <Button
+          onClick={() => router.push('/admin/tv-series/create')}
+          className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 text-white"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Create TV Series
+        </Button>
       </div>
 
       <DataTable<AdminContent>
@@ -319,27 +240,6 @@ export default function TvSeriesPage() {
         }}
       />
 
-      {/* Modal for create/edit */}
-      <Modal
-        open={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
-        title={selectedContent ? 'Edit TV Series' : 'Add New TV Series'}
-        description={selectedContent ? 'Update TV series information' : 'Add a new TV series'}
-        onSubmit={() => {
-          const form = document.querySelector('form');
-          form?.dispatchEvent(new Event('submit', { bubbles: true }));
-        }}
-        isSubmitting={isSubmitting}
-        submitLabel={selectedContent ? 'Update' : 'Create'}
-      >
-        <ContentForm
-          content={selectedContent}
-          onSubmit={selectedContent ? handleUpdateContent : handleCreateContent}
-          isSubmitting={isSubmitting}
-          defaultType="tv"
-        />
-      </Modal>
-
       {/* Delete confirmation dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="bg-card border-border text-foreground">
@@ -353,10 +253,10 @@ export default function TvSeriesPage() {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteContent}
-          className="bg-primary hover:bg-accent shadow-lg shadow-primary/20"
-              disabled={isSubmitting}
+              className="bg-accent hover:bg-accent/90 text-white"
+              disabled={isDeleting}
             >
-              {isSubmitting ? 'Deleting...' : 'Delete'}
+              {isDeleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </div>
         </AlertDialogContent>
