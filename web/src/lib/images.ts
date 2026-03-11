@@ -16,5 +16,5 @@ export const BACKDROP_SIZE = 'w1280';
  * @returns Full image URL or placeholder
  */
 export function getImageUrl(path: string | null, size: string = POSTER_SIZE): string {
-  return path ? `${IMAGE_BASE_URL}${size}${path}` : 'https://placehold.co/500x750';
+  return path ? `${IMAGE_BASE_URL}${size}${path}` : 'https://placehold.net/main.svg';
 }
