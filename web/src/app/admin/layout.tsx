@@ -4,24 +4,16 @@ import React from 'react';
 import { ProtectedRoute } from '@/components/protected-route';
 import { AdminSidebar } from '@/components/admin/sidebar';
 import { AdminHeader } from '@/components/admin/header';
-import { SidebarProvider, useSidebar } from '@/contexts/sidebar-context';
+import { SidebarProvider } from '@/contexts/sidebar-context';
 import { UserRole } from '@/types/auth';
-import { cn } from '@/lib/utils';
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
-  const { isOpen } = useSidebar();
-
   return (
     <div className="min-h-screen bg-background">
       <AdminSidebar />
       
-      {/* Main content - responsive margin that matches sidebar width */}
-      <div 
-        className={cn(
-          'flex flex-col min-h-screen transition-all duration-300',
-          isOpen ? 'md:ml-56' : 'md:ml-16'
-        )}
-      >
+      {/* Main content */}
+      <div className="flex flex-col min-h-screen md:ml-56">
         {/* Header */}
         <AdminHeader />
         
