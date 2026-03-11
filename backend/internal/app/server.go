@@ -4,18 +4,30 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/oshanavishkapiries/sinhalasub/backend/internal/config"
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/pkg/utils"
 )
 
 type App struct {
-	router http.Handler
+	router    http.Handler
+	container *config.Container
 }
 
 func New() *App {
+	container := config.NewContainer()
 	app := &App{
-		router: loadRoutes(),
+		router:    loadRoutes(container),
+		container: container,
 	}
 	return app
+}
+
+// NewWithContainer creates an App with a specific container (useful for testing)
+func NewWithContainer(container *config.Container) *App {
+	return &App{
+		router:    loadRoutes(container),
+		container: container,
+	}
 }
 
 func (a *App) Start(ctx context.Context, port string) error {
@@ -33,4 +45,9 @@ func (a *App) Start(ctx context.Context, port string) error {
 	}
 
 	return nil
+}
+
+// GetContainer returns the dependency container
+func (a *App) GetContainer() *config.Container {
+	return a.container
 }
