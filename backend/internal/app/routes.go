@@ -3,8 +3,10 @@ package app
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/config"
 	customMiddleware "github.com/oshanavishkapiries/sinhalasub/backend/internal/middleware"
+	_ "github.com/oshanavishkapiries/sinhalasub/backend/docs/swagger"
 )
 
 func loadRoutes(container *config.Container) *chi.Mux {
@@ -19,6 +21,12 @@ func loadRoutes(container *config.Container) *chi.Mux {
 	router.Use(customMiddleware.CORSMiddleware)
 	router.Use(customMiddleware.SecureHeadersMiddleware)
 	router.Use(customMiddleware.RateLimitMiddleware)
+
+	// Swagger UI endpoints
+	router.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:3000/swagger/doc.json"),
+	))
+	router.Get("/api/docs", httpSwagger.WrapHandler)
 
 	// Health check endpoint
 	healthHandler := container.HealthHandler()

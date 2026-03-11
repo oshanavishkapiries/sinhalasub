@@ -2,9 +2,12 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/oshanavishkapiries/sinhalasub/backend/internal/pkg/metrics"
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/pkg/response"
+	"github.com/oshanavishkapiries/sinhalasub/backend/internal/pkg/utils"
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/service"
 )
 
@@ -17,12 +20,47 @@ func NewHealthHandler() *HealthHandler {
 }
 
 // Check handles GET /health requests
+// @Summary Health Check
+// @Description Get health status of the server with system metrics
+// @Tags Health
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{} "Server health status"
+// @Router /health [get]
 func (h *HealthHandler) Check(w http.ResponseWriter, r *http.Request) {
-	data := map[string]interface{}{
-		"status":  "OK",
-		"service": "sinhala-sub",
-		"version": "v1.0.0",
+	// Get system metrics
+	sysMetrics, err := metrics.GetSystemMetrics()
+	if err != nil {
+		utils.WarnLog("Failed to get system metrics: %s", err)
+		// Continue with health check even if metrics fail
+		sysMetrics = nil
 	}
+
+	data := map[string]interface{}{
+		"status":    "OK",
+		"service":   "sinhala-sub",
+		"version":   "v1.0.0",
+		"timestamp": time.Now().UTC(),
+	}
+
+	// Add system metrics if available
+	if sysMetrics != nil {
+		data["metrics"] = map[string]interface{}{
+			"cpu": map[string]interface{}{
+				"usage_percent": sysMetrics.CPU.UsagePercent,
+				"cores":         sysMetrics.CPU.Cores,
+				"logical_cores": sysMetrics.CPU.LogicalCores,
+			},
+			"memory": map[string]interface{}{
+				"total_bytes":     sysMetrics.Memory.Total,
+				"available_bytes": sysMetrics.Memory.Available,
+				"used_bytes":      sysMetrics.Memory.Used,
+				"used_percent":    sysMetrics.Memory.UsedPercent,
+				"free_bytes":      sysMetrics.Memory.Free,
+			},
+		}
+	}
+
 	response.Success(w, data, "Server is running")
 }
 
