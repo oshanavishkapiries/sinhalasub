@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Search, Loader2, Plus, Trash2, Eye, EyeOff, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Loader2, Plus, Trash2, Eye, EyeOff, ChevronDown, ChevronRight, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -58,24 +58,56 @@ const PLAYER_TYPES = [
   { value: 'custom', label: 'Custom Player' },
 ];
 
+// Debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 export function TVSeriesForm({ data, onUpdate }: TVSeriesFormProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<TMDBSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState<'search' | 'details' | 'seasons'>('search');
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const searchTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-
-    setIsSearching(true);
-    try {
-      const results = await searchTVSeries(searchQuery);
-      setSearchResults(results);
-    } catch (error) {
-      console.error('Search error:', error);
-    } finally {
-      setIsSearching(false);
+  // Auto-search when debounced query changes
+  useEffect(() => {
+    if (!debouncedSearchQuery.trim()) {
+      setSearchResults([]);
+      return;
     }
+
+    const performSearch = async () => {
+      setIsSearching(true);
+      try {
+        const results = await searchTVSeries(debouncedSearchQuery);
+        setSearchResults(results);
+      } catch (error) {
+        console.error('Search error:', error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    performSearch();
+  }, [debouncedSearchQuery]);
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setSearchResults([]);
   };
 
   const handleSelectSeries = async (tmdbId: number) => {
@@ -99,6 +131,7 @@ export function TVSeriesForm({ data, onUpdate }: TVSeriesFormProps) {
         onUpdate(transformedData);
         setSearchResults([]);
         setSearchQuery('');
+        setCurrentStep('details');
       }
     } catch (error) {
       console.error('Error loading series details:', error);
@@ -210,250 +243,288 @@ export function TVSeriesForm({ data, onUpdate }: TVSeriesFormProps) {
     onUpdate({ ...data, seasons: newSeasons });
   };
 
-  return (
-    <div className="space-y-8">
-      {/* TMDB Search Section */}
-      <div className="border border-border rounded-lg bg-card p-6">
-        <h3 className="text-lg font-semibold text-foreground mb-4">
-          Search TMDB for TV Series
-        </h3>
-
-        <div className="flex gap-2">
-          <Input
-            placeholder="Search for a TV series..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            className="bg-card border-border text-foreground placeholder:text-muted-foreground"
-          />
-          <Button
-            onClick={handleSearch}
-            disabled={isSearching || !searchQuery.trim()}
-            className="bg-primary hover:bg-primary/90 text-white"
-          >
-            {isSearching ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Search className="w-4 h-4" />
-            )}
-            <span className="ml-2">Search</span>
-          </Button>
-        </div>
-
-        {searchResults.length > 0 && (
-          <div className="mt-4 space-y-2 max-h-96 overflow-y-auto scrollbar-hide border border-border rounded-lg bg-background p-4">
-            {searchResults.map((result) => (
-              <div
-                key={result.id}
-                onClick={() => handleSelectSeries(result.id)}
-                className="flex gap-4 p-3 rounded-lg hover:bg-white/5 cursor-pointer transition-colors border border-border"
-              >
-                {result.poster_path && (
-                  <img
-                    src={result.poster_path}
-                    alt={result.name}
-                    className="w-16 h-24 object-cover rounded"
-                  />
-                )}
-                <div className="flex-1">
-                  <h4 className="font-semibold text-foreground">{result.name}</h4>
-                  {result.original_name !== result.name && (
-                    <p className="text-sm text-muted-foreground">
-                      {result.original_name}
-                    </p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {result.first_air_date} • ⭐ {result.vote_average.toFixed(1)}
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                    {result.overview}
-                  </p>
-                </div>
-              </div>
-            ))}
+  // Step 1: Search for TV Series
+  if (currentStep === 'search') {
+    return (
+      <div className="space-y-8">
+        <div className="border border-border rounded-lg bg-card p-8 space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Search TV Series</h3>
+            <p className="text-muted-foreground text-sm">
+              Find and select a TV series from TMDB to begin
+            </p>
           </div>
-        )}
 
-        {isLoading && (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <span className="ml-3 text-muted-foreground">Loading series details...</span>
-          </div>
-        )}
-      </div>
-
-      {data.tmdb_id && !isLoading && (
-        <>
-          {/* Basic Information Section */}
-          <div className="border border-border rounded-lg bg-card p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-foreground">
-              Series Information
-            </h3>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-muted-foreground">Title</Label>
-                <Input
-                  value={data.name || ''}
-                  onChange={(e) => onUpdate({ ...data, name: e.target.value })}
-                  className="bg-card border-border text-foreground mt-1.5"
-                />
-              </div>
-
-              <div>
-                <Label className="text-muted-foreground">Original Title</Label>
-                <Input
-                  value={data.original_name || ''}
-                  onChange={(e) => onUpdate({ ...data, original_name: e.target.value })}
-                  className="bg-card border-border text-foreground mt-1.5"
-                />
-              </div>
-
-              <div>
-                <Label className="text-muted-foreground">First Air Date</Label>
-                <Input
-                  type="date"
-                  value={data.first_air_date || ''}
-                  onChange={(e) => onUpdate({ ...data, first_air_date: e.target.value })}
-                  className="bg-card border-border text-foreground mt-1.5"
-                />
-              </div>
-
-              <div>
-                <Label className="text-muted-foreground">Status</Label>
-                <Input
-                  value={data.status || ''}
-                  onChange={(e) => onUpdate({ ...data, status: e.target.value })}
-                  className="bg-card border-border text-foreground mt-1.5"
-                />
-              </div>
-
-              <div>
-                <Label className="text-muted-foreground">TMDB ID</Label>
-                <Input
-                  value={data.tmdb_id || ''}
-                  disabled
-                  className="bg-card border-border text-muted-foreground mt-1.5"
-                />
-              </div>
-
-              <div>
-                <Label className="text-muted-foreground">IMDB ID</Label>
-                <Input
-                  value={data.imdb_id || ''}
-                  onChange={(e) => onUpdate({ ...data, imdb_id: e.target.value })}
-                  className="bg-card border-border text-foreground mt-1.5"
-                />
-              </div>
-
-              <div>
-                <Label className="text-muted-foreground">Rating</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  max="10"
-                  step="0.1"
-                  value={data.vote_average || ''}
-                  onChange={(e) => onUpdate({ ...data, vote_average: parseFloat(e.target.value) })}
-                  className="bg-card border-border text-foreground mt-1.5"
-                />
-              </div>
-
-              <div>
-                <Label className="text-muted-foreground">Trailer Link</Label>
-                <Input
-                  type="url"
-                  value={data.trailer_link || ''}
-                  onChange={(e) => onUpdate({ ...data, trailer_link: e.target.value })}
-                  placeholder="https://youtube.com/watch?v=..."
-                  className="bg-card border-border text-foreground mt-1.5"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-muted-foreground">Overview</Label>
-              <Textarea
-                value={data.overview || ''}
-                onChange={(e) => onUpdate({ ...data, overview: e.target.value })}
-                rows={4}
-                className="bg-card border-border text-foreground mt-1.5"
-              />
-            </div>
-
-            <div>
-              <Label className="text-muted-foreground">Tagline</Label>
+          <div className="flex gap-3 items-center">
+            <div className="flex-1 relative">
               <Input
-                value={data.tagline || ''}
-                onChange={(e) => onUpdate({ ...data, tagline: e.target.value })}
-                className="bg-card border-border text-foreground mt-1.5"
+                placeholder="Search for a TV series..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 bg-background border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 pr-10"
+              />
+              {searchQuery && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            {isSearching && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm">Searching...</span>
+              </div>
+            )}
+          </div>
+
+          {/* Search Results - Grid Layout with Poster Previews */}
+          {searchQuery && searchResults.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-96 overflow-y-auto scrollbar-hide">
+              {searchResults.map((result) => (
+                <div
+                  key={result.id}
+                  onClick={() => handleSelectSeries(result.id)}
+                  className="border border-border rounded-lg bg-background overflow-hidden hover:border-primary/50 transition-all cursor-pointer group"
+                >
+                  {/* Poster Image */}
+                  {result.poster_path ? (
+                    <img
+                      src={result.poster_path}
+                      alt={result.name}
+                      className="w-full h-48 object-cover group-hover:opacity-80 transition-opacity"
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-white/5 flex items-center justify-center">
+                      <span className="text-muted-foreground text-sm">No Image</span>
+                    </div>
+                  )}
+                  
+                  {/* Details Overlay */}
+                  <div className="p-3 space-y-1">
+                    <h4 className="font-semibold text-foreground text-sm line-clamp-2">{result.name}</h4>
+                    {result.original_name !== result.name && (
+                      <p className="text-xs text-muted-foreground line-clamp-1">{result.original_name}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {result.first_air_date ? result.first_air_date.split('-')[0] : 'N/A'} • ⭐ {result.vote_average.toFixed(1)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* No Results Message */}
+          {searchQuery && !isSearching && searchResults.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-12 gap-2">
+              <Search className="w-8 h-8 text-muted-foreground opacity-50" />
+              <p className="text-muted-foreground text-sm">No TV series found for "{searchQuery}"</p>
+              <p className="text-muted-foreground text-xs">Try searching with a different name</p>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!searchQuery && searchResults.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-12 gap-2">
+              <Search className="w-8 h-8 text-muted-foreground opacity-50" />
+              <p className="text-muted-foreground text-sm">Start by searching for a TV series</p>
+            </div>
+          )}
+
+          {isLoading && (
+            <div className="flex flex-col items-center justify-center py-12 gap-2">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <span className="text-muted-foreground">Loading series details...</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Step 2: Series Details
+  if (currentStep === 'details') {
+    return (
+      <div className="space-y-8">
+        {/* Selected Series Info */}
+        <div className="border border-border rounded-lg bg-card p-6">
+          <div className="flex items-start justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Series Information</h3>
+              <p className="text-muted-foreground text-sm mt-1">Verify and update series details</p>
+            </div>
+            <Button
+              onClick={() => setCurrentStep('search')}
+              variant="outline"
+              className="border-border text-foreground hover:bg-white/5 text-sm"
+            >
+              Change Series
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              <Label className="text-muted-foreground text-sm">Title</Label>
+              <Input
+                value={data.name || ''}
+                onChange={(e) => onUpdate({ ...data, name: e.target.value })}
+                className="bg-background border-border text-foreground mt-2"
               />
             </div>
 
-            {/* Poster URLs */}
             <div>
-              <Label className="text-muted-foreground">Poster Images (3 URLs)</Label>
-              <div className="space-y-3 mt-2">
-                {[0, 1, 2].map((index) => (
-                  <div key={index}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs text-muted-foreground w-20">Poster {index + 1}</span>
-                    </div>
-                    <Input
-                      value={data.poster_urls?.[index] || ''}
-                      onChange={(e) => updatePosterUrl(index, e.target.value)}
-                      placeholder="https://example.com/poster.jpg"
-                      className="bg-card border-border text-foreground"
-                    />
-                    {data.poster_urls?.[index] && (
-                      <img
-                        src={data.poster_urls[index]}
-                        alt={`Poster ${index + 1}`}
-                        className="mt-2 w-32 rounded"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Backdrop URLs */}
-            <div>
-              <Label className="text-muted-foreground">Backdrop Images (3 URLs)</Label>
-              <div className="space-y-3 mt-2">
-                {[0, 1, 2].map((index) => (
-                  <div key={index}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs text-muted-foreground w-20">Backdrop {index + 1}</span>
-                    </div>
-                    <Input
-                      value={data.backdrop_urls?.[index] || ''}
-                      onChange={(e) => updateBackdropUrl(index, e.target.value)}
-                      placeholder="https://example.com/backdrop.jpg"
-                      className="bg-card border-border text-foreground"
-                    />
-                    {data.backdrop_urls?.[index] && (
-                      <img
-                        src={data.backdrop_urls[index]}
-                        alt={`Backdrop ${index + 1}`}
-                        className="mt-2 w-full max-w-md rounded"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
+              <Label className="text-muted-foreground text-sm">Original Title</Label>
+              <Input
+                value={data.original_name || ''}
+                onChange={(e) => onUpdate({ ...data, original_name: e.target.value })}
+                className="bg-background border-border text-foreground mt-2"
+              />
             </div>
 
             <div>
-              <Label className="text-muted-foreground">Genres</Label>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {data.genres?.map((genre) => (
+              <Label className="text-muted-foreground text-sm">First Air Date</Label>
+              <Input
+                type="date"
+                value={data.first_air_date || ''}
+                onChange={(e) => onUpdate({ ...data, first_air_date: e.target.value })}
+                className="bg-background border-border text-foreground mt-2"
+              />
+            </div>
+
+            <div>
+              <Label className="text-muted-foreground text-sm">Status</Label>
+              <Input
+                value={data.status || ''}
+                onChange={(e) => onUpdate({ ...data, status: e.target.value })}
+                className="bg-background border-border text-foreground mt-2"
+              />
+            </div>
+
+            <div>
+              <Label className="text-muted-foreground text-sm">TMDB ID</Label>
+              <Input
+                value={data.tmdb_id || ''}
+                disabled
+                className="bg-background border-border text-muted-foreground mt-2"
+              />
+            </div>
+
+            <div>
+              <Label className="text-muted-foreground text-sm">IMDB ID</Label>
+              <Input
+                value={data.imdb_id || ''}
+                onChange={(e) => onUpdate({ ...data, imdb_id: e.target.value })}
+                className="bg-background border-border text-foreground mt-2"
+              />
+            </div>
+
+            <div>
+              <Label className="text-muted-foreground text-sm">Rating</Label>
+              <Input
+                type="number"
+                min="0"
+                max="10"
+                step="0.1"
+                value={data.vote_average || ''}
+                onChange={(e) => onUpdate({ ...data, vote_average: parseFloat(e.target.value) })}
+                className="bg-background border-border text-foreground mt-2"
+              />
+            </div>
+
+            <div>
+              <Label className="text-muted-foreground text-sm">Trailer Link</Label>
+              <Input
+                type="url"
+                value={data.trailer_link || ''}
+                onChange={(e) => onUpdate({ ...data, trailer_link: e.target.value })}
+                placeholder="https://youtube.com/watch?v=..."
+                className="bg-background border-border text-foreground mt-2"
+              />
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <Label className="text-muted-foreground text-sm">Overview</Label>
+            <Textarea
+              value={data.overview || ''}
+              onChange={(e) => onUpdate({ ...data, overview: e.target.value })}
+              rows={4}
+              className="bg-background border-border text-foreground mt-2"
+            />
+          </div>
+
+          <div className="mb-6">
+            <Label className="text-muted-foreground text-sm">Tagline</Label>
+            <Input
+              value={data.tagline || ''}
+              onChange={(e) => onUpdate({ ...data, tagline: e.target.value })}
+              className="bg-background border-border text-foreground mt-2"
+            />
+          </div>
+
+          {/* Poster URLs */}
+          <div className="mb-6">
+            <Label className="text-muted-foreground text-sm mb-3 block">Poster Images (3 URLs)</Label>
+            <div className="grid grid-cols-3 gap-4">
+              {[0, 1, 2].map((index) => (
+                <div key={index} className="space-y-2">
+                  <Input
+                    value={data.poster_urls?.[index] || ''}
+                    onChange={(e) => updatePosterUrl(index, e.target.value)}
+                    placeholder="https://example.com/poster.jpg"
+                    className="bg-background border-border text-foreground text-sm"
+                  />
+                  {data.poster_urls?.[index] && (
+                    <img
+                      src={data.poster_urls[index]}
+                      alt={`Poster ${index + 1}`}
+                      className="w-full h-32 rounded object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Backdrop URLs */}
+          <div className="mb-6">
+            <Label className="text-muted-foreground text-sm mb-3 block">Backdrop Images (3 URLs)</Label>
+            <div className="space-y-3">
+              {[0, 1, 2].map((index) => (
+                <div key={index} className="space-y-2">
+                  <Input
+                    value={data.backdrop_urls?.[index] || ''}
+                    onChange={(e) => updateBackdropUrl(index, e.target.value)}
+                    placeholder="https://example.com/backdrop.jpg"
+                    className="bg-background border-border text-foreground text-sm"
+                  />
+                  {data.backdrop_urls?.[index] && (
+                    <img
+                      src={data.backdrop_urls[index]}
+                      alt={`Backdrop ${index + 1}`}
+                      className="w-full h-24 rounded object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Genres */}
+          {data.genres && data.genres.length > 0 && (
+            <div>
+              <Label className="text-muted-foreground text-sm mb-3 block">Genres</Label>
+              <div className="flex flex-wrap gap-2">
+                {data.genres.map((genre) => (
                   <span
                     key={genre.id}
                     className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm"
@@ -463,428 +534,370 @@ export function TVSeriesForm({ data, onUpdate }: TVSeriesFormProps) {
                 ))}
               </div>
             </div>
+          )}
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="flex items-center justify-end gap-3">
+          <Button
+            onClick={() => setCurrentStep('search')}
+            variant="outline"
+            className="border-border text-foreground hover:bg-white/5"
+          >
+            Back
+          </Button>
+          <Button
+            onClick={() => setCurrentStep('seasons')}
+            className="bg-primary hover:bg-primary/90 text-white"
+          >
+            Next
+            <ChevronRight className="w-4 h-4 ml-2" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 3: Seasons & Episodes
+  if (currentStep === 'seasons') {
+    return (
+      <div className="space-y-8">
+        <div className="border border-border rounded-lg bg-card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Seasons & Episodes</h3>
+              <p className="text-muted-foreground text-sm mt-1">Manage seasons and episode stream/download links</p>
+            </div>
           </div>
 
-          {/* Seasons Accordion */}
-          <div className="border border-border rounded-lg bg-card p-6">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              Seasons & Episodes
-            </h3>
+          {!data.seasons || data.seasons.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">
+              No seasons found. Please go back and search for a TV series.
+            </p>
+          ) : (
+            <Accordion type="multiple" className="space-y-3">
+              {data.seasons.map((season, seasonIndex) => (
+                <AccordionItem
+                  key={seasonIndex}
+                  value={`season-${seasonIndex}`}
+                  className="border border-border rounded-lg bg-background/50 overflow-hidden"
+                >
+                  <AccordionTrigger className="px-4 hover:bg-white/5 transition-colors">
+                    <div className="flex items-center justify-between w-full pr-4">
+                      <div className="flex items-center gap-3">
+                        {season.poster && (
+                          <img
+                            src={`https://image.tmdb.org/t/p/w92${season.poster}`}
+                            alt={season.title}
+                            className="w-12 h-16 object-cover rounded"
+                          />
+                        )}
+                        <div className="text-left">
+                          <h4 className="font-semibold text-foreground">
+                            {season.title}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {season.episodes?.length || 0} episodes
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleSeasonVisibility(seasonIndex);
+                        }}
+                        variant="ghost"
+                        size="sm"
+                        className={`${
+                          season.is_visible
+                            ? 'text-primary hover:text-primary'
+                            : 'text-muted-foreground hover:text-muted-foreground'
+                        } hover:bg-white/10`}
+                      >
+                        {season.is_visible ? (
+                          <Eye className="w-4 h-4" />
+                        ) : (
+                          <EyeOff className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pb-4 pt-2">
+                    {/* Season Details */}
+                    <div className="grid grid-cols-2 gap-3 mb-4 p-3 bg-card rounded-lg border border-border">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Season Number</Label>
+                        <Input
+                          type="number"
+                          value={season.season_number}
+                          onChange={(e) =>
+                            updateSeason(seasonIndex, {
+                              season_number: parseInt(e.target.value)
+                            })
+                          }
+                          className="bg-background border-border text-foreground mt-1 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Title</Label>
+                        <Input
+                          value={season.title}
+                          onChange={(e) =>
+                            updateSeason(seasonIndex, { title: e.target.value })
+                          }
+                          className="bg-background border-border text-foreground mt-1 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Air Date</Label>
+                        <Input
+                          type="date"
+                          value={season.air_date || ''}
+                          onChange={(e) =>
+                            updateSeason(seasonIndex, { air_date: e.target.value })
+                          }
+                          className="bg-background border-border text-foreground mt-1 text-sm"
+                        />
+                      </div>
+                    </div>
 
-            {!data.seasons || data.seasons.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">
-                No seasons found. Search and select a TV series from TMDB above.
-              </p>
-            ) : (
-              <Accordion type="multiple" className="space-y-3">
-                {data.seasons.map((season, seasonIndex) => (
-                  <AccordionItem
-                    key={seasonIndex}
-                    value={`season-${seasonIndex}`}
-                    className="border border-border rounded-lg bg-background/50 overflow-hidden"
-                  >
-                    <AccordionTrigger className="px-4 hover:bg-white/5 transition-colors">
-                      <div className="flex items-center justify-between w-full pr-4">
-                        <div className="flex items-center gap-3">
-                          {season.poster && (
-                            <img
-                              src={`https://image.tmdb.org/t/p/w92${season.poster}`}
-                              alt={season.title}
-                              className="w-12 h-16 object-cover rounded"
-                            />
-                          )}
-                          <div className="text-left">
-                            <h4 className="font-semibold text-foreground">
-                              {season.title}
-                            </h4>
-                            <p className="text-sm text-muted-foreground">
-                              {season.episodes?.length || 0} episodes
-                            </p>
+                    {/* Episodes */}
+                    <div className="space-y-2">
+                      <h5 className="text-sm font-semibold text-foreground">Episodes</h5>
+                      {season.episodes?.map((episode, episodeIndex) => (
+                        <div key={episodeIndex} className="border border-border rounded-lg bg-background p-3 space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-foreground">
+                                Episode {episode.episode_number}: {episode.title}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{episode.overview}</p>
+                            </div>
+                            <Button
+                              onClick={() => toggleEpisodeVisibility(seasonIndex, episodeIndex)}
+                              variant="ghost"
+                              size="sm"
+                              className={`${
+                                episode.is_visible
+                                  ? 'text-primary hover:text-primary'
+                                  : 'text-muted-foreground hover:text-muted-foreground'
+                              } hover:bg-white/10`}
+                            >
+                              {episode.is_visible ? (
+                                <Eye className="w-4 h-4" />
+                              ) : (
+                                <EyeOff className="w-4 h-4" />
+                              )}
+                            </Button>
                           </div>
-                        </div>
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleSeasonVisibility(seasonIndex);
-                          }}
-                          variant="ghost"
-                          size="sm"
-                          className={`${
-                            season.is_visible
-                              ? 'text-primary hover:text-primary'
-                              : 'text-muted-foreground hover:text-muted-foreground'
-                          } hover:bg-white/10`}
-                        >
-                          {season.is_visible ? (
-                            <Eye className="w-4 h-4" />
-                          ) : (
-                            <EyeOff className="w-4 h-4" />
-                          )}
-                        </Button>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="px-4 pb-4 pt-2">
-                      {/* Season Details */}
-                      <div className="grid grid-cols-2 gap-3 mb-4 p-3 bg-card rounded-lg border border-border">
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Season Number</Label>
-                          <Input
-                            type="number"
-                            value={season.season_number}
-                            onChange={(e) =>
-                              updateSeason(seasonIndex, {
-                                season_number: parseInt(e.target.value)
-                              })
-                            }
-                            className="bg-background border-border text-foreground mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Title</Label>
-                          <Input
-                            value={season.title}
-                            onChange={(e) =>
-                              updateSeason(seasonIndex, { title: e.target.value })
-                            }
-                            className="bg-background border-border text-foreground mt-1"
-                          />
-                        </div>
-                      </div>
 
-                      {/* Episodes Accordion */}
-                      <Accordion type="multiple" className="space-y-2">
-                        {season.episodes?.map((episode, episodeIndex) => (
-                          <AccordionItem
-                            key={episodeIndex}
-                            value={`episode-${seasonIndex}-${episodeIndex}`}
-                            className="border border-border rounded-lg bg-card"
-                          >
-                            <AccordionTrigger className="px-3 py-2 hover:bg-white/5 transition-colors">
-                              <div className="flex items-center justify-between w-full pr-3">
-                                <div className="flex items-center gap-2">
-                                  {episode.thumbnail && (
-                                    <img
-                                      src={`https://image.tmdb.org/t/p/w92${episode.thumbnail}`}
-                                      alt={episode.title}
-                                      className="w-16 h-10 object-cover rounded"
-                                    />
-                                  )}
-                                  <div className="text-left">
-                                    <p className="text-sm font-medium text-foreground">
-                                      E{episode.episode_number}: {episode.title}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                      {episode.stream_links?.length || 0} streams •{' '}
-                                      {episode.downloads?.length || 0} downloads
-                                    </p>
-                                  </div>
-                                </div>
-                                <Button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleEpisodeVisibility(seasonIndex, episodeIndex);
-                                  }}
-                                  variant="ghost"
-                                  size="sm"
-                                  className={`${
-                                    episode.is_visible
-                                      ? 'text-primary hover:text-primary'
-                                      : 'text-muted-foreground hover:text-muted-foreground'
-                                  } hover:bg-white/10`}
+                          {/* Episode Title & Overview */}
+                          <div className="grid grid-cols-2 gap-2 bg-card p-2 rounded">
+                            <Input
+                              placeholder="Episode title"
+                              value={episode.title}
+                              onChange={(e) =>
+                                updateEpisode(seasonIndex, episodeIndex, { title: e.target.value })
+                              }
+                              className="bg-background border-border text-foreground text-xs"
+                            />
+                            <Input
+                              placeholder="Thumbnail URL"
+                              value={episode.thumbnail}
+                              onChange={(e) =>
+                                updateEpisode(seasonIndex, episodeIndex, { thumbnail: e.target.value })
+                              }
+                              className="bg-background border-border text-foreground text-xs"
+                            />
+                          </div>
+
+                          {/* Stream Links */}
+                          <div className="bg-card p-3 rounded border border-border space-y-2">
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs font-semibold text-foreground">Stream Links</p>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => addStreamLink(seasonIndex, episodeIndex)}
+                                className="text-primary hover:bg-primary/10 h-auto p-1"
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                Add
+                              </Button>
+                            </div>
+                            {episode.stream_links?.map((link, linkIndex) => (
+                              <div key={linkIndex} className="flex gap-2 items-end">
+                                <Select
+                                  value={String(link.provider_id)}
+                                  onValueChange={(value) =>
+                                    updateStreamLink(seasonIndex, episodeIndex, linkIndex, {
+                                      provider_id: parseInt(value)
+                                    })
+                                  }
                                 >
-                                  {episode.is_visible ? (
-                                    <Eye className="w-3 h-3" />
-                                  ) : (
-                                    <EyeOff className="w-3 h-3" />
-                                  )}
+                                  <SelectTrigger className="w-32 h-8 text-xs bg-background border-border">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {STREAM_PROVIDERS.map((p) => (
+                                      <SelectItem key={p.id} value={String(p.id)} className="text-xs">
+                                        {p.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Select
+                                  value={link.player_type}
+                                  onValueChange={(value) =>
+                                    updateStreamLink(seasonIndex, episodeIndex, linkIndex, {
+                                      player_type: value as any
+                                    })
+                                  }
+                                >
+                                  <SelectTrigger className="w-32 h-8 text-xs bg-background border-border">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {PLAYER_TYPES.map((p) => (
+                                      <SelectItem key={p.value} value={p.value} className="text-xs">
+                                        {p.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Input
+                                  placeholder="Stream URL"
+                                  value={link.stream_url}
+                                  onChange={(e) =>
+                                    updateStreamLink(seasonIndex, episodeIndex, linkIndex, {
+                                      stream_url: e.target.value
+                                    })
+                                  }
+                                  className="flex-1 h-8 text-xs bg-background border-border"
+                                />
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => removeStreamLink(seasonIndex, episodeIndex, linkIndex)}
+                                  className="h-8 px-2"
+                                >
+                                  <Trash2 className="w-3 h-3" />
                                 </Button>
                               </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="px-3 pb-3">
-                              {/* Episode Details */}
-                              <div className="space-y-3 mb-4 p-3 bg-background/50 rounded-lg border border-border">
-                                <div className="grid grid-cols-2 gap-2">
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Episode #</Label>
-                                    <Input
-                                      type="number"
-                                      value={episode.episode_number}
-                                      onChange={(e) =>
-                                        updateEpisode(seasonIndex, episodeIndex, {
-                                          episode_number: parseInt(e.target.value)
-                                        })
-                                      }
-                                      className="bg-card border-border text-foreground mt-1"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Title</Label>
-                                    <Input
-                                      value={episode.title}
-                                      onChange={(e) =>
-                                        updateEpisode(seasonIndex, episodeIndex, {
-                                          title: e.target.value
-                                        })
-                                      }
-                                      className="bg-card border-border text-foreground mt-1"
-                                    />
-                                  </div>
-                                </div>
-                                <div>
-                                  <Label className="text-xs text-muted-foreground">Overview</Label>
-                                  <Textarea
-                                    value={episode.overview}
-                                    onChange={(e) =>
-                                      updateEpisode(seasonIndex, episodeIndex, {
-                                        overview: e.target.value
-                                      })
-                                    }
-                                    rows={2}
-                                    className="bg-card border-border text-foreground mt-1"
-                                  />
-                                </div>
-                              </div>
+                            ))}
+                          </div>
 
-                              {/* Stream Links */}
-                              <div className="mb-4">
-                                <div className="flex items-center justify-between mb-2">
-                                  <Label className="text-sm text-foreground">Stream Links</Label>
-                                  <Button
-                                    onClick={() => addStreamLink(seasonIndex, episodeIndex)}
-                                    size="sm"
-                                    className="bg-primary hover:bg-primary/90 text-white h-7 text-xs"
-                                  >
-                                    <Plus className="w-3 h-3 mr-1" />
-                                    Add Stream
-                                  </Button>
-                                </div>
-                                <div className="space-y-2">
-                                  {episode.stream_links?.map((link, linkIndex) => (
-                                    <div
-                                      key={linkIndex}
-                                      className="p-2 bg-background/50 rounded border border-border"
-                                    >
-                                      <div className="grid grid-cols-3 gap-2 mb-2">
-                                        <div>
-                                          <Label className="text-xs text-muted-foreground">Provider</Label>
-                                          <Select
-                                            value={link.provider_id.toString()}
-                                            onValueChange={(value) =>
-                                              updateStreamLink(seasonIndex, episodeIndex, linkIndex, {
-                                                provider_id: parseInt(value)
-                                              })
-                                            }
-                                          >
-                                            <SelectTrigger className="bg-card border-border text-foreground h-8 text-xs mt-1">
-                                              <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-card border-border text-foreground">
-                                              {STREAM_PROVIDERS.map((provider) => (
-                                                <SelectItem
-                                                  key={provider.id}
-                                                  value={provider.id.toString()}
-                                                  className="hover:bg-white/10 focus:bg-white/10"
-                                                >
-                                                  {provider.name}
-                                                </SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                        <div>
-                                          <Label className="text-xs text-muted-foreground">Player Type</Label>
-                                          <Select
-                                            value={link.player_type}
-                                            onValueChange={(value: any) =>
-                                              updateStreamLink(seasonIndex, episodeIndex, linkIndex, {
-                                                player_type: value
-                                              })
-                                            }
-                                          >
-                                            <SelectTrigger className="bg-card border-border text-foreground h-8 text-xs mt-1">
-                                              <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-card border-border text-foreground">
-                                              {PLAYER_TYPES.map((type) => (
-                                                <SelectItem
-                                                  key={type.value}
-                                                  value={type.value}
-                                                  className="hover:bg-white/10 focus:bg-white/10"
-                                                >
-                                                  {type.label}
-                                                </SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                        <div className="flex items-end">
-                                          <Button
-                                            onClick={() =>
-                                              removeStreamLink(seasonIndex, episodeIndex, linkIndex)
-                                            }
-                                            variant="ghost"
-                                            size="sm"
-                                            className="text-accent hover:text-accent hover:bg-accent/10 h-8 w-full"
-                                          >
-                                            <Trash2 className="w-3 h-3" />
-                                          </Button>
-                                        </div>
-                                      </div>
-                                      <div>
-                                        <Label className="text-xs text-muted-foreground">Stream URL</Label>
-                                        <Input
-                                          value={link.stream_url}
-                                          onChange={(e) =>
-                                            updateStreamLink(seasonIndex, episodeIndex, linkIndex, {
-                                              stream_url: e.target.value
-                                            })
-                                          }
-                                          placeholder="https://..."
-                                          className="bg-card border-border text-foreground h-8 text-xs mt-1"
-                                        />
-                                      </div>
-                                    </div>
-                                  ))}
-                                  {(!episode.stream_links || episode.stream_links.length === 0) && (
-                                    <p className="text-xs text-muted-foreground text-center py-2">
-                                      No stream links added
-                                    </p>
-                                  )}
-                                </div>
+                          {/* Download Links */}
+                          <div className="bg-card p-3 rounded border border-border space-y-2">
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs font-semibold text-foreground">Download Links</p>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => addDownloadLink(seasonIndex, episodeIndex)}
+                                className="text-primary hover:bg-primary/10 h-auto p-1"
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                Add
+                              </Button>
+                            </div>
+                            {episode.downloads?.map((download, downloadIndex) => (
+                              <div key={downloadIndex} className="flex gap-2 items-end">
+                                <Select
+                                  value={String(download.provider_id)}
+                                  onValueChange={(value) =>
+                                    updateDownloadLink(seasonIndex, episodeIndex, downloadIndex, {
+                                      provider_id: parseInt(value)
+                                    })
+                                  }
+                                >
+                                  <SelectTrigger className="w-28 h-8 text-xs bg-background border-border">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {DOWNLOAD_PROVIDERS.map((p) => (
+                                      <SelectItem key={p.id} value={String(p.id)} className="text-xs">
+                                        {p.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Select
+                                  value={download.quality}
+                                  onValueChange={(value) =>
+                                    updateDownloadLink(seasonIndex, episodeIndex, downloadIndex, {
+                                      quality: value as any
+                                    })
+                                  }
+                                >
+                                  <SelectTrigger className="w-20 h-8 text-xs bg-background border-border">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {QUALITY_OPTIONS.map((q) => (
+                                      <SelectItem key={q} value={q} className="text-xs">
+                                        {q}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Input
+                                  placeholder="File size"
+                                  value={download.file_size}
+                                  onChange={(e) =>
+                                    updateDownloadLink(seasonIndex, episodeIndex, downloadIndex, {
+                                      file_size: e.target.value
+                                    })
+                                  }
+                                  className="w-20 h-8 text-xs bg-background border-border"
+                                />
+                                <Input
+                                  placeholder="Download URL"
+                                  value={download.download_url}
+                                  onChange={(e) =>
+                                    updateDownloadLink(seasonIndex, episodeIndex, downloadIndex, {
+                                      download_url: e.target.value
+                                    })
+                                  }
+                                  className="flex-1 h-8 text-xs bg-background border-border"
+                                />
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => removeDownloadLink(seasonIndex, episodeIndex, downloadIndex)}
+                                  className="h-8 px-2"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
                               </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
+        </div>
 
-                              {/* Download Links */}
-                              <div>
-                                <div className="flex items-center justify-between mb-2">
-                                  <Label className="text-sm text-foreground">Download Links</Label>
-                                  <Button
-                                    onClick={() => addDownloadLink(seasonIndex, episodeIndex)}
-                                    size="sm"
-                                    className="bg-primary hover:bg-primary/90 text-white h-7 text-xs"
-                                  >
-                                    <Plus className="w-3 h-3 mr-1" />
-                                    Add Download
-                                  </Button>
-                                </div>
-                                <div className="space-y-2">
-                                  {episode.downloads?.map((link, linkIndex) => (
-                                    <div
-                                      key={linkIndex}
-                                      className="p-2 bg-background/50 rounded border border-border"
-                                    >
-                                      <div className="grid grid-cols-4 gap-2 mb-2">
-                                        <div>
-                                          <Label className="text-xs text-muted-foreground">Provider</Label>
-                                          <Select
-                                            value={link.provider_id.toString()}
-                                            onValueChange={(value) =>
-                                              updateDownloadLink(seasonIndex, episodeIndex, linkIndex, {
-                                                provider_id: parseInt(value)
-                                              })
-                                            }
-                                          >
-                                            <SelectTrigger className="bg-card border-border text-foreground h-8 text-xs mt-1">
-                                              <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-card border-border text-foreground">
-                                              {DOWNLOAD_PROVIDERS.map((provider) => (
-                                                <SelectItem
-                                                  key={provider.id}
-                                                  value={provider.id.toString()}
-                                                  className="hover:bg-white/10 focus:bg-white/10"
-                                                >
-                                                  {provider.name}
-                                                </SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                        <div>
-                                          <Label className="text-xs text-muted-foreground">Quality</Label>
-                                          <Select
-                                            value={link.quality}
-                                            onValueChange={(value: any) =>
-                                              updateDownloadLink(seasonIndex, episodeIndex, linkIndex, {
-                                                quality: value
-                                              })
-                                            }
-                                          >
-                                            <SelectTrigger className="bg-card border-border text-foreground h-8 text-xs mt-1">
-                                              <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-card border-border text-foreground">
-                                              {QUALITY_OPTIONS.map((quality) => (
-                                                <SelectItem
-                                                  key={quality}
-                                                  value={quality}
-                                                  className="hover:bg-white/10 focus:bg-white/10"
-                                                >
-                                                  {quality}
-                                                </SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                        <div>
-                                          <Label className="text-xs text-muted-foreground">File Size</Label>
-                                          <Input
-                                            value={link.file_size}
-                                            onChange={(e) =>
-                                              updateDownloadLink(seasonIndex, episodeIndex, linkIndex, {
-                                                file_size: e.target.value
-                                              })
-                                            }
-                                            placeholder="450 MB"
-                                            className="bg-card border-border text-foreground h-8 text-xs mt-1"
-                                          />
-                                        </div>
-                                        <div className="flex items-end">
-                                          <Button
-                                            onClick={() =>
-                                              removeDownloadLink(seasonIndex, episodeIndex, linkIndex)
-                                            }
-                                            variant="ghost"
-                                            size="sm"
-                                            className="text-accent hover:text-accent hover:bg-accent/10 h-8 w-full"
-                                          >
-                                            <Trash2 className="w-3 h-3" />
-                                          </Button>
-                                        </div>
-                                      </div>
-                                      <div>
-                                        <Label className="text-xs text-muted-foreground">Download URL</Label>
-                                        <Input
-                                          value={link.download_url}
-                                          onChange={(e) =>
-                                            updateDownloadLink(seasonIndex, episodeIndex, linkIndex, {
-                                              download_url: e.target.value
-                                            })
-                                          }
-                                          placeholder="https://..."
-                                          className="bg-card border-border text-foreground h-8 text-xs mt-1"
-                                        />
-                                      </div>
-                                    </div>
-                                  ))}
-                                  {(!episode.downloads || episode.downloads.length === 0) && (
-                                    <p className="text-xs text-muted-foreground text-center py-2">
-                                      No download links added
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))}
-                      </Accordion>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            )}
+        {/* Navigation Buttons */}
+        <div className="flex items-center justify-between">
+          <Button
+            onClick={() => setCurrentStep('details')}
+            variant="outline"
+            className="border-border text-foreground hover:bg-white/5"
+          >
+            Back
+          </Button>
+          <div className="text-sm text-muted-foreground">
+            Step 3 of 3
           </div>
-        </>
-      )}
-    </div>
-  );
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }

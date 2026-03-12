@@ -115,14 +115,7 @@ export default function CreateTVSeriesPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <button
-          onClick={handleCancel}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to TV Series
-        </button>
+      <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground">Create TV Series</h1>
         <p className="text-muted-foreground mt-2">
           Add a new TV series with complete season and episode information
@@ -131,7 +124,7 @@ export default function CreateTVSeriesPage() {
 
       <TVSeriesForm data={tvSeriesData} onUpdate={handleUpdateData} />
 
-      <div className="flex items-center justify-between mt-6 pt-6 border-t border-border">
+      <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
         <Button
           onClick={handleCancel}
           variant="outline"
@@ -158,20 +151,6 @@ export default function CreateTVSeriesPage() {
           )}
         </Button>
       </div>
-
-      {/* Data Summary Panel (for debugging) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-6 p-4 bg-card border border-border rounded-lg">
-          <details>
-            <summary className="cursor-pointer text-sm font-medium text-muted-foreground mb-2">
-              Debug: Current Data
-            </summary>
-            <pre className="text-xs text-muted-foreground overflow-auto max-h-96 scrollbar-hide">
-              {JSON.stringify(tvSeriesData, null, 2)}
-            </pre>
-          </details>
-        </div>
-      )}
     </div>
   );
 }
