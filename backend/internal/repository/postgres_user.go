@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/domain/models"
@@ -269,20 +270,65 @@ func (r *PostgresUserRepository) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-// GetAll retrieves all users with pagination
-func (r *PostgresUserRepository) GetAll(ctx context.Context, limit, offset int) ([]*models.User, error) {
-	query := `
+// List retrieves users with pagination and filters.
+func (r *PostgresUserRepository) List(ctx context.Context, filter UserListFilter) ([]*models.User, int, error) {
+	where := []string{"deleted_at IS NULL"}
+	args := []interface{}{}
+	argPos := 1
+
+	if strings.TrimSpace(filter.Search) != "" {
+		where = append(where, fmt.Sprintf("(username ILIKE $%d OR email ILIKE $%d)", argPos, argPos))
+		args = append(args, "%"+strings.TrimSpace(filter.Search)+"%")
+		argPos++
+	}
+	if strings.TrimSpace(filter.Role) != "" {
+		where = append(where, fmt.Sprintf("role = $%d", argPos))
+		args = append(args, strings.TrimSpace(filter.Role))
+		argPos++
+	}
+	if filter.IsActive != nil {
+		where = append(where, fmt.Sprintf("is_active = $%d", argPos))
+		args = append(args, *filter.IsActive)
+		argPos++
+	}
+	if filter.IsVerified != nil {
+		where = append(where, fmt.Sprintf("is_verified = $%d", argPos))
+		args = append(args, *filter.IsVerified)
+		argPos++
+	}
+
+	whereSQL := strings.Join(where, " AND ")
+
+	countQuery := fmt.Sprintf(`SELECT COUNT(*) FROM users WHERE %s`, whereSQL)
+	var total int
+	if err := r.db.QueryRowContext(ctx, countQuery, args...).Scan(&total); err != nil {
+		utils.ErrorLog("failed to count users: %s", err)
+		return nil, 0, err
+	}
+
+	sortBy := "created_at"
+	switch filter.SortBy {
+	case "username", "email", "created_at", "updated_at", "last_login_at":
+		sortBy = filter.SortBy
+	}
+	sortOrder := "DESC"
+	if strings.EqualFold(filter.SortOrder, "asc") {
+		sortOrder = "ASC"
+	}
+
+	query := fmt.Sprintf(`
 		SELECT id, username, email, password_hash, role, avatar, is_verified, is_active, last_login_at, created_at, updated_at, deleted_at
 		FROM users
-		WHERE deleted_at IS NULL
-		ORDER BY created_at DESC
-		LIMIT $1 OFFSET $2
-	`
+		WHERE %s
+		ORDER BY %s %s
+		LIMIT $%d OFFSET $%d
+	`, whereSQL, sortBy, sortOrder, argPos, argPos+1)
 
-	rows, err := r.db.QueryContext(ctx, query, limit, offset)
+	args = append(args, filter.Limit, filter.Offset)
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		utils.ErrorLog("failed to get all users: %s", err)
-		return nil, err
+		utils.ErrorLog("failed to list users: %s", err)
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -306,7 +352,7 @@ func (r *PostgresUserRepository) GetAll(ctx context.Context, limit, offset int) 
 
 		if err != nil {
 			utils.ErrorLog("failed to scan user: %s", err)
-			return nil, err
+			return nil, 0, err
 		}
 
 		users = append(users, user)
@@ -314,8 +360,8 @@ func (r *PostgresUserRepository) GetAll(ctx context.Context, limit, offset int) 
 
 	if err = rows.Err(); err != nil {
 		utils.ErrorLog("rows error: %s", err)
-		return nil, err
+		return nil, 0, err
 	}
 
-	return users, nil
+	return users, total, nil
 }

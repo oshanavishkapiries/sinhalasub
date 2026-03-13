@@ -7,6 +7,17 @@ import (
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/domain/models"
 )
 
+type UserListFilter struct {
+	Search     string
+	Role       string
+	IsActive   *bool
+	IsVerified *bool
+	SortBy     string
+	SortOrder  string
+	Limit      int
+	Offset     int
+}
+
 // UserRepository defines the interface for user data operations
 type UserRepository interface {
 	Create(ctx context.Context, user *models.User) error
@@ -17,7 +28,7 @@ type UserRepository interface {
 	UpdatePasswordHash(ctx context.Context, userID string, passwordHash string) error
 	UpdateLastLoginAt(ctx context.Context, userID string, lastLoginAt time.Time) error
 	Delete(ctx context.Context, id string) error
-	GetAll(ctx context.Context, limit, offset int) ([]*models.User, error)
+	List(ctx context.Context, filter UserListFilter) ([]*models.User, int, error)
 }
 
 type VerificationCodeRepository interface {

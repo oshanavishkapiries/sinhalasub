@@ -3,11 +3,13 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/pkg/metrics"
+	"github.com/oshanavishkapiries/sinhalasub/backend/internal/pkg/pagination"
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/pkg/response"
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/pkg/utils"
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/service"
@@ -157,25 +159,63 @@ func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 // List handles GET /users requests
 // @Summary List Users
-// @Description List users with default paging
+// @Description List users with pagination and filters
 // @Tags Users
 // @Accept json
 // @Produce json
+// @Param page query int false "Page number" default(1)
+// @Param per_page query int false "Items per page" default(10)
+// @Param sort_by query string false "Sort field" Enums(created_at,updated_at,last_login_at,username,email) default(created_at)
+// @Param sort_order query string false "Sort order" Enums(asc,desc) default(desc)
+// @Param search query string false "Search by username/email"
+// @Param role query string false "Filter by role"
+// @Param is_active query boolean false "Filter by active status"
+// @Param is_verified query boolean false "Filter by verification status"
 // @Success 200 {object} map[string]interface{} "Users fetched"
 // @Failure 500 {object} map[string]interface{} "Server error"
 // @Router /users/ [get]
 func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	// In a real application, you would parse query parameters for limit and offset
-	users, err := h.userService.ListUsers(ctx, 10, 0)
+	pg, err := pagination.ParseRequest(r, pagination.Options{
+		DefaultPage:    1,
+		DefaultPerPage: 10,
+		MaxPerPage:     100,
+		DefaultSortBy:  "created_at",
+		AllowedSortBy: map[string]struct{}{
+			"created_at":    {},
+			"updated_at":    {},
+			"last_login_at": {},
+			"username":      {},
+			"email":         {},
+		},
+	})
+	if err != nil {
+		apiErr := response.BadRequestException("Invalid pagination parameters", err)
+		response.HandleError(w, apiErr)
+		return
+	}
+
+	users, total, err := h.userService.ListUsers(ctx, service.UserListQuery{
+		Search:     strings.TrimSpace(r.URL.Query().Get("search")),
+		Role:       strings.TrimSpace(r.URL.Query().Get("role")),
+		IsActive:   parseOptionalBool(r.URL.Query().Get("is_active")),
+		IsVerified: parseOptionalBool(r.URL.Query().Get("is_verified")),
+		SortBy:     pg.SortBy,
+		SortOrder:  pg.SortOrder,
+		Limit:      pg.PerPage,
+		Offset:     pg.Offset(),
+	})
 	if err != nil {
 		apiErr := response.InternalServerException("Failed to fetch users", err)
 		response.HandleError(w, apiErr)
 		return
 	}
 
-	response.Success(w, users, "Users retrieved successfully")
+	response.Success(w, map[string]interface{}{
+		"items": users,
+		"meta":  pagination.NewMeta(pg.Page, pg.PerPage, total),
+	}, "Users retrieved successfully")
 }
 
 // Update handles PUT /users/:id requests
@@ -241,4 +281,16 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	user.PasswordHash = ""
 	response.Success(w, user, "User updated successfully")
+}
+
+func parseOptionalBool(raw string) *bool {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil
+	}
+	v, err := strconv.ParseBool(raw)
+	if err != nil {
+		return nil
+	}
+	return &v
 }

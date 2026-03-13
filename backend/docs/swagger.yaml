@@ -311,7 +311,53 @@ paths:
     get:
       consumes:
       - application/json
-      description: List users with default paging
+      description: List users with pagination and filters
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      - default: created_at
+        description: Sort field
+        enum:
+        - created_at
+        - updated_at
+        - last_login_at
+        - username
+        - email
+        in: query
+        name: sort_by
+        type: string
+      - default: desc
+        description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort_order
+        type: string
+      - description: Search by username/email
+        in: query
+        name: search
+        type: string
+      - description: Filter by role
+        in: query
+        name: role
+        type: string
+      - description: Filter by active status
+        in: query
+        name: is_active
+        type: boolean
+      - description: Filter by verification status
+        in: query
+        name: is_verified
+        type: boolean
       produces:
       - application/json
       responses:
