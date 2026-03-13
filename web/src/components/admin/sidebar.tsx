@@ -4,9 +4,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Users, Home, Film, Tv } from 'lucide-react';
+import { Menu, X, Users, Home, Film, Tv, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/contexts/sidebar-context';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface SidebarItem {
   href: string;
@@ -74,7 +81,32 @@ export function AdminSidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="space-y-1">
+        <nav className="space-y-1 p-3">
+          {/* Create */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-3 bg-card border-border text-foreground hover:bg-white/5"
+              >
+                <Plus className="w-5 h-5" />
+                <span className="font-medium text-sm">Create</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-52 bg-card border-border text-foreground" align="start">
+              <DropdownMenuItem asChild className="cursor-pointer hover:bg-white/10 focus:bg-white/10">
+                <Link href="/admin/users?create=1">User</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="cursor-pointer hover:bg-white/10 focus:bg-white/10">
+                <Link href="/admin/movies?create=1">Movie</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-border" />
+              <DropdownMenuItem asChild className="cursor-pointer hover:bg-white/10 focus:bg-white/10">
+                <Link href="/admin/tv-series/create">TV Series</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           {menuItems.map((item) => {
             const isActive = pathname === item.href || (pathname.startsWith(item.href + '/') && item.href !== '/admin');
             return (

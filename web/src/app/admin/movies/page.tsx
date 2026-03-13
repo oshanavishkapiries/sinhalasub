@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { DataTable, Column, RowAction } from '@/components/admin/data-table';
 import { Modal } from '@/components/admin/modal';
@@ -21,6 +22,8 @@ import { Badge } from '@/components/ui/badge';
 import { useAdminTopbar } from '@/contexts/admin-topbar-context';
 
 export default function MoviesPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { setSearch, clearSearch } = useAdminTopbar();
   const [content, setContent] = useState<AdminContent[]>([]);
   const [loading, setLoading] = useState(false);
@@ -35,6 +38,7 @@ export default function MoviesPage() {
   const [contentToDelete, setContentToDelete] = useState<AdminContent | null>(null);
 
   const { toast } = useToast();
+  const createFromLayout = searchParams.get('create') === '1';
 
   useEffect(() => {
     setSearch({
@@ -48,6 +52,19 @@ export default function MoviesPage() {
 
     return () => clearSearch();
   }, [clearSearch, searchQuery, setSearch]);
+
+  useEffect(() => {
+    if (!createFromLayout) return;
+    setSelectedContent(undefined);
+    setIsDrawerOpen(true);
+  }, [createFromLayout]);
+
+  const handleDrawerOpenChange = (open: boolean) => {
+    setIsDrawerOpen(open);
+    if (!open && createFromLayout) {
+      router.replace('/admin/movies');
+    }
+  };
 
   const fetchContent = useCallback(async () => {
     setLoading(true);
@@ -322,7 +339,7 @@ export default function MoviesPage() {
       {/* Modal for create/edit */}
       <Modal
         open={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
+        onOpenChange={handleDrawerOpenChange}
         title={selectedContent ? 'Edit Movie' : 'Add New Movie'}
         description={selectedContent ? 'Update movie information' : 'Add a new movie'}
         onSubmit={() => {

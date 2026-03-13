@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { DataTable, Column, RowAction } from '@/components/admin/data-table';
 import { Modal } from '@/components/admin/modal';
@@ -22,6 +23,8 @@ import { UserRole } from '@/types/auth';
 import { useAdminTopbar } from '@/contexts/admin-topbar-context';
 
 export default function UsersPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { setSearch, clearSearch } = useAdminTopbar();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(false);
@@ -36,6 +39,7 @@ export default function UsersPage() {
   const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
 
   const { toast } = useToast();
+  const createFromLayout = searchParams.get('create') === '1';
 
   useEffect(() => {
     setSearch({
@@ -49,6 +53,19 @@ export default function UsersPage() {
 
     return () => clearSearch();
   }, [clearSearch, searchQuery, setSearch]);
+
+  useEffect(() => {
+    if (!createFromLayout) return;
+    setSelectedUser(undefined);
+    setIsDrawerOpen(true);
+  }, [createFromLayout]);
+
+  const handleDrawerOpenChange = (open: boolean) => {
+    setIsDrawerOpen(open);
+    if (!open && createFromLayout) {
+      router.replace('/admin/users');
+    }
+  };
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -307,7 +324,7 @@ export default function UsersPage() {
       {/* Modal for create/edit */}
       <Modal
         open={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
+        onOpenChange={handleDrawerOpenChange}
         title={selectedUser ? 'Edit User' : 'Create New User'}
         description={selectedUser ? 'Update user information' : 'Add a new user to the system'}
         onSubmit={() => {
