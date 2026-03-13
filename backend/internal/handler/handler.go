@@ -92,6 +92,16 @@ type UpdateUserRequest struct {
 }
 
 // Create handles POST /users requests
+// @Summary Create User
+// @Description Create a new user
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param request body CreateUserRequest true "User data"
+// @Success 200 {object} map[string]interface{} "User created"
+// @Failure 400 {object} map[string]interface{} "Invalid request"
+// @Failure 500 {object} map[string]interface{} "Server error"
+// @Router /users/ [post]
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var req CreateUserRequest
@@ -116,6 +126,16 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetByID handles GET /users/:id requests
+// @Summary Get User By ID
+// @Description Get one user by id
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Success 200 {object} map[string]interface{} "User fetched"
+// @Failure 400 {object} map[string]interface{} "Invalid request"
+// @Failure 404 {object} map[string]interface{} "User not found"
+// @Router /users/{id} [get]
 func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := chi.URLParam(r, "id")
@@ -136,6 +156,14 @@ func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 // List handles GET /users requests
+// @Summary List Users
+// @Description List users with default paging
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{} "Users fetched"
+// @Failure 500 {object} map[string]interface{} "Server error"
+// @Router /users/ [get]
 func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -151,6 +179,18 @@ func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 }
 
 // Update handles PUT /users/:id requests
+// @Summary Update User
+// @Description Update user profile fields
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Param request body UpdateUserRequest true "Fields to update"
+// @Success 200 {object} map[string]interface{} "User updated"
+// @Failure 400 {object} map[string]interface{} "Invalid request"
+// @Failure 404 {object} map[string]interface{} "User not found"
+// @Failure 500 {object} map[string]interface{} "Server error"
+// @Router /users/{id} [put]
 func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := chi.URLParam(r, "id")
