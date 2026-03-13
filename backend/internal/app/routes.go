@@ -55,9 +55,7 @@ func loadRoutes(container *config.Container) *chi.Mux {
 			r.Post("/logout", authHandler.Logout)
 			r.Post("/forgot-password/request", authHandler.RequestPasswordReset)
 			r.Post("/forgot-password", authHandler.ForgotPassword)
-
-			// Protected route - requires JWT
-			r.With(customMiddleware.JWTMiddleware).Get("/me", authHandler.GetCurrentUser)
+			r.Get("/me", authHandler.GetCurrentUser)
 		})
 	}
 

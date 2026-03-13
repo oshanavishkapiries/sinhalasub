@@ -1,207 +1,156 @@
 'use client';
 
 import React, { createContext, useCallback, useEffect, useState } from 'react';
-import { AuthContextType, User, UserRole } from '@/types/auth';
-import { loginUser, signupUser, logoutUser, getCurrentUser, refreshToken } from '@/services/auth';
+import { AuthContextType, User } from '@/types/auth';
 import {
-  saveSession,
-  getSession,
-  getToken,
-  getRefreshToken,
-  clearSession,
-  updateToken,
-  updateRefreshToken,
-  decodeToken,
-} from '@/lib/session-storage';
+  getCurrentUser,
+  loginUser,
+  logoutUser,
+  refreshToken,
+  requestPasswordReset as requestPasswordResetApi,
+  resetPassword as resetPasswordApi,
+  signupUser,
+  verifyAccount as verifyAccountApi,
+} from '@/services/auth';
+import { clearUser, getUser, saveUser } from '@/lib/session-storage';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(getUser());
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!getUser());
 
-  // Initialize auth state on mount
-  useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const storedToken = getToken();
-        const storedSession = getSession();
+  const setAuthenticatedState = useCallback((nextUser: User | null) => {
+    setUser(nextUser);
+    setIsAuthenticated(!!nextUser);
 
-        if (storedToken && storedSession) {
-          // Verify token is still valid
-          const tokenData = decodeToken(storedToken);
-          if (tokenData && tokenData.exp && tokenData.exp * 1000 > Date.now()) {
-            setToken(storedToken);
-            setUser(storedSession.user);
-            setIsAuthenticated(true);
-          } else {
-            // Token expired, try to refresh
-            const refreshTokenValue = getRefreshToken();
-            if (refreshTokenValue) {
-              try {
-                const response = await refreshToken(refreshTokenValue);
-                if (response.success && response.data) {
-                  const { token: newToken, refreshToken: newRefreshToken } = response.data;
-                  updateToken(newToken);
-                  if (newRefreshToken) {
-                    updateRefreshToken(newRefreshToken);
-                  }
-                  setToken(newToken);
-                  setUser(storedSession.user);
-                  setIsAuthenticated(true);
-                } else {
-                  clearSession();
-                }
-              } catch (error) {
-                clearSession();
-              }
-            } else {
-              clearSession();
-            }
-          }
+    if (nextUser) {
+      saveUser(nextUser);
+      return;
+    }
+
+    clearUser();
+  }, []);
+
+  const fetchCurrentUser = useCallback(async (): Promise<User | null> => {
+    const meResponse = await getCurrentUser();
+    if (meResponse.success && meResponse.data?.user) {
+      return meResponse.data.user;
+    }
+    return null;
+  }, []);
+
+  const revalidateAuth = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      let currentUser = await fetchCurrentUser();
+
+      if (!currentUser) {
+        const refreshResponse = await refreshToken();
+        if (refreshResponse.success) {
+          currentUser = await fetchCurrentUser();
         }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-        clearSession();
+      }
+
+      setAuthenticatedState(currentUser);
+    } catch (error) {
+      console.error('Error revalidating auth:', error);
+      setAuthenticatedState(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchCurrentUser, setAuthenticatedState]);
+
+  useEffect(() => {
+    revalidateAuth();
+  }, [revalidateAuth]);
+
+  const handleLogin = useCallback(
+    async (email: string, password: string) => {
+      setIsLoading(true);
+      try {
+        const response = await loginUser(email, password);
+        if (!response.success) {
+          throw new Error(response.message || 'Login failed');
+        }
+
+        const currentUser = response.data?.user || (await fetchCurrentUser());
+        if (!currentUser) {
+          throw new Error('Unable to load user profile');
+        }
+
+        setAuthenticatedState(currentUser);
       } finally {
         setIsLoading(false);
       }
-    };
+    },
+    [fetchCurrentUser, setAuthenticatedState]
+  );
 
-    initializeAuth();
-  }, []);
-
-  // Handle login
-  const handleLogin = useCallback(async (email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      const response = await loginUser(email, password);
-
-      if (response.success && response.data) {
-        const { user: responseUser, token: responseToken, refreshToken: responseRefreshToken } = response.data;
-
-        // Save session
-        saveSession({
-          user: responseUser,
-          token: responseToken,
-          refreshToken: responseRefreshToken,
-          expiresAt: Math.floor(Date.now() / 1000) + 86400, // 24 hours
-        });
-
-        setUser(responseUser);
-        setToken(responseToken);
-        setIsAuthenticated(true);
-      } else {
-        throw new Error(response.message || 'Login failed');
-      }
-    } catch (error) {
-      clearSession();
-      setUser(null);
-      setToken(null);
-      setIsAuthenticated(false);
-      throw error;
-    } finally {
-      setIsLoading(false);
+  const handleSignup = useCallback(async (username: string, email: string, password: string) => {
+    const response = await signupUser(username, email, password);
+    if (!response.success) {
+      throw new Error(response.message || 'Signup failed');
     }
   }, []);
 
-  // Handle signup
-  const handleSignup = useCallback(async (email: string, password: string, name: string) => {
-    setIsLoading(true);
-    try {
-      const response = await signupUser(email, password, name);
-
-      if (response.success && response.data) {
-        const { user: responseUser, token: responseToken, refreshToken: responseRefreshToken } = response.data;
-
-        // Save session
-        saveSession({
-          user: responseUser,
-          token: responseToken,
-          refreshToken: responseRefreshToken,
-          expiresAt: Math.floor(Date.now() / 1000) + 86400,
-        });
-
-        setUser(responseUser);
-        setToken(responseToken);
-        setIsAuthenticated(true);
-      } else {
-        throw new Error(response.message || 'Signup failed');
-      }
-    } catch (error) {
-      clearSession();
-      setUser(null);
-      setToken(null);
-      setIsAuthenticated(false);
-      throw error;
-    } finally {
-      setIsLoading(false);
+  const handleVerifyAccount = useCallback(async (email: string, verificationCode: string) => {
+    const response = await verifyAccountApi(email, verificationCode);
+    if (!response.success) {
+      throw new Error(response.message || 'Verification failed');
     }
   }, []);
 
-  // Handle logout
-  const handleLogout = useCallback(() => {
-    logoutUser().catch(console.error);
-    clearSession();
-    setUser(null);
-    setToken(null);
-    setIsAuthenticated(false);
+  const handleRequestPasswordReset = useCallback(async (email: string) => {
+    const response = await requestPasswordResetApi(email);
+    if (!response.success) {
+      throw new Error(response.message || 'Failed to request password reset');
+    }
   }, []);
 
-  // Handle token refresh
+  const handleResetPassword = useCallback(
+    async (email: string, newPassword: string, verificationCode: string) => {
+      const response = await resetPasswordApi(email, newPassword, verificationCode);
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to reset password');
+      }
+      setAuthenticatedState(null);
+    },
+    [setAuthenticatedState]
+  );
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await logoutUser();
+    } finally {
+      setAuthenticatedState(null);
+    }
+  }, [setAuthenticatedState]);
+
   const handleRefreshToken = useCallback(async () => {
-    try {
-      const refreshTokenValue = getRefreshToken();
-      if (!refreshTokenValue) {
-        throw new Error('No refresh token available');
-      }
-
-      const response = await refreshToken(refreshTokenValue);
-
-      if (response.success && response.data) {
-        const { token: newToken, refreshToken: newRefreshToken } = response.data;
-
-        updateToken(newToken);
-        if (newRefreshToken) {
-          updateRefreshToken(newRefreshToken);
-        }
-
-        setToken(newToken);
-
-        // Update session
-        const currentSession = getSession();
-        if (currentSession) {
-          saveSession({
-            ...currentSession,
-            token: newToken,
-            refreshToken: newRefreshToken || currentSession.refreshToken,
-            expiresAt: Math.floor(Date.now() / 1000) + 86400,
-          });
-        }
-      } else {
-        throw new Error('Token refresh failed');
-      }
-    } catch (error) {
-      console.error('Error refreshing token:', error);
-      clearSession();
-      setUser(null);
-      setToken(null);
-      setIsAuthenticated(false);
-      throw error;
+    const response = await refreshToken();
+    if (!response.success) {
+      setAuthenticatedState(null);
+      throw new Error(response.message || 'Token refresh failed');
     }
-  }, []);
+
+    const currentUser = await fetchCurrentUser();
+    setAuthenticatedState(currentUser);
+  }, [fetchCurrentUser, setAuthenticatedState]);
 
   const value: AuthContextType = {
     user,
-    token,
     isAuthenticated,
     isLoading,
     login: handleLogin,
     signup: handleSignup,
+    verifyAccount: handleVerifyAccount,
+    requestPasswordReset: handleRequestPasswordReset,
+    resetPassword: handleResetPassword,
     logout: handleLogout,
     refreshToken: handleRefreshToken,
+    revalidateAuth,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -2,6 +2,7 @@
  * User Role Enumeration
  */
 export enum UserRole {
+  PLATFORM_USER = 'platform-user',
   USER = 'user',
   MODERATOR = 'moderator',
   ADMIN = 'admin',
@@ -13,13 +14,16 @@ export enum UserRole {
  */
 export interface User {
   id: string;
-  email: string;
+  username: string;
   name: string;
-  role: UserRole;
+  email: string;
+  role: UserRole | string;
   avatar?: string;
   isActive: boolean;
+  isVerified?: boolean;
   createdAt: string;
   updatedAt: string;
+  lastLoginAt?: string;
 }
 
 /**
@@ -31,31 +35,45 @@ export interface LoginRequest {
 }
 
 export interface SignupRequest {
+  username: string;
   email: string;
   password: string;
-  name: string;
+}
+
+export interface VerifyRequest {
+  email: string;
+  verificationCode: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  newPassword: string;
+  verificationCode: string;
 }
 
 export interface AuthResponse {
   success: boolean;
   message: string;
   data?: {
-    user: User;
-    token: string;
-    refreshToken?: string;
+    user?: User;
+    verified?: boolean;
+    refreshed?: boolean;
+    sent?: boolean;
+    updated?: boolean;
+    logged_out?: boolean;
   };
   error?: string;
 }
 
-export interface RefreshTokenRequest {
-  refreshToken: string;
-}
-
 export interface RefreshTokenResponse {
   success: boolean;
+  message: string;
   data?: {
-    token: string;
-    refreshToken?: string;
+    refreshed?: boolean;
   };
   error?: string;
 }
@@ -65,21 +83,14 @@ export interface RefreshTokenResponse {
  */
 export interface AuthContextType {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
+  signup: (username: string, email: string, password: string) => Promise<void>;
+  verifyAccount: (email: string, verificationCode: string) => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  resetPassword: (email: string, newPassword: string, verificationCode: string) => Promise<void>;
+  logout: () => Promise<void>;
   refreshToken: () => Promise<void>;
-}
-
-/**
- * Session Storage Type
- */
-export interface SessionData {
-  user: User;
-  token: string;
-  refreshToken?: string;
-  expiresAt: number;
+  revalidateAuth: () => Promise<void>;
 }

@@ -12,7 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
 export default function SignupPage() {
-  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -25,13 +25,13 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      await signup(email, password, name);
+      await signup(username, email, password);
       toast({
         title: 'Account created successfully',
-        description: 'Welcome to SinhalaSub!',
+        description: 'We sent a verification code to your email.',
       });
-      
-      router.push('/');
+
+      router.push(`/verify?email=${encodeURIComponent(email)}`);
     } catch (error) {
       toast({
         title: 'Signup failed',
@@ -60,12 +60,12 @@ export default function SignupPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
-                id="name"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                id="username"
+                placeholder="john_doe"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>

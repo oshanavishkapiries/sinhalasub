@@ -23,12 +23,13 @@ export const useAuth = (): AuthContextType => {
  */
 export const useAuthRole = () => {
   const { user } = useAuth();
+  const role = user?.role;
 
   return {
-    isAdmin: user?.role === 'admin' || user?.role === 'super_admin',
-    isModerator: user?.role === 'moderator' || user?.role === 'admin' || user?.role === 'super_admin',
+    isAdmin: role === 'admin' || role === 'super_admin',
+    isModerator: role === 'moderator' || role === 'admin' || role === 'super_admin',
     isUser: !!user,
-    role: user?.role,
+    role,
   };
 };
 
