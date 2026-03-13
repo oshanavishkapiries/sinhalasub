@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Users, Home, Film, Tv, Plus } from 'lucide-react';
+import { Users, Home, Film, Tv, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/contexts/sidebar-context';
 import {
@@ -50,16 +50,6 @@ export function AdminSidebar() {
 
   return (
     <>
-      {/* Mobile Toggle Button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="md:hidden fixed top-4 left-4 z-50 text-foreground hover:bg-white/10"
-        onClick={toggle}
-      >
-        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-      </Button>
-
       {/* Sidebar */}
       <aside
         className={cn(
@@ -117,6 +107,77 @@ export function AdminSidebar() {
                     'w-full flex items-center gap-3 px-3 py-2.5 transition-all cursor-pointer',
                     isActive 
                       ? 'bg-primary text-foreground shadow-lg shadow-primary/20' 
+                      : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+                  )}
+                >
+                  {item.icon}
+                  <span className="font-medium text-sm">{item.label}</span>
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
+      </aside>
+
+      {/* Mobile sidebar (slide-in) */}
+      <aside
+        className={cn(
+          'fixed left-0 top-0 h-screen bg-background border-r border-border z-40 md:hidden w-72',
+          'transition-transform duration-200 ease-out',
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        {/* Logo/Branding */}
+        <div className="h-16 flex items-center justify-center px-4 border-b border-border">
+          <div className="w-[120px] h-12">
+            <Image
+              src="/logo.png"
+              alt="SinhalaSub Logo"
+              width={120}
+              height={48}
+              className="w-full h-full object-contain"
+            />
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="space-y-1 p-3">
+          {/* Create */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full mb-3 justify-start gap-3 bg-card border-border text-foreground hover:bg-white/5"
+              >
+                <Plus className="w-5 h-5" />
+                <span className="font-medium text-sm">Create</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-52 bg-card border-border text-foreground" align="start">
+              <DropdownMenuItem asChild className="cursor-pointer hover:bg-white/10 focus:bg-white/10">
+                <Link href="/admin/users?create=1" onClick={toggle}>User</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="cursor-pointer hover:bg-white/10 focus:bg-white/10">
+                <Link href="/admin/movies?create=1" onClick={toggle}>Movie</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-border" />
+              <DropdownMenuItem asChild className="cursor-pointer hover:bg-white/10 focus:bg-white/10">
+                <Link href="/admin/tv-series/create" onClick={toggle}>TV Series</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {menuItems.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (pathname.startsWith(item.href + '/') && item.href !== '/admin');
+            return (
+              <Link key={item.href} href={item.href} onClick={toggle}>
+                <div
+                  className={cn(
+                    'w-full flex items-center gap-3 px-3 py-2.5 transition-all cursor-pointer',
+                    isActive
+                      ? 'bg-primary text-foreground shadow-lg shadow-primary/20'
                       : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
                   )}
                 >

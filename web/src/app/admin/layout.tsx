@@ -7,8 +7,10 @@ import { AdminHeader } from '@/components/admin/header';
 import { SidebarProvider } from '@/contexts/sidebar-context';
 import { AdminTopbarProvider } from '@/contexts/admin-topbar-context';
 import { UserRole } from '@/types/auth';
+import { useSidebar } from '@/contexts/sidebar-context';
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
+  const { toggle } = useSidebar();
   return (
     <div className="min-h-screen bg-background">
       <AdminSidebar />
@@ -16,7 +18,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Main content */}
       <div className="flex flex-col min-h-screen md:ml-56">
         {/* Header */}
-        <AdminHeader />
+        <AdminHeader onToggleSidebar={toggle} />
         
         {/* Page content */}
         <main className="flex-1">
