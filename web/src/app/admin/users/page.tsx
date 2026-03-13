@@ -9,7 +9,7 @@ import { UserForm } from '@/components/admin/users/user-form';
 import { AdminUser } from '@/types/admin';
 import adminUsersService from '@/services/admin-users';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -286,21 +286,11 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Users Management</h1>
           <p className="text-muted-foreground mt-1">Manage system users and their permissions</p>
         </div>
-        <Button
-          onClick={() => {
-            setSelectedUser(undefined);
-            setIsDrawerOpen(true);
-          }}
-              className="bg-primary hover:bg-accent shadow-lg shadow-primary/20"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add User
-        </Button>
       </div>
 
       <DataTable<AdminUser>

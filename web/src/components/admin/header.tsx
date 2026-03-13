@@ -39,7 +39,7 @@ export function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
-      <div className="flex items-center justify-between h-16 px-6">
+      <div className="flex items-center justify-end h-16 px-6">
         {/* Left - Toggle Sidebar Mobile */}
         <div className="flex items-center gap-4 md:hidden">
           <Button
@@ -54,68 +54,57 @@ export function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
 
         {/* Center - Search (optional, page-controlled) */}
         {search && (
-          <div className="hidden md:flex flex-1 px-6 max-w-xl">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={search.placeholder || "Search..."}
-                value={search.value}
-                onChange={(e) => search.onChange(e.target.value)}
-                className="w-full bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 pl-9"
-              />
+          <div className="flex flex-1 justify-center">
+            <div className="flex flex-1 px-6 max-w-3xl">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder={search.placeholder || "Search..."}
+                  value={search.value}
+                  onChange={(e) => search.onChange(e.target.value)}
+                  className="w-full bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 pl-9"
+                />
+              </div>
             </div>
           </div>
         )}
 
-        {/* Right - User Menu & Notifications */}
-        <div className="flex items-center gap-4 ml-auto">
-          {/* Notifications */}
-          {/* <Button
-            variant="ghost"
-            size="icon"
-            className="relative text-muted-foreground hover:text-foreground hover:bg-white/10"
+        {/* User Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user?.avatar} alt={user?.name} />
+                <AvatarFallback>{initials}</AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="w-56 bg-card border-border text-foreground"
           >
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full ring-2 ring-background"></span>
-          </Button> */}
-
-          {/* User Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.avatar} alt={user?.name} />
-                  <AvatarFallback>{initials}</AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-56 bg-card border-border text-foreground"
+            <div className="px-2 py-1.5">
+              <p className="font-semibold text-sm text-foreground">
+                {user?.name || "Admin"}
+              </p>
+              <p className="text-xs text-muted-foreground">{user?.email}</p>
+            </div>
+            <DropdownMenuSeparator className="bg-border" />
+            <DropdownMenuItem asChild>
+              <Link href="/" className="text-yellow-500">
+                Client Side
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="text-primary hover:bg-primary/10 focus:bg-primary/10 cursor-pointer"
             >
-              <div className="px-2 py-1.5">
-                <p className="font-semibold text-sm text-foreground">
-                  {user?.name || "Admin"}
-                </p>
-                <p className="text-xs text-muted-foreground">{user?.email}</p>
-              </div>
-              <DropdownMenuSeparator className="bg-border" />
-              <DropdownMenuItem asChild>
-                <Link href="/" className="text-yellow-500">
-                  Client Side
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={handleLogout}
-                className="text-primary hover:bg-primary/10 focus:bg-primary/10 cursor-pointer"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

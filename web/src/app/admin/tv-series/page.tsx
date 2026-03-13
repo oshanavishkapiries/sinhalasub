@@ -7,7 +7,7 @@ import { DataTable, Column, RowAction } from '@/components/admin/data-table';
 import { AdminContent } from '@/types/admin';
 import adminContentService from '@/services/admin-content';
 import { useToast } from '@/hooks/use-toast';
-import { Edit, Trash2, Eye, EyeOff, Plus } from 'lucide-react';
+import { Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -220,18 +220,11 @@ export default function TvSeriesPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">TV Series Management</h1>
           <p className="text-muted-foreground mt-1">Manage TV series</p>
         </div>
-        <Button
-          onClick={() => router.push('/admin/tv-series/create')}
-          className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 text-white"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Create TV Series
-        </Button>
       </div>
 
       <DataTable<AdminContent>

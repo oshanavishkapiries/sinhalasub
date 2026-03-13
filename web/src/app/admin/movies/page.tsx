@@ -9,7 +9,7 @@ import { ContentForm } from '@/components/admin/content/content-form';
 import { AdminContent } from '@/types/admin';
 import adminContentService from '@/services/admin-content';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -301,21 +301,11 @@ export default function MoviesPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Movies Management</h1>
           <p className="text-muted-foreground mt-1">Manage movies</p>
         </div>
-        <Button
-          onClick={() => {
-            setSelectedContent(undefined);
-            setIsDrawerOpen(true);
-          }}
-              className="bg-primary hover:bg-accent shadow-lg shadow-primary/20"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Movie
-        </Button>
       </div>
 
       <DataTable<AdminContent>

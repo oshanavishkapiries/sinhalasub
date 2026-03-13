@@ -87,7 +87,7 @@ export function AdminSidebar() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="w-full justify-start gap-3 bg-card border-border text-foreground hover:bg-white/5"
+                className="w-full mb-3 justify-start gap-3 bg-card border-border text-foreground hover:bg-white/5"
               >
                 <Plus className="w-5 h-5" />
                 <span className="font-medium text-sm">Create</span>
@@ -97,6 +97,7 @@ export function AdminSidebar() {
               <DropdownMenuItem asChild className="cursor-pointer hover:bg-white/10 focus:bg-white/10">
                 <Link href="/admin/users?create=1">User</Link>
               </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-border" />
               <DropdownMenuItem asChild className="cursor-pointer hover:bg-white/10 focus:bg-white/10">
                 <Link href="/admin/movies?create=1">Movie</Link>
               </DropdownMenuItem>
