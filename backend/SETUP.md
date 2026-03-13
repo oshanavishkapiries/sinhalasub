@@ -3,21 +3,24 @@
 ## Quick Start
 
 ### 1. Install Air for Hot Reload
+
 ```bash
 go install github.com/cosmtrek/air@latest
 ```
 
 ### 2. Set Up Environment
+
 ```bash
 cp .env.example .env
 ```
 
 ### 3. Run with Hot Reload
+
 ```bash
 air
 ```
 
-The server starts on http://localhost:3000
+The server starts on http://localhost:5001
 
 ## Project Architecture
 
@@ -64,7 +67,7 @@ go build -o main ./cmd
 ./main
 
 # Test API
-curl http://localhost:3000/health
+curl http://localhost:5001/health
 
 # Format code
 go fmt ./...
@@ -89,6 +92,6 @@ go mod tidy
 2. Read HOT_RELOAD.md for development setup
 3. Start Air: `air`
 4. Make code changes - server restarts automatically
-5. Test with: `curl http://localhost:3000/health`
+5. Test with: `curl http://localhost:5001/health`
 
 Happy coding!

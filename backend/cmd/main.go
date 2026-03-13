@@ -22,7 +22,7 @@ import (
 func main() {
 
 	utils.LoadEnv()
-	port := utils.GetEnv("PORT", "3000")
+	port := utils.GetEnv("PORT", "5001")
 
 	application := app.New()
 

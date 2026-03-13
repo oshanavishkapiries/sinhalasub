@@ -28,7 +28,7 @@ func loadRoutes(container *config.Container) *chi.Mux {
 	// Get dynamic port for Swagger URL
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "3000"
+		port = "5001"
 	}
 	swaggerURL := fmt.Sprintf("http://localhost:%s/swagger/doc.json", port)
 

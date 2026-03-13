@@ -34,8 +34,8 @@ WORKDIR /root/
 # Copy the built executable from the builder stage
 COPY --from=builder /app/main .
 
-# Expose the port the app runs on (default is 3000 from your main.go)
-EXPOSE 3000
+# Expose the port the app runs on (default is 5001 from your main.go)
+EXPOSE 5001
 
 # Command to run the executable. The app will use environment variables for configuration.
 CMD ["./main"]
