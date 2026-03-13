@@ -74,14 +74,14 @@ export function AdminSidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="p-3 space-y-1">
+        <nav className="space-y-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.href || (pathname.startsWith(item.href + '/') && item.href !== '/admin');
             return (
               <Link key={item.href} href={item.href}>
                 <div
                   className={cn(
-                    'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all cursor-pointer',
+                    'w-full flex items-center gap-3 px-3 py-2.5 transition-all cursor-pointer',
                     isActive 
                       ? 'bg-primary text-foreground shadow-lg shadow-primary/20' 
                       : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
