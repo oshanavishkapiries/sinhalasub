@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/domain/models"
+	emailpkg "github.com/oshanavishkapiries/sinhalasub/backend/internal/pkg/email"
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/pkg/security"
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/pkg/utils"
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/repository"
@@ -123,8 +124,10 @@ func (as *authServiceImpl) Signup(ctx context.Context, username, email, password
 		return err
 	}
 
-	// TODO: Replace with real email provider integration.
-	utils.InfoLog("signup verification code for %s: %s", email, code)
+	if err := emailpkg.SendVerificationCode(email, code); err != nil {
+		utils.ErrorLog("failed to send signup verification email: %s", err)
+		return err
+	}
 
 	return nil
 }
@@ -350,8 +353,10 @@ func (as *authServiceImpl) RequestPasswordReset(ctx context.Context, email strin
 		return err
 	}
 
-	// TODO: Replace with real email provider integration.
-	utils.InfoLog("password reset code for %s: %s", email, code)
+	if err := emailpkg.SendPasswordResetCode(email, code); err != nil {
+		utils.ErrorLog("failed to send password reset email: %s", err)
+		return err
+	}
 	return nil
 }
 

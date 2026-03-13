@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -83,6 +85,12 @@ type CreateUserRequest struct {
 	Password string `json:"password"`
 }
 
+type UpdateUserRequest struct {
+	Username *string `json:"username"`
+	Email    *string `json:"email"`
+	Avatar   *string `json:"avatar"`
+}
+
 // Create handles POST /users requests
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -140,4 +148,57 @@ func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.Success(w, users, "Users retrieved successfully")
+}
+
+// Update handles PUT /users/:id requests
+func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := chi.URLParam(r, "id")
+	if strings.TrimSpace(userID) == "" {
+		response.BadRequest(w, "User ID is required")
+		return
+	}
+
+	var req UpdateUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		apiErr := response.BadRequestException("Invalid request body", err)
+		response.HandleError(w, apiErr)
+		return
+	}
+
+	user, err := h.userService.GetUser(ctx, userID)
+	if err != nil || user == nil {
+		apiErr := response.NotFoundException("User not found", err)
+		response.HandleError(w, apiErr)
+		return
+	}
+
+	updated := false
+	if req.Username != nil && strings.TrimSpace(*req.Username) != "" {
+		user.Username = strings.TrimSpace(*req.Username)
+		updated = true
+	}
+	if req.Email != nil && strings.TrimSpace(*req.Email) != "" {
+		user.Email = strings.TrimSpace(*req.Email)
+		updated = true
+	}
+	if req.Avatar != nil {
+		user.Avatar = strings.TrimSpace(*req.Avatar)
+		updated = true
+	}
+
+	if !updated {
+		apiErr := response.BadRequestException("No valid fields provided to update", nil)
+		response.HandleError(w, apiErr)
+		return
+	}
+
+	if err := h.userService.UpdateUser(ctx, user); err != nil {
+		apiErr := response.InternalServerException("Failed to update user", err)
+		response.HandleError(w, apiErr)
+		return
+	}
+
+	user.PasswordHash = ""
+	response.Success(w, user, "User updated successfully")
 }

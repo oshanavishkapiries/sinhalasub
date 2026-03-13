@@ -67,6 +67,7 @@ func loadRoutes(container *config.Container) *chi.Mux {
 			r.Post("/", userHandler.Create)
 			r.Get("/", userHandler.List)
 			r.Get("/{id}", userHandler.GetByID)
+			r.Put("/{id}", userHandler.Update)
 		})
 	}
 
