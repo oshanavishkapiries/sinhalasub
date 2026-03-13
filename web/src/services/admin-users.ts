@@ -10,7 +10,7 @@ import {
   ApiResponse,
 } from '@/types/admin';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3100/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
 // Create axios instance for admin requests
 const adminClient = axios.create({

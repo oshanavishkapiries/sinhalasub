@@ -3,17 +3,10 @@
  * Centralized location for all API endpoint definitions
  */
 
-// Use mock server in development, real API in production
-const BASE_URL = process.env.NODE_ENV === 'development' 
-  ? 'http://localhost:3100/api'
-  : 'https://api.themoviedb.org/3';
-
-const MOCK_MODE = process.env.NODE_ENV === 'development';
+const BASE_URL = 'https://api.themoviedb.org/3';
 
 export const API_CONFIG = {
   BASE_URL,
-  MOCK_MODE,
-  // For real TMDB API (when not using mock)
   TMDB_API_KEY: process.env.NEXT_PUBLIC_TMDB_API_KEY,
 };
 
