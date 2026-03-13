@@ -1,5 +1,10 @@
 basePath: /
 definitions:
+  handler.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
+    type: object
   handler.LoginRequest:
     properties:
       email:
@@ -7,18 +12,29 @@ definitions:
       password:
         type: string
     type: object
-  handler.RefreshTokenRequest:
+  handler.ResetPasswordRequest:
     properties:
-      refresh_token:
+      email:
+        type: string
+      new_password:
+        type: string
+      verification_code:
         type: string
     type: object
   handler.SignupRequest:
     properties:
       email:
         type: string
-      name:
-        type: string
       password:
+        type: string
+      username:
+        type: string
+    type: object
+  handler.VerifyRequest:
+    properties:
+      email:
+        type: string
+      verification_code:
         type: string
     type: object
 host: localhost:5001
@@ -35,11 +51,63 @@ info:
   title: Sinhala Subtitle API
   version: 1.0.0
 paths:
+  /api/auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Reset password using a verification code
+      parameters:
+      - description: Reset password data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password updated
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Invalid code
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Forgot Password
+      tags:
+      - Auth
+  /api/auth/forgot-password/request:
+    post:
+      consumes:
+      - application/json
+      description: Send a password reset code to the user's email (always returns
+        success)
+      parameters:
+      - description: Password reset request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reset code sent
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Request Password Reset
+      tags:
+      - Auth
   /api/auth/login:
     post:
       consumes:
       - application/json
-      description: Authenticate user and return access and refresh tokens
+      description: Authenticate user and set access/refresh cookies
       parameters:
       - description: Login credentials
         in: body
@@ -67,7 +135,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Logout the current user
+      description: Logout the current user and clear cookies
       produces:
       - application/json
       responses:
@@ -83,7 +151,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get the currently authenticated user
+      description: Get the currently authenticated user (cookie-based)
       produces:
       - application/json
       responses:
@@ -97,8 +165,6 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      security:
-      - Bearer: []
       summary: Get Current User
       tags:
       - Auth
@@ -106,14 +172,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Refresh access token using refresh token
-      parameters:
-      - description: Refresh token
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/handler.RefreshTokenRequest'
+      description: Refresh access token using refresh cookie
       produces:
       - application/json
       responses:
@@ -134,7 +193,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new user account
+      description: Create a new user account and send a verification code
       parameters:
       - description: User registration data
         in: body
@@ -146,16 +205,44 @@ paths:
       - application/json
       responses:
         "201":
-          description: Account created successfully
+          description: Account created; verification required
           schema:
             additionalProperties: true
             type: object
         "409":
-          description: Email already registered
+          description: Email/username already registered
           schema:
             additionalProperties: true
             type: object
       summary: User Signup
+      tags:
+      - Auth
+  /api/auth/verify:
+    post:
+      consumes:
+      - application/json
+      description: Verify a user account using a verification code
+      parameters:
+      - description: Verification data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.VerifyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Account verified
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Invalid code
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Verify Account
       tags:
       - Auth
   /health:

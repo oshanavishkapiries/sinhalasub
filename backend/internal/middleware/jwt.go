@@ -19,35 +19,39 @@ const UserRoleContextKey ContextKey = "user_role"
 // JWTMiddleware verifies JWT tokens and adds user info to context
 func JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Get token from Authorization header
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			apiErr := response.UnauthorizedException("Authorization header required", nil)
+		token := ""
+
+		// Prefer cookie-based auth.
+		if c, err := r.Cookie("access_token"); err == nil && strings.TrimSpace(c.Value) != "" {
+			token = c.Value
+		} else {
+			// Fallback to Authorization: Bearer <token>
+			authHeader := r.Header.Get("Authorization")
+			if authHeader != "" {
+				parts := strings.Split(authHeader, " ")
+				if len(parts) == 2 && parts[0] == "Bearer" && strings.TrimSpace(parts[1]) != "" {
+					token = parts[1]
+				}
+			}
+		}
+
+		if token == "" {
+			apiErr := response.UnauthorizedException("Unauthorized", nil)
 			response.HandleError(w, apiErr)
 			return
 		}
-
-		// Extract token from "Bearer <token>"
-		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			apiErr := response.UnauthorizedException("Invalid authorization header format", nil)
-			response.HandleError(w, apiErr)
-			return
-		}
-
-		token := parts[1]
 
 		// Verify token
 		claims, err := security.VerifyToken(token)
 		if err != nil {
-			apiErr := response.UnauthorizedException("Invalid or expired token", err)
+			apiErr := response.UnauthorizedException("Unauthorized", err)
 			response.HandleError(w, apiErr)
 			return
 		}
 
 		// Check if it's an access token
 		if claims.Type != "access" {
-			apiErr := response.UnauthorizedException("Invalid token type", nil)
+			apiErr := response.UnauthorizedException("Unauthorized", nil)
 			response.HandleError(w, apiErr)
 			return
 		}
@@ -66,24 +70,28 @@ func JWTMiddleware(next http.Handler) http.Handler {
 // OptionalJWTMiddleware verifies JWT tokens if provided but doesn't require them
 func OptionalJWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authHeader := r.Header.Get("Authorization")
+		token := ""
 
-		if authHeader != "" {
-			// Extract token from "Bearer <token>"
-			parts := strings.Split(authHeader, " ")
-			if len(parts) == 2 && parts[0] == "Bearer" {
-				token := parts[1]
-
-				// Verify token
-				claims, err := security.VerifyToken(token)
-				if err == nil && claims.Type == "access" {
-					// Add user info to context
-					ctx := r.Context()
-					ctx = context.WithValue(ctx, UserIDContextKey, claims.UserID)
-					ctx = context.WithValue(ctx, UserEmailContextKey, claims.Email)
-					ctx = context.WithValue(ctx, UserRoleContextKey, claims.Role)
-					r = r.WithContext(ctx)
+		if c, err := r.Cookie("access_token"); err == nil && strings.TrimSpace(c.Value) != "" {
+			token = c.Value
+		} else {
+			authHeader := r.Header.Get("Authorization")
+			if authHeader != "" {
+				parts := strings.Split(authHeader, " ")
+				if len(parts) == 2 && parts[0] == "Bearer" && strings.TrimSpace(parts[1]) != "" {
+					token = parts[1]
 				}
+			}
+		}
+
+		if token != "" {
+			claims, err := security.VerifyToken(token)
+			if err == nil && claims.Type == "access" {
+				ctx := r.Context()
+				ctx = context.WithValue(ctx, UserIDContextKey, claims.UserID)
+				ctx = context.WithValue(ctx, UserEmailContextKey, claims.Email)
+				ctx = context.WithValue(ctx, UserRoleContextKey, claims.Role)
+				r = r.WithContext(ctx)
 			}
 		}
 

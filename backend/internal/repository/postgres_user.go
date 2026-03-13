@@ -23,32 +23,21 @@ func NewPostgresUserRepository(db *sql.DB) UserRepository {
 
 // Create inserts a new user into the database
 func (r *PostgresUserRepository) Create(ctx context.Context, user *models.User) error {
-	if user.ID == "" {
-		user.ID = fmt.Sprintf("user_%d", time.Now().UnixNano())
-	}
-
-	now := time.Now()
-	user.CreatedAt = now
-	user.UpdatedAt = now
-
 	query := `
-		INSERT INTO users (id, name, email, password, role, avatar, is_active, created_at, updated_at, deleted_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		INSERT INTO users (username, email, password_hash, role, avatar, is_verified, is_active)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		RETURNING id, created_at, updated_at
 	`
 
-	_, err := r.db.ExecContext(ctx, query,
-		user.ID,
-		user.Name,
+	err := r.db.QueryRowContext(ctx, query,
+		user.Username,
 		user.Email,
-		user.Password,
+		user.PasswordHash,
 		user.Role,
 		user.Avatar,
+		user.IsVerified,
 		user.IsActive,
-		user.CreatedAt,
-		user.UpdatedAt,
-		user.DeletedAt,
-	)
-
+	).Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		utils.ErrorLog("failed to create user: %s", err)
 		return err
@@ -60,7 +49,7 @@ func (r *PostgresUserRepository) Create(ctx context.Context, user *models.User) 
 // GetByID retrieves a user by ID
 func (r *PostgresUserRepository) GetByID(ctx context.Context, id string) (*models.User, error) {
 	query := `
-		SELECT id, name, email, password, role, avatar, is_active, created_at, updated_at, deleted_at
+		SELECT id, username, email, password_hash, role, avatar, is_verified, is_active, last_login_at, created_at, updated_at, deleted_at
 		FROM users
 		WHERE id = $1 AND deleted_at IS NULL
 	`
@@ -70,12 +59,14 @@ func (r *PostgresUserRepository) GetByID(ctx context.Context, id string) (*model
 	user := &models.User{}
 	err := row.Scan(
 		&user.ID,
-		&user.Name,
+		&user.Username,
 		&user.Email,
-		&user.Password,
+		&user.PasswordHash,
 		&user.Role,
 		&user.Avatar,
+		&user.IsVerified,
 		&user.IsActive,
+		&user.LastLoginAt,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 		&user.DeletedAt,
@@ -95,7 +86,7 @@ func (r *PostgresUserRepository) GetByID(ctx context.Context, id string) (*model
 // GetByEmail retrieves a user by email
 func (r *PostgresUserRepository) GetByEmail(ctx context.Context, email string) (*models.User, error) {
 	query := `
-		SELECT id, name, email, password, role, avatar, is_active, created_at, updated_at, deleted_at
+		SELECT id, username, email, password_hash, role, avatar, is_verified, is_active, last_login_at, created_at, updated_at, deleted_at
 		FROM users
 		WHERE email = $1 AND deleted_at IS NULL
 	`
@@ -105,12 +96,14 @@ func (r *PostgresUserRepository) GetByEmail(ctx context.Context, email string) (
 	user := &models.User{}
 	err := row.Scan(
 		&user.ID,
-		&user.Name,
+		&user.Username,
 		&user.Email,
-		&user.Password,
+		&user.PasswordHash,
 		&user.Role,
 		&user.Avatar,
+		&user.IsVerified,
 		&user.IsActive,
+		&user.LastLoginAt,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 		&user.DeletedAt,
@@ -127,23 +120,62 @@ func (r *PostgresUserRepository) GetByEmail(ctx context.Context, email string) (
 	return user, nil
 }
 
+// GetByUsername retrieves a user by username
+func (r *PostgresUserRepository) GetByUsername(ctx context.Context, username string) (*models.User, error) {
+	query := `
+		SELECT id, username, email, password_hash, role, avatar, is_verified, is_active, last_login_at, created_at, updated_at, deleted_at
+		FROM users
+		WHERE username = $1 AND deleted_at IS NULL
+	`
+
+	row := r.db.QueryRowContext(ctx, query, username)
+
+	user := &models.User{}
+	err := row.Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.PasswordHash,
+		&user.Role,
+		&user.Avatar,
+		&user.IsVerified,
+		&user.IsActive,
+		&user.LastLoginAt,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.DeletedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		utils.ErrorLog("failed to get user by username: %s", err)
+		return nil, err
+	}
+
+	return user, nil
+}
+
 // Update updates an existing user
 func (r *PostgresUserRepository) Update(ctx context.Context, user *models.User) error {
 	user.UpdatedAt = time.Now()
 
 	query := `
 		UPDATE users
-		SET name = $1, email = $2, password = $3, role = $4, avatar = $5, is_active = $6, updated_at = $7
-		WHERE id = $8 AND deleted_at IS NULL
+		SET username = $1, email = $2, password_hash = $3, role = $4, avatar = $5, is_verified = $6, is_active = $7, last_login_at = $8, updated_at = $9
+		WHERE id = $10 AND deleted_at IS NULL
 	`
 
 	result, err := r.db.ExecContext(ctx, query,
-		user.Name,
+		user.Username,
 		user.Email,
-		user.Password,
+		user.PasswordHash,
 		user.Role,
 		user.Avatar,
+		user.IsVerified,
 		user.IsActive,
+		user.LastLoginAt,
 		user.UpdatedAt,
 		user.ID,
 	)
@@ -161,6 +193,48 @@ func (r *PostgresUserRepository) Update(ctx context.Context, user *models.User) 
 
 	if rowsAffected == 0 {
 		return fmt.Errorf("user not found")
+	}
+
+	return nil
+}
+
+func (r *PostgresUserRepository) UpdatePasswordHash(ctx context.Context, userID string, passwordHash string) error {
+	query := `
+		UPDATE users
+		SET password_hash = $1, updated_at = NOW()
+		WHERE id = $2 AND deleted_at IS NULL
+	`
+
+	result, err := r.db.ExecContext(ctx, query, passwordHash, userID)
+	if err != nil {
+		utils.ErrorLog("failed to update password hash: %s", err)
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		utils.ErrorLog("failed to get rows affected: %s", err)
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("user not found")
+	}
+
+	return nil
+}
+
+func (r *PostgresUserRepository) UpdateLastLoginAt(ctx context.Context, userID string, lastLoginAt time.Time) error {
+	query := `
+		UPDATE users
+		SET last_login_at = $1, updated_at = NOW()
+		WHERE id = $2 AND deleted_at IS NULL
+	`
+
+	_, err := r.db.ExecContext(ctx, query, lastLoginAt, userID)
+	if err != nil {
+		utils.ErrorLog("failed to update last_login_at: %s", err)
+		return err
 	}
 
 	return nil
@@ -198,7 +272,7 @@ func (r *PostgresUserRepository) Delete(ctx context.Context, id string) error {
 // GetAll retrieves all users with pagination
 func (r *PostgresUserRepository) GetAll(ctx context.Context, limit, offset int) ([]*models.User, error) {
 	query := `
-		SELECT id, name, email, password, role, avatar, is_active, created_at, updated_at, deleted_at
+		SELECT id, username, email, password_hash, role, avatar, is_verified, is_active, last_login_at, created_at, updated_at, deleted_at
 		FROM users
 		WHERE deleted_at IS NULL
 		ORDER BY created_at DESC
@@ -217,12 +291,14 @@ func (r *PostgresUserRepository) GetAll(ctx context.Context, limit, offset int) 
 		user := &models.User{}
 		err := rows.Scan(
 			&user.ID,
-			&user.Name,
+			&user.Username,
 			&user.Email,
-			&user.Password,
+			&user.PasswordHash,
 			&user.Role,
 			&user.Avatar,
+			&user.IsVerified,
 			&user.IsActive,
+			&user.LastLoginAt,
 			&user.CreatedAt,
 			&user.UpdatedAt,
 			&user.DeletedAt,

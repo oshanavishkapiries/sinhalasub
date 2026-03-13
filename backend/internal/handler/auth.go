@@ -2,53 +2,126 @@ package handler
 
 import (
 	"encoding/json"
+	"net"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/pkg/response"
+	"github.com/oshanavishkapiries/sinhalasub/backend/internal/pkg/utils"
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/service"
 )
 
-// AuthHandler handles authentication requests
 type AuthHandler struct {
 	authService service.AuthService
 }
 
-// NewAuthHandler creates a new auth handler
 func NewAuthHandler(authService service.AuthService) *AuthHandler {
-	return &AuthHandler{
-		authService: authService,
-	}
+	return &AuthHandler{authService: authService}
 }
 
-// LoginRequest represents the request body for login
+type SignupRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type VerifyRequest struct {
+	Email            string `json:"email"`
+	VerificationCode string `json:"verification_code"`
+}
+
 type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-// SignupRequest represents the request body for signup
-type SignupRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+type ForgotPasswordRequest struct {
+	Email string `json:"email"`
 }
 
-// RefreshTokenRequest represents the request body for refreshing token
-type RefreshTokenRequest struct {
-	RefreshToken string `json:"refresh_token"`
+type ResetPasswordRequest struct {
+	Email            string `json:"email"`
+	NewPassword      string `json:"new_password"`
+	VerificationCode string `json:"verification_code"`
 }
 
-// AuthResponse represents the auth response with user and tokens
-type AuthResponse struct {
-	User         map[string]interface{} `json:"user"`
-	Token        string                 `json:"token"`
-	RefreshToken string                 `json:"refresh_token"`
+// Signup handles POST /api/auth/signup
+// @Summary User Signup
+// @Description Create a new user account and send a verification code
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body SignupRequest true "User registration data"
+// @Success 201 {object} map[string]interface{} "Account created; verification required"
+// @Failure 409 {object} map[string]interface{} "Email/username already registered"
+// @Router /api/auth/signup [post]
+func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var req SignupRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.HandleError(w, response.BadRequestException("Invalid request body", err))
+		return
+	}
+
+	if strings.TrimSpace(req.Username) == "" || strings.TrimSpace(req.Email) == "" || req.Password == "" {
+		response.HandleError(w, response.BadRequestException("username, email and password are required", nil))
+		return
+	}
+
+	if err := h.authService.Signup(ctx, req.Username, req.Email, req.Password); err != nil {
+		if strings.Contains(err.Error(), "already") || strings.Contains(err.Error(), "taken") {
+			response.HandleError(w, response.ConflictException("Account already exists", err))
+			return
+		}
+		response.HandleError(w, response.InternalServerException("Failed to create account", err))
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "Account created. Please verify your email to login.",
+	})
+}
+
+// Verify handles POST /api/auth/verify
+// @Summary Verify Account
+// @Description Verify a user account using a verification code
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body VerifyRequest true "Verification data"
+// @Success 200 {object} map[string]interface{} "Account verified"
+// @Failure 401 {object} map[string]interface{} "Invalid code"
+// @Router /api/auth/verify [post]
+func (h *AuthHandler) Verify(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var req VerifyRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.HandleError(w, response.BadRequestException("Invalid request body", err))
+		return
+	}
+
+	if strings.TrimSpace(req.Email) == "" || strings.TrimSpace(req.VerificationCode) == "" {
+		response.HandleError(w, response.BadRequestException("email and verification_code are required", nil))
+		return
+	}
+
+	if err := h.authService.VerifySignup(ctx, req.Email, req.VerificationCode); err != nil {
+		response.HandleError(w, response.UnauthorizedException("Invalid or expired verification code", err))
+		return
+	}
+
+	response.Success(w, map[string]interface{}{"verified": true}, "Account verified")
 }
 
 // Login handles POST /api/auth/login
 // @Summary User Login
-// @Description Authenticate user and return access and refresh tokens
+// @Description Authenticate user and set access/refresh cookies
 // @Tags Auth
 // @Accept json
 // @Produce json
@@ -61,241 +134,243 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	var req LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		apiErr := response.BadRequestException("Invalid request body", err)
-		response.HandleError(w, apiErr)
+		response.HandleError(w, response.BadRequestException("Invalid request body", err))
 		return
 	}
 
-	// Validate input
-	if req.Email == "" || req.Password == "" {
-		apiErr := response.BadRequestException("Email and password are required", nil)
-		response.HandleError(w, apiErr)
+	if strings.TrimSpace(req.Email) == "" || req.Password == "" {
+		response.HandleError(w, response.BadRequestException("email and password are required", nil))
 		return
 	}
 
-	// Authenticate user
-	user, token, refreshToken, err := h.authService.Login(ctx, req.Email, req.Password)
+	userAgent := r.UserAgent()
+	ip := clientIP(r)
+
+	user, tokens, err := h.authService.Login(ctx, req.Email, req.Password, userAgent, ip)
 	if err != nil {
-		apiErr := response.UnauthorizedException("Invalid email or password", err)
-		response.HandleError(w, apiErr)
+		response.HandleError(w, response.UnauthorizedException("Invalid email or password", err))
 		return
 	}
 
-	// Prepare response
-	userResponse := map[string]interface{}{
-		"id":         user.ID,
-		"email":      user.Email,
-		"name":       user.Name,
-		"role":       user.Role,
-		"avatar":     user.Avatar,
-		"is_active":  user.IsActive,
-		"created_at": user.CreatedAt,
-		"updated_at": user.UpdatedAt,
-	}
+	setAuthCookies(w, tokens)
 
-	authResp := AuthResponse{
-		User:         userResponse,
-		Token:        token,
-		RefreshToken: refreshToken,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"message": "Login successful",
-		"data":    authResp,
-	})
-}
-
-// Signup handles POST /api/auth/signup
-// @Summary User Signup
-// @Description Create a new user account
-// @Tags Auth
-// @Accept json
-// @Produce json
-// @Param request body SignupRequest true "User registration data"
-// @Success 201 {object} map[string]interface{} "Account created successfully"
-// @Failure 409 {object} map[string]interface{} "Email already registered"
-// @Router /api/auth/signup [post]
-func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	var req SignupRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		apiErr := response.BadRequestException("Invalid request body", err)
-		response.HandleError(w, apiErr)
-		return
-	}
-
-	// Validate input
-	if req.Name == "" || req.Email == "" || req.Password == "" {
-		apiErr := response.BadRequestException("Name, email, and password are required", nil)
-		response.HandleError(w, apiErr)
-		return
-	}
-
-	// Create user
-	user, token, refreshToken, err := h.authService.Signup(ctx, req.Name, req.Email, req.Password)
-	if err != nil {
-		if strings.Contains(err.Error(), "already registered") {
-			apiErr := response.ConflictException("Email already registered", err)
-			response.HandleError(w, apiErr)
-			return
-		}
-		apiErr := response.InternalServerException("Failed to create account", err)
-		response.HandleError(w, apiErr)
-		return
-	}
-
-	// Prepare response
-	userResponse := map[string]interface{}{
-		"id":         user.ID,
-		"email":      user.Email,
-		"name":       user.Name,
-		"role":       user.Role,
-		"avatar":     user.Avatar,
-		"is_active":  user.IsActive,
-		"created_at": user.CreatedAt,
-		"updated_at": user.UpdatedAt,
-	}
-
-	authResp := AuthResponse{
-		User:         userResponse,
-		Token:        token,
-		RefreshToken: refreshToken,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"message": "Account created successfully",
-		"data":    authResp,
-	})
-}
-
-// GetCurrentUser handles GET /api/auth/me
-// @Summary Get Current User
-// @Description Get the currently authenticated user
-// @Tags Auth
-// @Accept json
-// @Produce json
-// @Security Bearer
-// @Success 200 {object} map[string]interface{} "User fetched successfully"
-// @Failure 401 {object} map[string]interface{} "Unauthorized"
-// @Router /api/auth/me [get]
-func (h *AuthHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	// Get token from Authorization header
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		apiErr := response.UnauthorizedException("Authorization header required", nil)
-		response.HandleError(w, apiErr)
-		return
-	}
-
-	// Extract token from "Bearer <token>"
-	parts := strings.Split(authHeader, " ")
-	if len(parts) != 2 || parts[0] != "Bearer" {
-		apiErr := response.UnauthorizedException("Invalid authorization header format", nil)
-		response.HandleError(w, apiErr)
-		return
-	}
-
-	token := parts[1]
-
-	// Get user from token
-	user, err := h.authService.GetCurrentUser(ctx, token)
-	if err != nil {
-		apiErr := response.UnauthorizedException("Invalid or expired token", err)
-		response.HandleError(w, apiErr)
-		return
-	}
-
-	// Prepare response
-	userResponse := map[string]interface{}{
-		"id":         user.ID,
-		"email":      user.Email,
-		"name":       user.Name,
-		"role":       user.Role,
-		"avatar":     user.Avatar,
-		"is_active":  user.IsActive,
-		"created_at": user.CreatedAt,
-		"updated_at": user.UpdatedAt,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"message": "User fetched successfully",
-		"data": map[string]interface{}{
-			"user": userResponse,
-		},
-	})
+	response.Success(w, map[string]interface{}{"user": user}, "Login successful")
 }
 
 // RefreshToken handles POST /api/auth/refresh
 // @Summary Refresh Access Token
-// @Description Refresh access token using refresh token
+// @Description Refresh access token using refresh cookie
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param request body RefreshTokenRequest true "Refresh token"
 // @Success 200 {object} map[string]interface{} "Token refreshed successfully"
 // @Failure 401 {object} map[string]interface{} "Invalid refresh token"
 // @Router /api/auth/refresh [post]
 func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var req RefreshTokenRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		apiErr := response.BadRequestException("Invalid request body", err)
-		response.HandleError(w, apiErr)
+	rt, err := r.Cookie("refresh_token")
+	if err != nil || strings.TrimSpace(rt.Value) == "" {
+		response.HandleError(w, response.UnauthorizedException("Invalid refresh token", err))
 		return
 	}
 
-	// Validate input
-	if req.RefreshToken == "" {
-		apiErr := response.BadRequestException("Refresh token is required", nil)
-		response.HandleError(w, apiErr)
-		return
-	}
+	userAgent := r.UserAgent()
+	ip := clientIP(r)
 
-	// Refresh access token
-	accessToken, err := h.authService.RefreshToken(ctx, req.RefreshToken)
+	tokens, err := h.authService.Refresh(ctx, rt.Value, userAgent, ip)
 	if err != nil {
-		apiErr := response.UnauthorizedException("Invalid refresh token", err)
-		response.HandleError(w, apiErr)
+		response.HandleError(w, response.UnauthorizedException("Invalid refresh token", err))
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"message": "Token refreshed successfully",
-		"data": map[string]interface{}{
-			"token": accessToken,
-		},
-	})
+	setAuthCookies(w, tokens)
+	response.Success(w, map[string]interface{}{"refreshed": true}, "Token refreshed")
 }
 
 // Logout handles POST /api/auth/logout
 // @Summary User Logout
-// @Description Logout the current user
+// @Description Logout the current user and clear cookies
 // @Tags Auth
 // @Accept json
 // @Produce json
 // @Success 200 {object} map[string]interface{} "Logout successful"
 // @Router /api/auth/logout [post]
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"message": "Logout successful",
+	ctx := r.Context()
+
+	rt, _ := r.Cookie("refresh_token")
+	if rt != nil && strings.TrimSpace(rt.Value) != "" {
+		_ = h.authService.Logout(ctx, rt.Value)
+	}
+
+	clearAuthCookies(w)
+	response.Success(w, map[string]interface{}{"logged_out": true}, "Logout successful")
+}
+
+// GetCurrentUser handles GET /api/auth/me
+// @Summary Get Current User
+// @Description Get the currently authenticated user (cookie-based)
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{} "User fetched successfully"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Router /api/auth/me [get]
+func (h *AuthHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	at, err := r.Cookie("access_token")
+	if err != nil || strings.TrimSpace(at.Value) == "" {
+		response.HandleError(w, response.UnauthorizedException("Unauthorized", err))
+		return
+	}
+
+	user, err := h.authService.GetCurrentUserFromAccessToken(ctx, at.Value)
+	if err != nil {
+		response.HandleError(w, response.UnauthorizedException("Unauthorized", err))
+		return
+	}
+
+	response.Success(w, map[string]interface{}{"user": user}, "User fetched successfully")
+}
+
+// RequestPasswordReset handles POST /api/auth/forgot-password/request
+// @Summary Request Password Reset
+// @Description Send a password reset code to the user's email (always returns success)
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body ForgotPasswordRequest true "Password reset request"
+// @Success 200 {object} map[string]interface{} "Reset code sent"
+// @Router /api/auth/forgot-password/request [post]
+func (h *AuthHandler) RequestPasswordReset(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var req ForgotPasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.HandleError(w, response.BadRequestException("Invalid request body", err))
+		return
+	}
+
+	_ = h.authService.RequestPasswordReset(ctx, req.Email)
+	response.Success(w, map[string]interface{}{"sent": true}, "If the email exists, a reset code has been sent.")
+}
+
+// ForgotPassword handles POST /api/auth/forgot-password
+// @Summary Forgot Password
+// @Description Reset password using a verification code
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body ResetPasswordRequest true "Reset password data"
+// @Success 200 {object} map[string]interface{} "Password updated"
+// @Failure 401 {object} map[string]interface{} "Invalid code"
+// @Router /api/auth/forgot-password [post]
+func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var req ResetPasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.HandleError(w, response.BadRequestException("Invalid request body", err))
+		return
+	}
+
+	if strings.TrimSpace(req.Email) == "" || strings.TrimSpace(req.NewPassword) == "" || strings.TrimSpace(req.VerificationCode) == "" {
+		response.HandleError(w, response.BadRequestException("email, new_password, and verification_code are required", nil))
+		return
+	}
+
+	if err := h.authService.ResetPassword(ctx, req.Email, req.NewPassword, req.VerificationCode); err != nil {
+		response.HandleError(w, response.UnauthorizedException("Invalid or expired verification code", err))
+		return
+	}
+
+	clearAuthCookies(w)
+	response.Success(w, map[string]interface{}{"updated": true}, "Password updated")
+}
+
+func setAuthCookies(w http.ResponseWriter, tokens service.AuthTokens) {
+	secure := utils.GetEnvAsBool("COOKIE_SECURE", false)
+	domain := strings.TrimSpace(utils.GetEnv("COOKIE_DOMAIN", ""))
+	sameSite := parseSameSite(utils.GetEnv("COOKIE_SAMESITE", "Lax"))
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "access_token",
+		Value:    tokens.AccessToken,
+		Path:     "/",
+		Domain:   domain,
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: sameSite,
+		Expires:  tokens.AccessExpiresAt,
 	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    tokens.RefreshToken,
+		Path:     "/",
+		Domain:   domain,
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: sameSite,
+		Expires:  tokens.RefreshExpiresAt,
+	})
+}
+
+func clearAuthCookies(w http.ResponseWriter) {
+	secure := utils.GetEnvAsBool("COOKIE_SECURE", false)
+	domain := strings.TrimSpace(utils.GetEnv("COOKIE_DOMAIN", ""))
+	sameSite := parseSameSite(utils.GetEnv("COOKIE_SAMESITE", "Lax"))
+	exp := time.Unix(0, 0)
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		Path:     "/",
+		Domain:   domain,
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: sameSite,
+		Expires:  exp,
+		MaxAge:   -1,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Path:     "/",
+		Domain:   domain,
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: sameSite,
+		Expires:  exp,
+		MaxAge:   -1,
+	})
+}
+
+func parseSameSite(v string) http.SameSite {
+	switch strings.ToLower(strings.TrimSpace(v)) {
+	case "strict":
+		return http.SameSiteStrictMode
+	case "none":
+		return http.SameSiteNoneMode
+	default:
+		return http.SameSiteLaxMode
+	}
+}
+
+func clientIP(r *http.Request) string {
+	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		parts := strings.Split(xff, ",")
+		if len(parts) > 0 {
+			return strings.TrimSpace(parts[0])
+		}
+	}
+
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
+	}
+	return host
 }

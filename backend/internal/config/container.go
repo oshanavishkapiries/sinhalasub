@@ -16,22 +16,18 @@ type Container struct {
 	db *sql.DB
 
 	// Repositories
-	userRepository     repository.UserRepository
-	videoRepository    repository.VideoRepository
-	subtitleRepository repository.SubtitleRepository
+	userRepository             repository.UserRepository
+	verificationCodeRepository repository.VerificationCodeRepository
+	refreshSessionRepository   repository.RefreshSessionRepository
 
 	// Services
-	userService     service.UserService
-	authService     service.AuthService
-	videoService    service.VideoService
-	subtitleService service.SubtitleService
+	userService service.UserService
+	authService service.AuthService
 
 	// Handlers
-	healthHandler   *handler.HealthHandler
-	authHandler     *handler.AuthHandler
-	userHandler     *handler.UserHandler
-	videoHandler    *handler.VideoHandler
-	subtitleHandler *handler.SubtitleHandler
+	healthHandler *handler.HealthHandler
+	authHandler   *handler.AuthHandler
+	userHandler   *handler.UserHandler
 }
 
 // NewContainer creates and initializes a new dependency container
@@ -64,6 +60,8 @@ func (c *Container) initDatabase() {
 func (c *Container) initRepositories() {
 	if c.db != nil {
 		c.userRepository = repository.NewPostgresUserRepository(c.db)
+		c.verificationCodeRepository = repository.NewPostgresVerificationCodeRepository(c.db)
+		c.refreshSessionRepository = repository.NewPostgresRefreshSessionRepository(c.db)
 		// TODO: Initialize other repositories with database
 		// c.videoRepository = repository.NewPostgresVideoRepository(c.db)
 		// c.subtitleRepository = repository.NewPostgresSubtitleRepository(c.db)
@@ -74,7 +72,9 @@ func (c *Container) initRepositories() {
 func (c *Container) initServices() {
 	if c.userRepository != nil {
 		c.userService = service.NewUserService(c.userRepository)
-		c.authService = service.NewAuthService(c.userRepository)
+	}
+	if c.userRepository != nil && c.verificationCodeRepository != nil && c.refreshSessionRepository != nil {
+		c.authService = service.NewAuthService(c.userRepository, c.verificationCodeRepository, c.refreshSessionRepository)
 	}
 	// TODO: Initialize other services
 	// if c.videoRepository != nil {
@@ -116,14 +116,6 @@ func (c *Container) UserHandler() *handler.UserHandler {
 	return c.userHandler
 }
 
-func (c *Container) VideoHandler() *handler.VideoHandler {
-	return c.videoHandler
-}
-
-func (c *Container) SubtitleHandler() *handler.SubtitleHandler {
-	return c.subtitleHandler
-}
-
 // Getters for services
 func (c *Container) UserService() service.UserService {
 	return c.userService
@@ -131,12 +123,4 @@ func (c *Container) UserService() service.UserService {
 
 func (c *Container) AuthService() service.AuthService {
 	return c.authService
-}
-
-func (c *Container) VideoService() service.VideoService {
-	return c.videoService
-}
-
-func (c *Container) SubtitleService() service.SubtitleService {
-	return c.subtitleService
 }

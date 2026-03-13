@@ -49,9 +49,12 @@ func loadRoutes(container *config.Container) *chi.Mux {
 	if authHandler := container.AuthHandler(); authHandler != nil {
 		router.Route("/api/auth", func(r chi.Router) {
 			r.Post("/signup", authHandler.Signup)
+			r.Post("/verify", authHandler.Verify)
 			r.Post("/login", authHandler.Login)
 			r.Post("/refresh", authHandler.RefreshToken)
 			r.Post("/logout", authHandler.Logout)
+			r.Post("/forgot-password/request", authHandler.RequestPasswordReset)
+			r.Post("/forgot-password", authHandler.ForgotPassword)
 
 			// Protected route - requires JWT
 			r.With(customMiddleware.JWTMiddleware).Get("/me", authHandler.GetCurrentUser)
@@ -64,22 +67,6 @@ func loadRoutes(container *config.Container) *chi.Mux {
 			r.Post("/", userHandler.Create)
 			r.Get("/", userHandler.List)
 			r.Get("/{id}", userHandler.GetByID)
-		})
-	}
-
-	// Video routes
-	if videoHandler := container.VideoHandler(); videoHandler != nil {
-		router.Route("/videos", func(r chi.Router) {
-			r.Get("/", videoHandler.List)
-			r.Get("/{id}", videoHandler.GetByID)
-		})
-	}
-
-	// Subtitle routes
-	if subtitleHandler := container.SubtitleHandler(); subtitleHandler != nil {
-		router.Route("/subtitles", func(r chi.Router) {
-			r.Get("/", subtitleHandler.List)
-			r.Get("/{id}", subtitleHandler.GetByID)
 		})
 	}
 

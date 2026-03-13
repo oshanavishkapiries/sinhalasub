@@ -22,9 +22,86 @@
     "host": "localhost:5001",
     "basePath": "/",
     "paths": {
+        "/api/auth/forgot-password": {
+            "post": {
+                "description": "Reset password using a verification code",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Forgot Password",
+                "parameters": [
+                    {
+                        "description": "Reset password data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.ResetPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Password updated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid code",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/forgot-password/request": {
+            "post": {
+                "description": "Send a password reset code to the user's email (always returns success)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Request Password Reset",
+                "parameters": [
+                    {
+                        "description": "Password reset request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.ForgotPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reset code sent",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/login": {
             "post": {
-                "description": "Authenticate user and return access and refresh tokens",
+                "description": "Authenticate user and set access/refresh cookies",
                 "consumes": [
                     "application/json"
                 ],
@@ -66,7 +143,7 @@
         },
         "/api/auth/logout": {
             "post": {
-                "description": "Logout the current user",
+                "description": "Logout the current user and clear cookies",
                 "consumes": [
                     "application/json"
                 ],
@@ -90,12 +167,7 @@
         },
         "/api/auth/me": {
             "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Get the currently authenticated user",
+                "description": "Get the currently authenticated user (cookie-based)",
                 "consumes": [
                     "application/json"
                 ],
@@ -126,7 +198,7 @@
         },
         "/api/auth/refresh": {
             "post": {
-                "description": "Refresh access token using refresh token",
+                "description": "Refresh access token using refresh cookie",
                 "consumes": [
                     "application/json"
                 ],
@@ -137,17 +209,6 @@
                     "Auth"
                 ],
                 "summary": "Refresh Access Token",
-                "parameters": [
-                    {
-                        "description": "Refresh token",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.RefreshTokenRequest"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Token refreshed successfully",
@@ -168,7 +229,7 @@
         },
         "/api/auth/signup": {
             "post": {
-                "description": "Create a new user account",
+                "description": "Create a new user account and send a verification code",
                 "consumes": [
                     "application/json"
                 ],
@@ -192,14 +253,56 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Account created successfully",
+                        "description": "Account created; verification required",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "409": {
-                        "description": "Email already registered",
+                        "description": "Email/username already registered",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/verify": {
+            "post": {
+                "description": "Verify a user account using a verification code",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify Account",
+                "parameters": [
+                    {
+                        "description": "Verification data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.VerifyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Account verified",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid code",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -234,6 +337,14 @@
         }
     },
     "definitions": {
+        "handler.ForgotPasswordRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.LoginRequest": {
             "type": "object",
             "properties": {
@@ -245,10 +356,16 @@
                 }
             }
         },
-        "handler.RefreshTokenRequest": {
+        "handler.ResetPasswordRequest": {
             "type": "object",
             "properties": {
-                "refresh_token": {
+                "email": {
+                    "type": "string"
+                },
+                "new_password": {
+                    "type": "string"
+                },
+                "verification_code": {
                     "type": "string"
                 }
             }
@@ -259,10 +376,21 @@
                 "email": {
                     "type": "string"
                 },
-                "name": {
+                "password": {
                     "type": "string"
                 },
-                "password": {
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.VerifyRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "verification_code": {
                     "type": "string"
                 }
             }

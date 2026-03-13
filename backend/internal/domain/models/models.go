@@ -1,52 +1,25 @@
 package models
 
-import "github.com/oshanavishkapiries/sinhalasub/backend/internal/domain/entities"
+import (
+	"time"
+
+	"github.com/oshanavishkapiries/sinhalasub/backend/internal/domain/entities"
+)
 
 // User represents a user in the system
 type User struct {
 	entities.BaseEntity
-	Name     string `json:"name" validate:"required"`
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"-"`    // Password should never be serialized
-	Role     string `json:"role"` // admin, user, translator, reviewer
-	Avatar   string `json:"avatar"`
-	IsActive bool   `json:"is_active"`
+	Username     string     `json:"username" validate:"required"`
+	Email        string     `json:"email" validate:"required,email"`
+	PasswordHash string     `json:"-"`    // Password hash should never be serialized
+	Role         string     `json:"role"` // admin, moderator, platform-user
+	Avatar       string     `json:"avatar"`
+	IsVerified   bool       `json:"is_verified"`
+	IsActive     bool       `json:"is_active"`
+	LastLoginAt  *time.Time `json:"last_login_at,omitempty"`
 }
 
 // IsUserActive checks if user is active
 func (u *User) IsUserActive() bool {
 	return u.IsActive
-}
-
-// Video represents a video in the system
-type Video struct {
-	entities.BaseEntity
-	Title       string `json:"title" validate:"required"`
-	Description string `json:"description"`
-	URL         string `json:"url" validate:"required,url"`
-	Duration    int64  `json:"duration"` // in seconds
-	UserID      string `json:"user_id" validate:"required"`
-	Status      string `json:"status"` // draft, published, archived
-	Views       int64  `json:"views"`
-}
-
-// IsPublished checks if video is published
-func (v *Video) IsPublished() bool {
-	return v.Status == "published"
-}
-
-// Subtitle represents a subtitle entry
-type Subtitle struct {
-	entities.BaseEntity
-	VideoID   string `json:"video_id" validate:"required"`
-	Language  string `json:"language" validate:"required"`
-	StartTime int64  `json:"start_time"` // in milliseconds
-	EndTime   int64  `json:"end_time"`   // in milliseconds
-	Text      string `json:"text" validate:"required"`
-	Status    string `json:"status"` // pending, approved, rejected
-}
-
-// IsApproved checks if subtitle is approved
-func (s *Subtitle) IsApproved() bool {
-	return s.Status == "approved"
 }
