@@ -50,6 +50,7 @@ func loadRoutes(container *config.Container) *chi.Mux {
 		router.Route("/api/auth", func(r chi.Router) {
 			r.Post("/signup", authHandler.Signup)
 			r.Post("/verify", authHandler.Verify)
+			r.Post("/resend-verification", authHandler.ResendVerification)
 			r.Post("/login", authHandler.Login)
 			r.Post("/refresh", authHandler.RefreshToken)
 			r.Post("/logout", authHandler.Logout)

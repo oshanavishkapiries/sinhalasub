@@ -21,6 +21,11 @@ definitions:
       password:
         type: string
     type: object
+  handler.ResendVerificationRequest:
+    properties:
+      email:
+        type: string
+    type: object
   handler.ResetPasswordRequest:
     properties:
       email:
@@ -205,6 +210,29 @@ paths:
             additionalProperties: true
             type: object
       summary: Refresh Access Token
+      tags:
+      - Auth
+  /api/auth/resend-verification:
+    post:
+      consumes:
+      - application/json
+      description: Resend signup verification code to email (generic response)
+      parameters:
+      - description: Email address
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ResendVerificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Verification code resent
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Resend Verification Code
       tags:
       - Auth
   /api/auth/signup:

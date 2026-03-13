@@ -45,6 +45,10 @@ export interface VerifyRequest {
   verificationCode: string;
 }
 
+export interface ResendVerificationRequest {
+  email: string;
+}
+
 export interface ForgotPasswordRequest {
   email: string;
 }
@@ -88,6 +92,7 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (username: string, email: string, password: string) => Promise<void>;
   verifyAccount: (email: string, verificationCode: string) => Promise<void>;
+  resendVerificationCode: (email: string) => Promise<void>;
   requestPasswordReset: (email: string) => Promise<void>;
   resetPassword: (email: string, newPassword: string, verificationCode: string) => Promise<void>;
   logout: () => Promise<void>;

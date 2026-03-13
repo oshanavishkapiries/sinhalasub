@@ -5,6 +5,7 @@ import { AuthContextType, User } from '@/types/auth';
 import {
   getCurrentUser,
   loginUser,
+  resendVerificationCode as resendVerificationCodeApi,
   logoutUser,
   refreshToken,
   requestPasswordReset as requestPasswordResetApi,
@@ -102,6 +103,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  const handleResendVerificationCode = useCallback(async (email: string) => {
+    const response = await resendVerificationCodeApi(email);
+    if (!response.success) {
+      throw new Error(response.message || 'Failed to resend verification code');
+    }
+  }, []);
+
   const handleRequestPasswordReset = useCallback(async (email: string) => {
     const response = await requestPasswordResetApi(email);
     if (!response.success) {
@@ -146,6 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     login: handleLogin,
     signup: handleSignup,
     verifyAccount: handleVerifyAccount,
+    resendVerificationCode: handleResendVerificationCode,
     requestPasswordReset: handleRequestPasswordReset,
     resetPassword: handleResetPassword,
     logout: handleLogout,

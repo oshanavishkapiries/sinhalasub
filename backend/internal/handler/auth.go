@@ -31,6 +31,10 @@ type VerifyRequest struct {
 	VerificationCode string `json:"verification_code"`
 }
 
+type ResendVerificationRequest struct {
+	Email string `json:"email"`
+}
+
 type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -71,8 +75,16 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.authService.Signup(ctx, req.Username, req.Email, req.Password); err != nil {
-		if strings.Contains(err.Error(), "already") || strings.Contains(err.Error(), "taken") {
-			response.HandleError(w, response.ConflictException("Account already exists", err))
+		if service.IsEmailNotVerifiedError(err) {
+			response.HandleError(w, response.ConflictException("Email is not verified. Please verify your email.", err))
+			return
+		}
+		if service.IsEmailAlreadyExistsError(err) {
+			response.HandleError(w, response.ConflictException("Email already registered", err))
+			return
+		}
+		if service.IsUsernameAlreadyTakenError(err) {
+			response.HandleError(w, response.ConflictException("Username already taken", err))
 			return
 		}
 		response.HandleError(w, response.InternalServerException("Failed to create account", err))
@@ -119,6 +131,33 @@ func (h *AuthHandler) Verify(w http.ResponseWriter, r *http.Request) {
 	response.Success(w, map[string]interface{}{"verified": true}, "Account verified")
 }
 
+// ResendVerification handles POST /api/auth/resend-verification
+// @Summary Resend Verification Code
+// @Description Resend signup verification code to email (generic response)
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body ResendVerificationRequest true "Email address"
+// @Success 200 {object} map[string]interface{} "Verification code resent"
+// @Router /api/auth/resend-verification [post]
+func (h *AuthHandler) ResendVerification(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var req ResendVerificationRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.HandleError(w, response.BadRequestException("Invalid request body", err))
+		return
+	}
+
+	if strings.TrimSpace(req.Email) == "" {
+		response.HandleError(w, response.BadRequestException("email is required", nil))
+		return
+	}
+
+	_ = h.authService.ResendSignupVerification(ctx, req.Email)
+	response.Success(w, map[string]interface{}{"sent": true}, "If the account exists, a verification code has been sent.")
+}
+
 // Login handles POST /api/auth/login
 // @Summary User Login
 // @Description Authenticate user and set access/refresh cookies
@@ -148,6 +187,10 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	user, tokens, err := h.authService.Login(ctx, req.Email, req.Password, userAgent, ip)
 	if err != nil {
+		if service.IsEmailNotVerifiedError(err) {
+			response.HandleError(w, response.ForbiddenException("Email is not verified. Please verify your email.", err))
+			return
+		}
 		response.HandleError(w, response.UnauthorizedException("Invalid email or password", err))
 		return
 	}

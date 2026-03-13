@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"math/big"
 	"strings"
@@ -18,9 +19,29 @@ import (
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/repository"
 )
 
+var (
+	ErrInvalidCredentials   = errors.New("invalid email or password")
+	ErrEmailNotVerified     = errors.New("email not verified")
+	ErrEmailAlreadyExists   = errors.New("email already registered")
+	ErrUsernameAlreadyTaken = errors.New("username already taken")
+)
+
+func IsEmailNotVerifiedError(err error) bool {
+	return errors.Is(err, ErrEmailNotVerified)
+}
+
+func IsEmailAlreadyExistsError(err error) bool {
+	return errors.Is(err, ErrEmailAlreadyExists)
+}
+
+func IsUsernameAlreadyTakenError(err error) bool {
+	return errors.Is(err, ErrUsernameAlreadyTaken)
+}
+
 type AuthService interface {
 	Signup(ctx context.Context, username, email, password string) error
 	VerifySignup(ctx context.Context, email, code string) error
+	ResendSignupVerification(ctx context.Context, email string) error
 
 	Login(ctx context.Context, email, password, userAgent, ipAddress string) (*models.User, AuthTokens, error)
 	Refresh(ctx context.Context, refreshToken, userAgent, ipAddress string) (AuthTokens, error)
@@ -71,7 +92,10 @@ func (as *authServiceImpl) Signup(ctx context.Context, username, email, password
 		return err
 	}
 	if existingByEmail != nil {
-		return fmt.Errorf("email already registered")
+		if !existingByEmail.IsVerified {
+			return ErrEmailNotVerified
+		}
+		return ErrEmailAlreadyExists
 	}
 
 	existingByUsername, err := as.userRepo.GetByUsername(ctx, username)
@@ -79,7 +103,7 @@ func (as *authServiceImpl) Signup(ctx context.Context, username, email, password
 		return err
 	}
 	if existingByUsername != nil {
-		return fmt.Errorf("username already taken")
+		return ErrUsernameAlreadyTaken
 	}
 
 	passwordHash, err := security.HashPassword(password)
@@ -101,30 +125,7 @@ func (as *authServiceImpl) Signup(ctx context.Context, username, email, password
 		return err
 	}
 
-	code, err := generateNumericCode(6)
-	if err != nil {
-		return err
-	}
-
-	codeHash, err := security.HashPassword(code)
-	if err != nil {
-		return err
-	}
-
-	expiresAt := time.Now().UTC().Add(getVerificationCodeTTL())
-	_ = as.codeRepo.InvalidateUnused(ctx, user.ID, models.VerificationTypeSignup)
-
-	v := &models.VerificationCode{
-		UserID:    user.ID,
-		Type:      models.VerificationTypeSignup,
-		CodeHash:  codeHash,
-		ExpiresAt: expiresAt,
-	}
-	if err := as.codeRepo.Create(ctx, v); err != nil {
-		return err
-	}
-
-	if err := emailpkg.SendVerificationCode(email, code); err != nil {
+	if err := as.createAndSendSignupVerificationCode(ctx, user.ID, email); err != nil {
 		utils.ErrorLog("failed to send signup verification email: %s", err)
 		return err
 	}
@@ -172,10 +173,33 @@ func (as *authServiceImpl) VerifySignup(ctx context.Context, email, code string)
 	return nil
 }
 
+func (as *authServiceImpl) ResendSignupVerification(ctx context.Context, email string) error {
+	email = strings.TrimSpace(email)
+	if email == "" {
+		return nil
+	}
+
+	user, err := as.userRepo.GetByEmail(ctx, email)
+	if err != nil {
+		return err
+	}
+
+	// Keep response generic to avoid account enumeration.
+	if user == nil || user.IsVerified {
+		return nil
+	}
+
+	if err := as.createAndSendSignupVerificationCode(ctx, user.ID, email); err != nil {
+		utils.ErrorLog("failed to resend verification email: %s", err)
+		return err
+	}
+	return nil
+}
+
 func (as *authServiceImpl) Login(ctx context.Context, email, password, userAgent, ipAddress string) (*models.User, AuthTokens, error) {
 	email = strings.TrimSpace(email)
 	if email == "" || password == "" {
-		return nil, AuthTokens{}, fmt.Errorf("invalid email or password")
+		return nil, AuthTokens{}, ErrInvalidCredentials
 	}
 
 	user, err := as.userRepo.GetByEmail(ctx, email)
@@ -183,15 +207,19 @@ func (as *authServiceImpl) Login(ctx context.Context, email, password, userAgent
 		return nil, AuthTokens{}, err
 	}
 	if user == nil {
-		return nil, AuthTokens{}, fmt.Errorf("invalid email or password")
+		return nil, AuthTokens{}, ErrInvalidCredentials
 	}
 
-	if !user.IsActive || !user.IsVerified {
-		return nil, AuthTokens{}, fmt.Errorf("invalid email or password")
+	if !user.IsVerified {
+		return nil, AuthTokens{}, ErrEmailNotVerified
+	}
+
+	if !user.IsActive {
+		return nil, AuthTokens{}, ErrInvalidCredentials
 	}
 
 	if !security.VerifyPassword(user.PasswordHash, password) {
-		return nil, AuthTokens{}, fmt.Errorf("invalid email or password")
+		return nil, AuthTokens{}, ErrInvalidCredentials
 	}
 
 	accessToken, err := security.GenerateAccessToken(user.ID, user.Email, user.Role)
@@ -458,4 +486,31 @@ func getVerificationCodeTTL() time.Duration {
 		return 15 * time.Minute
 	}
 	return ttl
+}
+
+func (as *authServiceImpl) createAndSendSignupVerificationCode(ctx context.Context, userID string, email string) error {
+	code, err := generateNumericCode(6)
+	if err != nil {
+		return err
+	}
+
+	codeHash, err := security.HashPassword(code)
+	if err != nil {
+		return err
+	}
+
+	expiresAt := time.Now().UTC().Add(getVerificationCodeTTL())
+	_ = as.codeRepo.InvalidateUnused(ctx, userID, models.VerificationTypeSignup)
+
+	v := &models.VerificationCode{
+		UserID:    userID,
+		Type:      models.VerificationTypeSignup,
+		CodeHash:  codeHash,
+		ExpiresAt: expiresAt,
+	}
+	if err := as.codeRepo.Create(ctx, v); err != nil {
+		return err
+	}
+
+	return emailpkg.SendVerificationCode(email, code)
 }

@@ -3,6 +3,7 @@ import {
   AuthResponse,
   ForgotPasswordRequest,
   LoginRequest,
+  ResendVerificationRequest,
   RefreshTokenResponse,
   ResetPasswordRequest,
   SignupRequest,
@@ -107,6 +108,17 @@ export const verifyAccount = async (
   }
 };
 
+export const resendVerificationCode = async (email: string): Promise<AuthResponse> => {
+  const payload: ResendVerificationRequest = { email };
+  try {
+    const response = await authClient.post<AuthResponse>('/auth/resend-verification', payload);
+    return response.data;
+  } catch (error) {
+    const axiosError = error as AxiosError<AuthResponse>;
+    return toErrorResponse(axiosError, 'Failed to resend verification code');
+  }
+};
+
 export const getCurrentUser = async (): Promise<AuthResponse> => {
   try {
     const response = await authClient.get<AuthResponse>('/auth/me');
@@ -170,6 +182,7 @@ export default {
   loginUser,
   signupUser,
   verifyAccount,
+  resendVerificationCode,
   getCurrentUser,
   refreshToken,
   requestPasswordReset,

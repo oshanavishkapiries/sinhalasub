@@ -19,8 +19,9 @@ export default function VerifyPage() {
   const [email, setEmail] = useState(initialEmail);
   const [verificationCode, setVerificationCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
-  const { verifyAccount } = useAuth();
+  const { verifyAccount, resendVerificationCode } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -41,6 +42,25 @@ export default function VerifyPage() {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setIsResending(true);
+    try {
+      await resendVerificationCode(email);
+      toast({
+        title: 'Code sent',
+        description: 'A new verification code has been sent if the email exists.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Resend failed',
+        description: error instanceof Error ? error.message : 'Failed to resend verification code',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -83,6 +103,15 @@ export default function VerifyPage() {
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? 'Verifying...' : 'Verify account'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleResend}
+              disabled={isResending || !email}
+            >
+              {isResending ? 'Sending new code...' : 'Resend verification code'}
             </Button>
           </form>
 
