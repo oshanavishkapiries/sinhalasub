@@ -64,6 +64,8 @@ func loadRoutes(container *config.Container) *chi.Mux {
 	// User routes
 	if userHandler := container.UserHandler(); userHandler != nil {
 		router.Route("/users", func(r chi.Router) {
+			r.Use(customMiddleware.JWTMiddleware)
+			r.Use(customMiddleware.RequireRoles("admin", "moderator"))
 			r.Post("/", userHandler.Create)
 			r.Get("/", userHandler.List)
 			r.Get("/{id}", userHandler.GetByID)
