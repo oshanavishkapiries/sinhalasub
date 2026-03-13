@@ -18,8 +18,10 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
+import { useAdminTopbar } from '@/contexts/admin-topbar-context';
 
 export default function MoviesPage() {
+  const { setSearch, clearSearch } = useAdminTopbar();
   const [content, setContent] = useState<AdminContent[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -33,6 +35,19 @@ export default function MoviesPage() {
   const [contentToDelete, setContentToDelete] = useState<AdminContent | null>(null);
 
   const { toast } = useToast();
+
+  useEffect(() => {
+    setSearch({
+      value: searchQuery,
+      placeholder: 'Search by title...',
+      onChange: (query) => {
+        setSearchQuery(query);
+        setPage(1);
+      },
+    });
+
+    return () => clearSearch();
+  }, [clearSearch, searchQuery, setSearch]);
 
   const fetchContent = useCallback(async () => {
     setLoading(true);
@@ -291,10 +306,7 @@ export default function MoviesPage() {
         columns={columns}
         keyField="id"
         rowActions={rowActions}
-        onSearch={(query) => {
-          setSearchQuery(query);
-          setPage(1);
-        }}
+        showSearch={false}
         searchValue={searchQuery}
         searchPlaceholder="Search by title..."
         onBulkDelete={handleBulkDelete}

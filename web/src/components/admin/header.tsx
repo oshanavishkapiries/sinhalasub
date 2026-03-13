@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, Menu } from "lucide-react";
+import { LogOut, Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { useAdminTopbar } from "@/contexts/admin-topbar-context";
 
 interface AdminHeaderProps {
   onToggleSidebar?: () => void;
@@ -21,6 +23,7 @@ interface AdminHeaderProps {
 export function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const { search } = useAdminTopbar();
 
   const handleLogout = async () => {
     await logout();
@@ -48,6 +51,21 @@ export function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
             <Menu className="h-5 w-5" />
           </Button>
         </div>
+
+        {/* Center - Search (optional, page-controlled) */}
+        {search && (
+          <div className="hidden md:flex flex-1 px-6 max-w-xl">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={search.placeholder || "Search..."}
+                value={search.value}
+                onChange={(e) => search.onChange(e.target.value)}
+                className="w-full bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 pl-9"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Right - User Menu & Notifications */}
         <div className="flex items-center gap-4 ml-auto">

@@ -40,6 +40,7 @@ interface DataTableProps<T> {
   columns: Column<T>[];
   keyField: keyof T;
   title?: string;
+  showSearch?: boolean;
   onSearch?: (query: string) => void;
   searchPlaceholder?: string;
   searchValue?: string;
@@ -59,6 +60,7 @@ export function DataTable<T>({
   columns,
   keyField,
   title,
+  showSearch = true,
   onSearch,
   searchPlaceholder = 'Search...',
   searchValue = '',
@@ -106,7 +108,7 @@ export function DataTable<T>({
       <div className="flex items-center justify-between gap-4">
         {title && <h2 className="text-xl font-semibold text-foreground">{title}</h2>}
         <div className="flex items-center gap-3 flex-1 justify-end">
-          {onSearch && (
+          {showSearch && onSearch && (
             <Input
               placeholder={searchPlaceholder}
               value={searchValue}

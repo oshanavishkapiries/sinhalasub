@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/components/protected-route';
 import { AdminSidebar } from '@/components/admin/sidebar';
 import { AdminHeader } from '@/components/admin/header';
 import { SidebarProvider } from '@/contexts/sidebar-context';
+import { AdminTopbarProvider } from '@/contexts/admin-topbar-context';
 import { UserRole } from '@/types/auth';
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
@@ -34,7 +35,9 @@ export default function AdminLayout({
   return (
     <ProtectedRoute requiredRole={[UserRole.ADMIN, UserRole.SUPER_ADMIN]}>
       <SidebarProvider>
-        <AdminLayoutContent>{children}</AdminLayoutContent>
+        <AdminTopbarProvider>
+          <AdminLayoutContent>{children}</AdminLayoutContent>
+        </AdminTopbarProvider>
       </SidebarProvider>
     </ProtectedRoute>
   );

@@ -19,8 +19,10 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { UserRole } from '@/types/auth';
+import { useAdminTopbar } from '@/contexts/admin-topbar-context';
 
 export default function UsersPage() {
+  const { setSearch, clearSearch } = useAdminTopbar();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -34,6 +36,19 @@ export default function UsersPage() {
   const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
 
   const { toast } = useToast();
+
+  useEffect(() => {
+    setSearch({
+      value: searchQuery,
+      placeholder: 'Search by name or email...',
+      onChange: (query) => {
+        setSearchQuery(query);
+        setPage(1);
+      },
+    });
+
+    return () => clearSearch();
+  }, [clearSearch, searchQuery, setSearch]);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -276,10 +291,7 @@ export default function UsersPage() {
         columns={columns}
         keyField="id"
         rowActions={rowActions}
-        onSearch={(query) => {
-          setSearchQuery(query);
-          setPage(1);
-        }}
+        showSearch={false}
         searchValue={searchQuery}
         searchPlaceholder="Search by name or email..."
         onBulkDelete={handleBulkDelete}
