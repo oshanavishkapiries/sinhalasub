@@ -1,5 +1,10 @@
 basePath: /
 definitions:
+  handler.ChangeUserRoleRequest:
+    properties:
+      role:
+        type: string
+    type: object
   handler.CreateUserRequest:
     properties:
       email:
@@ -407,6 +412,37 @@ paths:
       tags:
       - Users
   /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Soft delete a user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete User
+      tags:
+      - Users
     get:
       consumes:
       - application/json
@@ -478,6 +514,49 @@ paths:
             additionalProperties: true
             type: object
       summary: Update User
+      tags:
+      - Users
+  /users/{id}/role:
+    patch:
+      consumes:
+      - application/json
+      description: Change user role between platform-user and moderator
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Target role
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ChangeUserRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role updated
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Change User Role
       tags:
       - Users
 schemes:

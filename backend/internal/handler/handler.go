@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -91,6 +92,10 @@ type UpdateUserRequest struct {
 	Username *string `json:"username"`
 	Email    *string `json:"email"`
 	Avatar   *string `json:"avatar"`
+}
+
+type ChangeUserRoleRequest struct {
+	Role string `json:"role"`
 }
 
 // Create handles POST /users requests
@@ -281,6 +286,82 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	user.PasswordHash = ""
 	response.Success(w, user, "User updated successfully")
+}
+
+// ChangeRole handles PATCH /users/:id/role requests
+// @Summary Change User Role
+// @Description Change user role between platform-user and moderator
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Param request body ChangeUserRoleRequest true "Target role"
+// @Success 200 {object} map[string]interface{} "Role updated"
+// @Failure 400 {object} map[string]interface{} "Invalid request"
+// @Failure 404 {object} map[string]interface{} "User not found"
+// @Failure 500 {object} map[string]interface{} "Server error"
+// @Router /users/{id}/role [patch]
+func (h *UserHandler) ChangeRole(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := chi.URLParam(r, "id")
+	if strings.TrimSpace(userID) == "" {
+		response.BadRequest(w, "User ID is required")
+		return
+	}
+
+	var req ChangeUserRoleRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		apiErr := response.BadRequestException("Invalid request body", err)
+		response.HandleError(w, apiErr)
+		return
+	}
+
+	user, err := h.userService.ChangeUserRole(ctx, userID, req.Role)
+	if err != nil {
+		if errors.Is(err, service.ErrUserNotFound) {
+			apiErr := response.NotFoundException("User not found", err)
+			response.HandleError(w, apiErr)
+			return
+		}
+		if errors.Is(err, service.ErrInvalidRoleChange) {
+			apiErr := response.BadRequestException("Role must be platform-user or moderator", err)
+			response.HandleError(w, apiErr)
+			return
+		}
+		apiErr := response.InternalServerException("Failed to change user role", err)
+		response.HandleError(w, apiErr)
+		return
+	}
+
+	response.Success(w, user, "User role updated successfully")
+}
+
+// Delete handles DELETE /users/:id requests
+// @Summary Delete User
+// @Description Soft delete a user
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Success 200 {object} map[string]interface{} "User deleted"
+// @Failure 400 {object} map[string]interface{} "Invalid request"
+// @Failure 500 {object} map[string]interface{} "Server error"
+// @Router /users/{id} [delete]
+func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := chi.URLParam(r, "id")
+	if strings.TrimSpace(userID) == "" {
+		response.BadRequest(w, "User ID is required")
+		return
+	}
+
+	if err := h.userService.DeleteUser(ctx, userID); err != nil {
+		apiErr := response.InternalServerException("Failed to delete user", err)
+		response.HandleError(w, apiErr)
+		return
+	}
+
+	response.Success(w, map[string]interface{}{"deleted": true}, "User deleted successfully")
 }
 
 func parseOptionalBool(raw string) *bool {

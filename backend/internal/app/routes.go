@@ -69,6 +69,8 @@ func loadRoutes(container *config.Container) *chi.Mux {
 			r.Get("/", userHandler.List)
 			r.Get("/{id}", userHandler.GetByID)
 			r.Put("/{id}", userHandler.Update)
+			r.With(customMiddleware.RequireRoles("admin")).Patch("/{id}/role", userHandler.ChangeRole)
+			r.With(customMiddleware.RequireRoles("admin")).Delete("/{id}", userHandler.Delete)
 		})
 	}
 
