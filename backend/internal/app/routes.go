@@ -33,10 +33,13 @@ func loadRoutes(container *config.Container) *chi.Mux {
 	swaggerURL := fmt.Sprintf("http://localhost:%s/swagger/doc.json", port)
 
 	// Swagger UI endpoints
-	router.Get("/swagger/*", httpSwagger.Handler(
+	swaggerHandler := httpSwagger.Handler(
 		httpSwagger.URL(swaggerURL),
-	))
-	router.Get("/api/docs", httpSwagger.WrapHandler)
+		httpSwagger.DocExpansion("none"),
+	)
+	router.Get("/swagger/*", swaggerHandler)
+	router.Get("/api/docs", swaggerHandler)
+	router.Get("/api/docs/*", swaggerHandler)
 
 	// Health check endpoint
 	healthHandler := container.HealthHandler()
