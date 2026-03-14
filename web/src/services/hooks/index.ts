@@ -1,4 +1,3 @@
 export * from './useAuth';
 export * from './useAdminUsers';
 export * from './useAdminContent';
-export * from './useContentDetails';

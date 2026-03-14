@@ -4,7 +4,6 @@
 import { useState } from 'react';
 import { Header } from '@/components/header';
 import { ContentCard } from '@/components/content-card';
-import { useMovieGenres, useLanguages, useDiscoverMovies } from '@/services/hooks';
 import {
   Select,
   SelectContent,
@@ -25,17 +24,6 @@ export default function MoviesPage() {
   const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState('');
 
-  // Fetch genres and languages using TanStack Query
-  const { data: genres = [], isLoading: genresLoading } = useMovieGenres();
-  const { data: languages = [], isLoading: languagesLoading } = useLanguages();
-
-  // Fetch movies based on filters
-  const { data: movies = [], isLoading: moviesLoading } = useDiscoverMovies({
-    category: selectedCategory,
-    genres: selectedGenres,
-    language: selectedLanguage,
-  });
-
   const toggleGenre = (genreId: number) => {
     setSelectedGenres(prev => 
       prev.includes(genreId) 
@@ -44,7 +32,6 @@ export default function MoviesPage() {
     );
   };
 
-  const isLoading = moviesLoading || genresLoading || languagesLoading;
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -68,17 +55,17 @@ export default function MoviesPage() {
                     <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Select language" />
                     </SelectTrigger>
-                    <SelectContent>
+                    {/* <SelectContent>
                         <SelectItem value="all">All Languages</SelectItem>
                         {languages.map(lang => (
                             <SelectItem key={lang.iso_639_1} value={lang.iso_639_1}>{lang.english_name}</SelectItem>
                         ))}
-                    </SelectContent>
+                    </SelectContent> */}
                 </Select>
             </div>
           </div>
           <div className="mb-8 flex flex-wrap gap-2">
-            {genres.map(genre => (
+            {/* {genres.map(genre => (
                 <Badge
                     key={genre.id}
                     variant={selectedGenres.includes(genre.id) ? 'default' : 'outline'}
@@ -87,10 +74,10 @@ export default function MoviesPage() {
                 >
                     {genre.name}
                 </Badge>
-            ))}
+            ))} */}
           </div>
 
-          {isLoading ? (
+          {/* {isLoading ? (
             <p className="text-center">Loading movies...</p>
           ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
@@ -98,7 +85,7 @@ export default function MoviesPage() {
                 <ContentCard key={item.id} item={item} />
               ))}
             </div>
-          )}
+          )} */}
         </div>
       </main>
     </div>
