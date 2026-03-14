@@ -4,3 +4,7 @@
 ### Search movies
 GET {{baseUrl}}/search/movie?api_key={{apiKey}}&query=Jack%20Reacher
 Accept: application/json
+
+### Get movie cast
+GET {{baseUrl}}/movie/343611/credits?api_key={{apiKey}}
+Accept: application/json
