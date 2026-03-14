@@ -1,7 +1,8 @@
 'use client';
 
 import { useServiceHealthQuery } from '@/services/hooks/useAdminServices';
-import { Activity, Server, Cpu, HardDrive, Clock } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Activity, Server, Cpu, HardDrive, Clock, RefreshCw } from 'lucide-react';
 
 interface ServiceStatusCardProps {
   name: string;
@@ -9,7 +10,12 @@ interface ServiceStatusCardProps {
 }
 
 export function ServiceStatusCard({ name, url }: ServiceStatusCardProps) {
-  const { data, isLoading, error } = useServiceHealthQuery(url);
+  const queryClient = useQueryClient();
+  const { data, isLoading, error, isFetching } = useServiceHealthQuery(url);
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['service-health', url] });
+  };
 
   const formatBytes = (bytes: number) => {
     const gb = bytes / (1024 * 1024 * 1024);
@@ -54,6 +60,14 @@ export function ServiceStatusCard({ name, url }: ServiceStatusCardProps) {
           <div className="flex items-center gap-2">
             <div className={`h-2.5 w-2.5 rounded-full ${getStatusColor(data.data.status)}`} />
             <span className="text-sm text-green-400">{data.data.status}</span>
+            <button
+              onClick={handleRefresh}
+              disabled={isFetching}
+              className="ml-2 p-1 hover:bg-background rounded transition-colors disabled:opacity-50"
+              title="Refresh"
+            >
+              <RefreshCw className={`h-4 w-4 text-muted-foreground ${isFetching ? 'animate-spin' : ''}`} />
+            </button>
           </div>
         ) : null}
       </div>

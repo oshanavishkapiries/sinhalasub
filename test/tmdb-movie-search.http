@@ -1,0 +1,5 @@
+@baseUrl = https://api.themoviedb.org
+@token = 1cf50e6248dc270629e802686245c2c8
+
+GET {{baseUrl}}/3/search/movie?query=Jack+Reacher
+Authorization: Bearer {{token}}
