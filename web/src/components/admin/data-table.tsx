@@ -17,8 +17,27 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ChevronLeft, ChevronRight, MoreHorizontal, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter, MoreHorizontal, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+
+export type ColumnFilterOption = {
+  label: string;
+  value: string;
+};
+
+export type ColumnFilter =
+  | {
+      type: 'select';
+      value?: string;
+      options: ColumnFilterOption[];
+      onChange: (value?: string) => void;
+    }
+  | {
+      type: 'boolean';
+      value?: boolean;
+      onChange: (value?: boolean) => void;
+      labels?: { true: string; false: string };
+    };
 
 export interface Column<T> {
   key: keyof T;
@@ -26,6 +45,7 @@ export interface Column<T> {
   width?: string;
   render?: (value: any, item: T) => React.ReactNode;
   sortable?: boolean;
+  filter?: ColumnFilter;
 }
 
 export interface RowAction<T> {
@@ -149,19 +169,83 @@ export function DataTable<T>({
                   key={String(column.key)}
                   className={`text-xs font-semibold uppercase text-muted-foreground ${column.width || ''}`}
                 >
-                  {column.sortable ? (
-                    <button
-                      onClick={() => handleSort(column.key)}
-                      className="flex items-center gap-1 hover:text-foreground transition-colors"
-                    >
-                      {column.label}
-                      {sortKey === column.key && (
-                        <span className="text-primary">{sortOrder === 'asc' ? '↑' : '↓'}</span>
-                      )}
-                    </button>
-                  ) : (
-                    column.label
-                  )}
+                  <div className="flex items-center gap-2">
+                    {column.sortable ? (
+                      <button
+                        onClick={() => handleSort(column.key)}
+                        className="flex items-center gap-1 hover:text-foreground transition-colors"
+                      >
+                        {column.label}
+                        {sortKey === column.key && (
+                          <span className="text-primary">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </button>
+                    ) : (
+                      <span>{column.label}</span>
+                    )}
+
+                    {column.filter &&
+                      ((filter) => (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              type="button"
+                              className={`rounded p-1 transition-colors hover:text-foreground hover:bg-white/10 ${
+                                (filter.type === 'select' && filter.value) ||
+                                (filter.type === 'boolean' && filter.value !== undefined)
+                                  ? 'text-primary'
+                                  : 'text-muted-foreground'
+                              }`}
+                              aria-label={`Filter ${column.label}`}
+                            >
+                              <Filter className="h-3.5 w-3.5" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start" className="bg-card border-border text-foreground">
+                            {filter.type === 'select' ? (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() => filter.onChange(undefined)}
+                                  className="cursor-pointer hover:bg-white/10 focus:bg-white/10"
+                                >
+                                  All
+                                </DropdownMenuItem>
+                                {filter.options.map((opt) => (
+                                  <DropdownMenuItem
+                                    key={opt.value}
+                                    onClick={() => filter.onChange(opt.value)}
+                                    className="cursor-pointer hover:bg-white/10 focus:bg-white/10"
+                                  >
+                                    {opt.label}
+                                  </DropdownMenuItem>
+                                ))}
+                              </>
+                            ) : (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() => filter.onChange(undefined)}
+                                  className="cursor-pointer hover:bg-white/10 focus:bg-white/10"
+                                >
+                                  All
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => filter.onChange(true)}
+                                  className="cursor-pointer hover:bg-white/10 focus:bg-white/10"
+                                >
+                                  {filter.labels?.true ?? 'Yes'}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => filter.onChange(false)}
+                                  className="cursor-pointer hover:bg-white/10 focus:bg-white/10"
+                                >
+                                  {filter.labels?.false ?? 'No'}
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ))(column.filter)}
+                  </div>
                 </TableHead>
               ))}
               {rowActions && <TableHead className="w-12">Actions</TableHead>}

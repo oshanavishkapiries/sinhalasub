@@ -8,7 +8,7 @@ import { UserForm, UserFormData } from '@/components/admin/users/user-form';
 import { AdminUser } from '@/types/admin';
 import adminUsersService from '@/services/admin-users';
 import { useToast } from '@/hooks/use-toast';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, ToggleLeft, Trash2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +19,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { useAdminTopbar } from '@/contexts/admin-topbar-context';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatDistanceToNowStrict } from 'date-fns';
 
 export default function UsersPage() {
   const router = useRouter();
@@ -30,6 +32,9 @@ export default function UsersPage() {
   const [pageSize] = useState(10);
   const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
+  const [isActiveFilter, setIsActiveFilter] = useState<boolean | undefined>(undefined);
+  const [isVerifiedFilter, setIsVerifiedFilter] = useState<boolean | undefined>(undefined);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<AdminUser | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,6 +77,9 @@ export default function UsersPage() {
         page,
         perPage: pageSize,
         search: searchQuery || undefined,
+        role: roleFilter,
+        isActive: isActiveFilter,
+        isVerified: isVerifiedFilter,
         sortBy: 'created_at',
         sortOrder: 'desc',
       });
@@ -90,7 +98,7 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, searchQuery, toast]);
+  }, [isActiveFilter, isVerifiedFilter, page, pageSize, roleFilter, searchQuery, toast]);
 
   useEffect(() => {
     fetchUsers();
@@ -207,7 +215,18 @@ export default function UsersPage() {
       key: 'id',
       label: 'ID',
       width: 'w-20',
-      render: (value) => <span className="text-xs font-mono text-muted-foreground">{value}</span>,
+      render: (value: string) => (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-xs font-mono text-muted-foreground cursor-help">
+                {String(value).slice(0, 8)}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{String(value)}</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      ),
     },
     {
       key: 'username',
@@ -224,6 +243,19 @@ export default function UsersPage() {
     {
       key: 'role',
       label: 'Role',
+      filter: {
+        type: 'select',
+        value: roleFilter,
+        options: [
+          { label: 'Admin', value: 'admin' },
+          { label: 'Moderator', value: 'moderator' },
+          { label: 'Platform User', value: 'platform-user' },
+        ],
+        onChange: (value) => {
+          setRoleFilter(value);
+          setPage(1);
+        },
+      },
       render: (value: string) => (
         <Badge 
           variant={value === 'admin' ? 'default' : 'secondary'}
@@ -240,6 +272,15 @@ export default function UsersPage() {
     {
       key: 'isVerified',
       label: 'Verified',
+      filter: {
+        type: 'boolean',
+        value: isVerifiedFilter,
+        onChange: (value) => {
+          setIsVerifiedFilter(value);
+          setPage(1);
+        },
+        labels: { true: 'Verified', false: 'Unverified' },
+      },
       render: (value: boolean) => (
         <Badge
           variant={value ? 'default' : 'secondary'}
@@ -252,6 +293,15 @@ export default function UsersPage() {
     {
       key: 'isActive',
       label: 'Active',
+      filter: {
+        type: 'boolean',
+        value: isActiveFilter,
+        onChange: (value) => {
+          setIsActiveFilter(value);
+          setPage(1);
+        },
+        labels: { true: 'Active', false: 'Inactive' },
+      },
       render: (value: boolean) => (
         <Badge
           variant={value ? 'default' : 'secondary'}
@@ -269,7 +319,11 @@ export default function UsersPage() {
     {
       key: 'lastLoginAt',
       label: 'Last Login',
-      render: (value?: string) => <span className="text-muted-foreground">{value ? new Date(value).toLocaleDateString() : 'N/A'}</span>,
+      render: (value?: string) => (
+        <span className="text-muted-foreground">
+          {value ? formatDistanceToNowStrict(new Date(value), { addSuffix: true }) : 'N/A'}
+        </span>
+      ),
     },
   ];
 
@@ -284,6 +338,7 @@ export default function UsersPage() {
     },
     {
       label: 'Toggle Role',
+      icon: <ToggleLeft className="h-4 w-4" />,
       onClick: async (user) => {
         if (user.role !== 'platform-user' && user.role !== 'moderator') return;
         setIsSubmitting(true);
