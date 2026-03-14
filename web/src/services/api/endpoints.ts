@@ -3,11 +3,10 @@
  * Centralized location for all API endpoint definitions
  */
 
-const BASE_URL = 'https://api.themoviedb.org/3';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const API_CONFIG = {
   BASE_URL,
-  TMDB_API_KEY: process.env.NEXT_PUBLIC_TMDB_API_KEY,
 };
 
 export const ENDPOINTS = {
