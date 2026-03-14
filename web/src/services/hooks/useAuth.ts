@@ -9,11 +9,18 @@ export function useCurrentUserQuery(options?: { enabled?: boolean }) {
   return useQuery<User | null>({
     queryKey: QUERY_KEYS.AUTH_ME,
     queryFn: async () => {
-      const resp = await api.getCurrentUser();
-      return resp.success && resp.data?.user ? resp.data.user : null;
+      const me = await api.getCurrentUser();
+      if (me.success && me.data?.user) return me.data.user;
+
+      const refreshed = await api.refreshToken();
+      if (!refreshed.success) return null;
+
+      const meAfterRefresh = await api.getCurrentUser();
+      return meAfterRefresh.success && meAfterRefresh.data?.user ? meAfterRefresh.data.user : null;
     },
     enabled: options?.enabled ?? true,
     staleTime: 1000 * 60,
+    retry: false,
   });
 }
 
@@ -111,4 +118,3 @@ export function useLogoutMutation() {
     },
   });
 }
-

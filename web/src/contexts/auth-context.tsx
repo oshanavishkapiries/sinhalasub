@@ -19,10 +19,9 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(getUser());
-  const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(!!getUser());
 
-  const currentUserQuery = useCurrentUserQuery({ enabled: false });
+  const currentUserQuery = useCurrentUserQuery();
   const loginMutation = useLoginMutation();
   const signupMutation = useSignupMutation();
   const verifyAccountMutation = useVerifyAccountMutation();
@@ -44,50 +43,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearUser();
   }, []);
 
-  const fetchCurrentUser = useCallback(async (): Promise<User | null> => {
-    const meResult = await currentUserQuery.refetch();
-    return meResult.data ?? null;
-  }, [currentUserQuery]);
-
-  const revalidateAuth = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      let currentUser = await fetchCurrentUser();
-
-      if (!currentUser) {
-        await refreshTokenMutation.mutateAsync();
-        currentUser = await fetchCurrentUser();
-      }
-
-      setAuthenticatedState(currentUser);
-    } catch (error) {
-      console.error('Error revalidating auth:', error);
-      setAuthenticatedState(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [fetchCurrentUser, refreshTokenMutation, setAuthenticatedState]);
-
   useEffect(() => {
-    revalidateAuth();
-  }, [revalidateAuth]);
+    if (!currentUserQuery.isFetched) return;
+    setAuthenticatedState(currentUserQuery.data ?? null);
+  }, [currentUserQuery.data, currentUserQuery.isFetched, setAuthenticatedState]);
 
   const handleLogin = useCallback(
     async (email: string, password: string) => {
-      setIsLoading(true);
-      try {
-        await loginMutation.mutateAsync({ email, password });
-        const currentUser = await fetchCurrentUser();
-        if (!currentUser) {
-          throw new Error('Unable to load user profile');
-        }
-
-        setAuthenticatedState(currentUser);
-      } finally {
-        setIsLoading(false);
+      await loginMutation.mutateAsync({ email, password });
+      const me = await currentUserQuery.refetch();
+      if (!me.data) {
+        throw new Error('Unable to load user profile');
       }
+      setAuthenticatedState(me.data);
     },
-    [fetchCurrentUser, loginMutation, setAuthenticatedState]
+    [currentUserQuery, loginMutation, setAuthenticatedState]
   );
 
   const handleSignup = useCallback(async (username: string, email: string, password: string) => {
@@ -124,9 +94,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const handleRefreshToken = useCallback(async () => {
     await refreshTokenMutation.mutateAsync();
-    const currentUser = await fetchCurrentUser();
-    setAuthenticatedState(currentUser);
-  }, [fetchCurrentUser, refreshTokenMutation, setAuthenticatedState]);
+    const me = await currentUserQuery.refetch();
+    setAuthenticatedState(me.data ?? null);
+  }, [currentUserQuery, refreshTokenMutation, setAuthenticatedState]);
+
+  const revalidateAuth = useCallback(async () => {
+    const me = await currentUserQuery.refetch();
+    setAuthenticatedState(me.data ?? null);
+  }, [currentUserQuery, setAuthenticatedState]);
+
+  const isLoading =
+    currentUserQuery.isLoading ||
+    currentUserQuery.isFetching ||
+    loginMutation.isPending ||
+    signupMutation.isPending ||
+    verifyAccountMutation.isPending ||
+    resendVerificationCodeMutation.isPending ||
+    requestPasswordResetMutation.isPending ||
+    resetPasswordMutation.isPending ||
+    logoutMutation.isPending ||
+    refreshTokenMutation.isPending;
 
   const value: AuthContextType = {
     user,
