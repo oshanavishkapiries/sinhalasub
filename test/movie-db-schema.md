@@ -2,19 +2,32 @@
 
 id : integer (primary key)
 title : string
-slug : string
+slug : string (unique)
 rating : float (imdb)
 release_date : date
 poster_url : string
+created_at : timestamp
+updated_at : timestamp
 
 # db_table schema : cast
 
 id : integer (primary key)
 movie_id : integer (foreign key to movies.id)
-tmdb_id : integer
+tmdb_id : integer (unique identifier from TMDB)
 actor_name : string
 actor_image_url : string
 character_name : string
+created_at : timestamp
+updated_at : timestamp
+
+# db_table schema : movie_categories
+
+id : integer (primary key)
+movie_id : integer (foreign key to movies.id)
+category_id : integer
+category_name : string
+created_at : timestamp
+updated_at : timestamp
 
 # db_table schema : movie_details
 
@@ -24,15 +37,14 @@ overview : string
 tmdb_id : integer
 imdb_id : string
 adult : boolean
-category_ids : array of integers
 language : string
 duration : integer (minutes)
-poster_url : string
 backdrop_url : string
 trailer_url : string
 director : string
 country : string
-cast : array of integers (foreign key to cast.id)
+created_at : timestamp
+updated_at : timestamp
 
 # db_table schema : movie_subtitles
 
@@ -41,6 +53,8 @@ movie_id : integer (foreign key to movies.id)
 language : string
 subtitle_url : string
 subtitle_author : string
+created_at : timestamp
+updated_at : timestamp
 
 # db_table schema : movie_player_providers
 
@@ -52,6 +66,8 @@ player_provider_type : string
 video_quality : string
 is_default : boolean
 is_ads_available : boolean
+created_at : timestamp
+updated_at : timestamp
 
 # db_table schema : movie_download_options
 
@@ -62,3 +78,5 @@ download_option_url : string
 download_option_type : string
 file_size : string
 video_quality : string
+created_at : timestamp
+updated_at : timestamp
