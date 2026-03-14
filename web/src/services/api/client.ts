@@ -9,14 +9,6 @@ export const apiClient = axios.create({
   },
 });
 
-export const originClient = axios.create({
-  baseURL: API_CONFIG.ORIGIN_URL,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
 export async function fetchAPI<T>(
   endpoint: string,
   params: Record<string, string> = {},

@@ -1,12 +1,19 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { DataTable, Column, RowAction } from '@/components/admin/data-table';
 import { Modal } from '@/components/admin/modal';
 import { UserForm, UserFormData } from '@/components/admin/users/user-form';
 import { AdminUser } from '@/types/admin';
-import adminUsersService from '@/services/functions/admin-users';
+import {
+  useAdminUsersQuery,
+  useBulkDeleteAdminUsersMutation,
+  useChangeAdminUserRoleMutation,
+  useCreateAdminUserMutation,
+  useDeleteAdminUserMutation,
+  useUpdateAdminUserMutation,
+} from '@/services/hooks/useAdminUsers';
 import { useToast } from '@/hooks/use-toast';
 import { Edit, ToggleLeft, Trash2 } from 'lucide-react';
 import {
@@ -26,11 +33,8 @@ export default function UsersPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setSearch, clearSearch } = useAdminTopbar();
-  const [users, setUsers] = useState<AdminUser[]>([]);
-  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
-  const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
   const [isActiveFilter, setIsActiveFilter] = useState<boolean | undefined>(undefined);
@@ -43,6 +47,27 @@ export default function UsersPage() {
 
   const { toast } = useToast();
   const createFromLayout = searchParams.get('create') === '1';
+
+  const usersQuery = useAdminUsersQuery({
+    page,
+    perPage: pageSize,
+    search: searchQuery || undefined,
+    role: roleFilter,
+    isActive: isActiveFilter,
+    isVerified: isVerifiedFilter,
+    sortBy: 'created_at',
+    sortOrder: 'desc',
+  });
+
+  const createUserMutation = useCreateAdminUserMutation();
+  const updateUserMutation = useUpdateAdminUserMutation();
+  const deleteUserMutation = useDeleteAdminUserMutation();
+  const changeUserRoleMutation = useChangeAdminUserRoleMutation();
+  const bulkDeleteUsersMutation = useBulkDeleteAdminUsersMutation();
+
+  const users = usersQuery.data?.items ?? [];
+  const total = usersQuery.data?.meta.totalItems ?? 0;
+  const loading = usersQuery.isLoading || usersQuery.isFetching;
 
   useEffect(() => {
     setSearch({
@@ -63,6 +88,15 @@ export default function UsersPage() {
     setIsDrawerOpen(true);
   }, [createFromLayout]);
 
+  useEffect(() => {
+    if (!usersQuery.error) return;
+    toast({
+      title: 'Error',
+      description: usersQuery.error.message || 'Failed to fetch users',
+      variant: 'destructive',
+    });
+  }, [toast, usersQuery.error]);
+
   const handleDrawerOpenChange = (open: boolean) => {
     setIsDrawerOpen(open);
     if (!open && createFromLayout) {
@@ -70,56 +104,20 @@ export default function UsersPage() {
     }
   };
 
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await adminUsersService.getUsers({
-        page,
-        perPage: pageSize,
-        search: searchQuery || undefined,
-        role: roleFilter,
-        isActive: isActiveFilter,
-        isVerified: isVerifiedFilter,
-        sortBy: 'created_at',
-        sortOrder: 'desc',
-      });
-      if (response.success && response.data) {
-        setUsers(response.data.items);
-        setTotal(response.data.meta.totalItems);
-      } else {
-        throw new Error(response.message || 'Failed to fetch users');
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to fetch users',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [isActiveFilter, isVerifiedFilter, page, pageSize, roleFilter, searchQuery, toast]);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
   const handleCreateUser = async (data: UserFormData) => {
     setIsSubmitting(true);
     try {
-      const resp = await adminUsersService.createUser({
+      await createUserMutation.mutateAsync({
         username: data.username,
         email: data.email,
         password: data.password || '',
         role: data.role,
       });
-      if (!resp.success) throw new Error(resp.message || 'Failed to create user');
       toast({
         title: 'Success',
         description: 'User created successfully',
       });
       setIsDrawerOpen(false);
-      fetchUsers();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -135,20 +133,21 @@ export default function UsersPage() {
     if (!selectedUser) return;
     setIsSubmitting(true);
     try {
-      const resp = await adminUsersService.updateUser(selectedUser.id, {
-        username: data.username,
-        email: data.email,
-        avatar: data.avatar,
-        role: data.role,
+      await updateUserMutation.mutateAsync({
+        userId: selectedUser.id,
+        data: {
+          username: data.username,
+          email: data.email,
+          avatar: data.avatar,
+          role: data.role,
+        },
       });
-      if (!resp.success) throw new Error(resp.message || 'Failed to update user');
       toast({
         title: 'Success',
         description: 'User updated successfully',
       });
       setIsDrawerOpen(false);
       setSelectedUser(undefined);
-      fetchUsers();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -164,15 +163,13 @@ export default function UsersPage() {
     if (!userToDelete) return;
     setIsSubmitting(true);
     try {
-      const resp = await adminUsersService.deleteUser(userToDelete.id);
-      if (!resp.success) throw new Error(resp.message || 'Failed to delete user');
+      await deleteUserMutation.mutateAsync({ userId: userToDelete.id });
       toast({
         title: 'Success',
         description: 'User deleted successfully',
       });
       setDeleteDialogOpen(false);
       setUserToDelete(null);
-      fetchUsers();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -188,9 +185,7 @@ export default function UsersPage() {
     if (!confirm(`Delete ${ids.length} users?`)) return;
     setIsSubmitting(true);
     try {
-      const result = await adminUsersService.bulkDeleteUsers({
-        ids: ids as string[],
-      });
+      const result = await bulkDeleteUsersMutation.mutateAsync({ ids: ids as string[] });
       toast({
         title: 'Success',
         description:
@@ -198,7 +193,6 @@ export default function UsersPage() {
             ? `${result.deletedCount} users deleted successfully`
             : `${result.deletedCount} deleted, ${result.failedCount} failed`,
       });
-      fetchUsers();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -344,10 +338,8 @@ export default function UsersPage() {
         setIsSubmitting(true);
         try {
           const nextRole = user.role === 'platform-user' ? 'moderator' : 'platform-user';
-          const resp = await adminUsersService.changeUserRole(user.id, nextRole);
-          if (!resp.success) throw new Error(resp.message || 'Failed to update role');
+          await changeUserRoleMutation.mutateAsync({ userId: user.id, role: nextRole });
           toast({ title: 'Success', description: `Role updated to ${nextRole}` });
-          fetchUsers();
         } catch (error) {
           toast({
             title: 'Error',

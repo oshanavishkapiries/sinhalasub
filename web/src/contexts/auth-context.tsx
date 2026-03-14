@@ -3,16 +3,16 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { AuthContextType, User } from '@/types/auth';
 import {
-  getCurrentUser,
-  loginUser,
-  resendVerificationCode as resendVerificationCodeApi,
-  logoutUser,
-  refreshToken,
-  requestPasswordReset as requestPasswordResetApi,
-  resetPassword as resetPasswordApi,
-  signupUser,
-  verifyAccount as verifyAccountApi,
-} from '@/services/functions/auth';
+  useCurrentUserQuery,
+  useLoginMutation,
+  useLogoutMutation,
+  useRefreshTokenMutation,
+  useRequestPasswordResetMutation,
+  useResendVerificationCodeMutation,
+  useResetPasswordMutation,
+  useSignupMutation,
+  useVerifyAccountMutation,
+} from '@/services/hooks/useAuth';
 import { clearUser, getUser, saveUser } from '@/lib/session-storage';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,6 +21,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(getUser());
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(!!getUser());
+
+  const currentUserQuery = useCurrentUserQuery({ enabled: false });
+  const loginMutation = useLoginMutation();
+  const signupMutation = useSignupMutation();
+  const verifyAccountMutation = useVerifyAccountMutation();
+  const resendVerificationCodeMutation = useResendVerificationCodeMutation();
+  const requestPasswordResetMutation = useRequestPasswordResetMutation();
+  const resetPasswordMutation = useResetPasswordMutation();
+  const logoutMutation = useLogoutMutation();
+  const refreshTokenMutation = useRefreshTokenMutation();
 
   const setAuthenticatedState = useCallback((nextUser: User | null) => {
     setUser(nextUser);
@@ -35,12 +45,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const fetchCurrentUser = useCallback(async (): Promise<User | null> => {
-    const meResponse = await getCurrentUser();
-    if (meResponse.success && meResponse.data?.user) {
-      return meResponse.data.user;
-    }
-    return null;
-  }, []);
+    const meResult = await currentUserQuery.refetch();
+    return meResult.data ?? null;
+  }, [currentUserQuery]);
 
   const revalidateAuth = useCallback(async () => {
     setIsLoading(true);
@@ -48,10 +55,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let currentUser = await fetchCurrentUser();
 
       if (!currentUser) {
-        const refreshResponse = await refreshToken();
-        if (refreshResponse.success) {
-          currentUser = await fetchCurrentUser();
-        }
+        await refreshTokenMutation.mutateAsync();
+        currentUser = await fetchCurrentUser();
       }
 
       setAuthenticatedState(currentUser);
@@ -61,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoading(false);
     }
-  }, [fetchCurrentUser, setAuthenticatedState]);
+  }, [fetchCurrentUser, refreshTokenMutation, setAuthenticatedState]);
 
   useEffect(() => {
     revalidateAuth();
@@ -71,12 +76,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     async (email: string, password: string) => {
       setIsLoading(true);
       try {
-        const response = await loginUser(email, password);
-        if (!response.success) {
-          throw new Error(response.message || 'Login failed');
-        }
-
-        const currentUser = response.data?.user || (await fetchCurrentUser());
+        await loginMutation.mutateAsync({ email, password });
+        const currentUser = await fetchCurrentUser();
         if (!currentUser) {
           throw new Error('Unable to load user profile');
         }
@@ -86,66 +87,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoading(false);
       }
     },
-    [fetchCurrentUser, setAuthenticatedState]
+    [fetchCurrentUser, loginMutation, setAuthenticatedState]
   );
 
   const handleSignup = useCallback(async (username: string, email: string, password: string) => {
-    const response = await signupUser(username, email, password);
-    if (!response.success) {
-      throw new Error(response.message || 'Signup failed');
-    }
-  }, []);
+    await signupMutation.mutateAsync({ username, email, password });
+  }, [signupMutation]);
 
   const handleVerifyAccount = useCallback(async (email: string, verificationCode: string) => {
-    const response = await verifyAccountApi(email, verificationCode);
-    if (!response.success) {
-      throw new Error(response.message || 'Verification failed');
-    }
-  }, []);
+    await verifyAccountMutation.mutateAsync({ email, verificationCode });
+  }, [verifyAccountMutation]);
 
   const handleResendVerificationCode = useCallback(async (email: string) => {
-    const response = await resendVerificationCodeApi(email);
-    if (!response.success) {
-      throw new Error(response.message || 'Failed to resend verification code');
-    }
-  }, []);
+    await resendVerificationCodeMutation.mutateAsync({ email });
+  }, [resendVerificationCodeMutation]);
 
   const handleRequestPasswordReset = useCallback(async (email: string) => {
-    const response = await requestPasswordResetApi(email);
-    if (!response.success) {
-      throw new Error(response.message || 'Failed to request password reset');
-    }
-  }, []);
+    await requestPasswordResetMutation.mutateAsync({ email });
+  }, [requestPasswordResetMutation]);
 
   const handleResetPassword = useCallback(
     async (email: string, newPassword: string, verificationCode: string) => {
-      const response = await resetPasswordApi(email, newPassword, verificationCode);
-      if (!response.success) {
-        throw new Error(response.message || 'Failed to reset password');
-      }
+      await resetPasswordMutation.mutateAsync({ email, newPassword, verificationCode });
       setAuthenticatedState(null);
     },
-    [setAuthenticatedState]
+    [resetPasswordMutation, setAuthenticatedState]
   );
 
   const handleLogout = useCallback(async () => {
     try {
-      await logoutUser();
+      await logoutMutation.mutateAsync();
     } finally {
       setAuthenticatedState(null);
     }
-  }, [setAuthenticatedState]);
+  }, [logoutMutation, setAuthenticatedState]);
 
   const handleRefreshToken = useCallback(async () => {
-    const response = await refreshToken();
-    if (!response.success) {
-      setAuthenticatedState(null);
-      throw new Error(response.message || 'Token refresh failed');
-    }
-
+    await refreshTokenMutation.mutateAsync();
     const currentUser = await fetchCurrentUser();
     setAuthenticatedState(currentUser);
-  }, [fetchCurrentUser, setAuthenticatedState]);
+  }, [fetchCurrentUser, refreshTokenMutation, setAuthenticatedState]);
 
   const value: AuthContextType = {
     user,

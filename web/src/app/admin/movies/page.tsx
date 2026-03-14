@@ -1,13 +1,20 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { DataTable, Column, RowAction } from '@/components/admin/data-table';
 import { Modal } from '@/components/admin/modal';
 import { ContentForm } from '@/components/admin/content/content-form';
 import { AdminContent } from '@/types/admin';
-import adminContentService from '@/services/functions/admin-content';
+import {
+  useAdminContentQuery,
+  useBulkDeleteAdminContentMutation,
+  useCreateAdminContentMutation,
+  useDeleteAdminContentMutation,
+  usePublishAdminContentMutation,
+  useUpdateAdminContentMutation,
+} from '@/services/hooks/useAdminContent';
 import { useToast } from '@/hooks/use-toast';
 import { Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import {
@@ -25,11 +32,8 @@ export default function MoviesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setSearch, clearSearch } = useAdminTopbar();
-  const [content, setContent] = useState<AdminContent[]>([]);
-  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(25);
-  const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedContent, setSelectedContent] = useState<AdminContent | undefined>(undefined);
@@ -39,6 +43,23 @@ export default function MoviesPage() {
 
   const { toast } = useToast();
   const createFromLayout = searchParams.get('create') === '1';
+
+  const contentQuery = useAdminContentQuery({
+    page,
+    limit: pageSize,
+    search: searchQuery || undefined,
+    type: 'movie',
+  });
+
+  const createContentMutation = useCreateAdminContentMutation();
+  const updateContentMutation = useUpdateAdminContentMutation();
+  const deleteContentMutation = useDeleteAdminContentMutation();
+  const publishContentMutation = usePublishAdminContentMutation();
+  const bulkDeleteContentMutation = useBulkDeleteAdminContentMutation();
+
+  const content = contentQuery.data?.data?.content ?? [];
+  const total = contentQuery.data?.data?.total ?? 0;
+  const loading = contentQuery.isLoading || contentQuery.isFetching;
 
   useEffect(() => {
     setSearch({
@@ -66,38 +87,19 @@ export default function MoviesPage() {
     }
   };
 
-  const fetchContent = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await adminContentService.getContent({
-        page,
-        limit: pageSize,
-        search: searchQuery || undefined,
-        type: 'movie',
-      });
-      if (response.data) {
-        setContent(response.data.content);
-        setTotal(response.data.total);
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch movies',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pageSize, searchQuery, toast]);
-
   useEffect(() => {
-    fetchContent();
-  }, [fetchContent]);
+    if (!contentQuery.error) return;
+    toast({
+      title: 'Error',
+      description: contentQuery.error.message || 'Failed to fetch movies',
+      variant: 'destructive',
+    });
+  }, [contentQuery.error, toast]);
 
   const handleCreateContent = async (data: Partial<AdminContent>) => {
     setIsSubmitting(true);
     try {
-      await adminContentService.createContent({
+      await createContentMutation.mutateAsync({
         title: data.title!,
         type: 'movie',
         overview: data.overview!,
@@ -110,7 +112,6 @@ export default function MoviesPage() {
         description: 'Movie created successfully',
       });
       setIsDrawerOpen(false);
-      fetchContent();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -126,11 +127,14 @@ export default function MoviesPage() {
     if (!selectedContent) return;
     setIsSubmitting(true);
     try {
-      await adminContentService.updateContent(selectedContent.id, {
-        title: data.title,
-        overview: data.overview,
-        genres: data.genres,
-        releaseDate: data.releaseDate,
+      await updateContentMutation.mutateAsync({
+        contentId: selectedContent.id,
+        data: {
+          title: data.title,
+          overview: data.overview,
+          genres: data.genres,
+          releaseDate: data.releaseDate,
+        },
       });
       toast({
         title: 'Success',
@@ -138,7 +142,6 @@ export default function MoviesPage() {
       });
       setIsDrawerOpen(false);
       setSelectedContent(undefined);
-      fetchContent();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -154,14 +157,13 @@ export default function MoviesPage() {
     if (!contentToDelete) return;
     setIsSubmitting(true);
     try {
-      await adminContentService.deleteContent(contentToDelete.id);
+      await deleteContentMutation.mutateAsync({ contentId: contentToDelete.id });
       toast({
         title: 'Success',
         description: 'Movie deleted successfully',
       });
       setDeleteDialogOpen(false);
       setContentToDelete(null);
-      fetchContent();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -176,14 +178,14 @@ export default function MoviesPage() {
   const handlePublishContent = async (item: AdminContent) => {
     setIsSubmitting(true);
     try {
-      await adminContentService.publishContent(item.id, {
-        status: item.status === 'published' ? 'unpublished' : 'published',
+      await publishContentMutation.mutateAsync({
+        contentId: item.id,
+        data: { status: item.status === 'published' ? 'unpublished' : 'published' },
       });
       toast({
         title: 'Success',
         description: `Movie ${item.status === 'published' ? 'unpublished' : 'published'} successfully`,
       });
-      fetchContent();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -199,14 +201,11 @@ export default function MoviesPage() {
     if (!confirm(`Delete ${ids.length} movies?`)) return;
     setIsSubmitting(true);
     try {
-      await adminContentService.bulkDeleteContent({
-        ids: ids as string[],
-      });
+      await bulkDeleteContentMutation.mutateAsync({ ids: ids as string[] });
       toast({
         title: 'Success',
         description: `${ids.length} movies deleted successfully`,
       });
-      fetchContent();
     } catch (error: any) {
       toast({
         title: 'Error',

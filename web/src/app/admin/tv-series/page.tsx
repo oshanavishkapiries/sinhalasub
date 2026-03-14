@@ -1,11 +1,16 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { DataTable, Column, RowAction } from '@/components/admin/data-table';
 import { AdminContent } from '@/types/admin';
-import adminContentService from '@/services/functions/admin-content';
+import {
+  useAdminContentQuery,
+  useBulkDeleteAdminContentMutation,
+  useDeleteAdminContentMutation,
+  usePublishAdminContentMutation,
+} from '@/services/hooks/useAdminContent';
 import { useToast } from '@/hooks/use-toast';
 import { Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import {
@@ -22,17 +27,29 @@ import { useAdminTopbar } from '@/contexts/admin-topbar-context';
 export default function TvSeriesPage() {
   const { setSearch, clearSearch } = useAdminTopbar();
   const router = useRouter();
-  const [content, setContent] = useState<AdminContent[]>([]);
-  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(25);
-  const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [contentToDelete, setContentToDelete] = useState<AdminContent | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const { toast } = useToast();
+
+  const contentQuery = useAdminContentQuery({
+    page,
+    limit: pageSize,
+    search: searchQuery || undefined,
+    type: 'tv',
+  });
+
+  const deleteContentMutation = useDeleteAdminContentMutation();
+  const publishContentMutation = usePublishAdminContentMutation();
+  const bulkDeleteContentMutation = useBulkDeleteAdminContentMutation();
+
+  const content = contentQuery.data?.data?.content ?? [];
+  const total = contentQuery.data?.data?.total ?? 0;
+  const loading = contentQuery.isLoading || contentQuery.isFetching;
 
   useEffect(() => {
     setSearch({
@@ -47,46 +64,26 @@ export default function TvSeriesPage() {
     return () => clearSearch();
   }, [clearSearch, searchQuery, setSearch]);
 
-  const fetchContent = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await adminContentService.getContent({
-        page,
-        limit: pageSize,
-        search: searchQuery || undefined,
-        type: 'tv',
-      });
-      if (response.data) {
-        setContent(response.data.content);
-        setTotal(response.data.total);
-      }
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to fetch TV series',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pageSize, searchQuery, toast]);
-
   useEffect(() => {
-    fetchContent();
-  }, [fetchContent]);
+    if (!contentQuery.error) return;
+    toast({
+      title: 'Error',
+      description: contentQuery.error.message || 'Failed to fetch TV series',
+      variant: 'destructive',
+    });
+  }, [contentQuery.error, toast]);
 
   const handleDeleteContent = async () => {
     if (!contentToDelete) return;
     setIsDeleting(true);
     try {
-      await adminContentService.deleteContent(contentToDelete.id);
+      await deleteContentMutation.mutateAsync({ contentId: contentToDelete.id });
       toast({
         title: 'Success',
         description: 'TV series deleted successfully',
       });
       setDeleteDialogOpen(false);
       setContentToDelete(null);
-      fetchContent();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -100,14 +97,14 @@ export default function TvSeriesPage() {
 
   const handlePublishContent = async (item: AdminContent) => {
     try {
-      await adminContentService.publishContent(item.id, {
-        status: item.status === 'published' ? 'unpublished' : 'published',
+      await publishContentMutation.mutateAsync({
+        contentId: item.id,
+        data: { status: item.status === 'published' ? 'unpublished' : 'published' },
       });
       toast({
         title: 'Success',
         description: `TV series ${item.status === 'published' ? 'unpublished' : 'published'} successfully`,
       });
-      fetchContent();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -120,14 +117,11 @@ export default function TvSeriesPage() {
   const handleBulkDelete = async (ids: (string | number)[]) => {
     if (!confirm(`Delete ${ids.length} TV series?`)) return;
     try {
-      await adminContentService.bulkDeleteContent({
-        ids: ids as string[],
-      });
+      await bulkDeleteContentMutation.mutateAsync({ ids: ids as string[] });
       toast({
         title: 'Success',
         description: `${ids.length} TV series deleted successfully`,
       });
-      fetchContent();
     } catch (error: any) {
       toast({
         title: 'Error',

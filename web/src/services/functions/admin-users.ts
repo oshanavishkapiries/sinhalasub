@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
-import { originClient } from '../api/client';
-import { ORIGIN_ENDPOINTS } from '../api/endpoints';
+import { apiClient } from '../api/client';
+import { ENDPOINTS } from '../api/endpoints';
 import type {
   AdminUser,
   BulkDeleteRequest,
@@ -68,7 +68,7 @@ const toErrorMessage = (error: unknown, fallback: string) => {
 
 export async function getUsers(params: GetUsersRequest): Promise<GetUsersResponse> {
   try {
-    const response = await originClient.get<BackendResponse<BackendUsersListData>>(ORIGIN_ENDPOINTS.USERS, {
+    const response = await apiClient.get<BackendResponse<BackendUsersListData>>(ENDPOINTS.USERS, {
       params: {
         page: params.page,
         per_page: params.perPage,
@@ -108,7 +108,7 @@ export async function getUsers(params: GetUsersRequest): Promise<GetUsersRespons
 
 export async function getUser(userId: string): Promise<BackendResponse<AdminUser>> {
   try {
-    const response = await originClient.get<BackendResponse<any>>(ORIGIN_ENDPOINTS.USER_BY_ID(userId));
+    const response = await apiClient.get<BackendResponse<any>>(ENDPOINTS.USER_BY_ID(userId));
     if (!response.data.success || !response.data.data) {
       return response.data as any;
     }
@@ -133,7 +133,7 @@ export async function changeUserRole(
   role: 'platform-user' | 'moderator',
 ): Promise<BackendResponse<AdminUser>> {
   try {
-    const response = await originClient.patch<BackendResponse<any>>(ORIGIN_ENDPOINTS.USER_ROLE(userId), { role });
+    const response = await apiClient.patch<BackendResponse<any>>(ENDPOINTS.USER_ROLE(userId), { role });
     if (!response.data.success || !response.data.data) return response.data as any;
     return { ...response.data, data: normalizeUser(response.data.data) };
   } catch (error) {
@@ -150,7 +150,7 @@ export async function changeUserRole(
 
 export async function createUser(data: CreateUserRequest): Promise<BackendResponse<AdminUser>> {
   try {
-    const response = await originClient.post<BackendResponse<any>>(ORIGIN_ENDPOINTS.USERS, {
+    const response = await apiClient.post<BackendResponse<any>>(ENDPOINTS.USERS, {
       username: data.username,
       email: data.email,
       password: data.password,
@@ -182,7 +182,7 @@ export async function createUser(data: CreateUserRequest): Promise<BackendRespon
 
 export async function updateUser(userId: string, data: UpdateUserRequest): Promise<BackendResponse<AdminUser>> {
   try {
-    const response = await originClient.put<BackendResponse<any>>(ORIGIN_ENDPOINTS.USER_BY_ID(userId), {
+    const response = await apiClient.put<BackendResponse<any>>(ENDPOINTS.USER_BY_ID(userId), {
       username: data.username,
       email: data.email,
       avatar: data.avatar,
@@ -214,7 +214,7 @@ export async function updateUser(userId: string, data: UpdateUserRequest): Promi
 
 export async function deleteUser(userId: string): Promise<BackendResponse<{ deleted: boolean }>> {
   try {
-    const response = await originClient.delete<BackendResponse<{ deleted: boolean }>>(ORIGIN_ENDPOINTS.USER_BY_ID(userId));
+    const response = await apiClient.delete<BackendResponse<{ deleted: boolean }>>(ENDPOINTS.USER_BY_ID(userId));
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError;
@@ -244,4 +244,3 @@ export default {
   changeUserRole,
   bulkDeleteUsers,
 };
-
