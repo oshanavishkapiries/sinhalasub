@@ -53,8 +53,8 @@ export function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
         </div>
 
         {/* Center - Search (optional, page-controlled) */}
-        {search && (
-          <div className="flex flex-1 justify-center">
+        <div className="flex flex-1 justify-center">
+          {search && (
             <div className="flex flex-1 px-6 max-w-3xl">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -66,8 +66,8 @@ export function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
                 />
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* User Dropdown */}
         <DropdownMenu>
