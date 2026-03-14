@@ -10,6 +10,10 @@ export const API_CONFIG = {
 };
 
 export const ENDPOINTS = {
+
+  // Health check
+  HEALTH_CHECK: '/health',
+
   // Auth (cookie-based)
   AUTH_LOGIN: '/auth/login',
   AUTH_SIGNUP: '/auth/signup',

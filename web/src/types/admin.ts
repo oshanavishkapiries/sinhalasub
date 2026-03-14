@@ -243,8 +243,8 @@ export interface TVSeries {
   overview: string;
   tagline?: string;
   homepage?: string;
-  poster_urls: string[]; // Array of 3 poster URLs
-  backdrop_urls: string[]; // Array of 3 backdrop URLs
+  poster_urls: string[];
+  backdrop_urls: string[];
   first_air_date: string;
   last_air_date?: string;
   status: string;
@@ -262,4 +262,49 @@ export interface TVSeries {
   imdb_id?: string;
   genres: { id: number; name: string }[];
   seasons: TVSeason[];
+}
+
+/**
+ * Service Health Types
+ */
+export interface ServiceCpuMetrics {
+  cores: number;
+  logical_cores: number;
+  usage_percent: number;
+}
+
+export interface ServiceMemoryMetrics {
+  available_bytes: number;
+  free_bytes: number;
+  total_bytes: number;
+  used_bytes: number;
+  used_percent: number;
+}
+
+export interface ServiceMetrics {
+  cpu: ServiceCpuMetrics;
+  memory: ServiceMemoryMetrics;
+}
+
+export interface ServiceHealthData {
+  metrics: ServiceMetrics;
+  service: string;
+  status: 'OK' | 'ERROR' | 'DEGRADED';
+  timestamp: string;
+  version: string;
+}
+
+export interface ServiceHealthResponse {
+  success: boolean;
+  message?: string;
+  data?: ServiceHealthData;
+  error?: string;
+}
+
+export interface ServiceStatus {
+  name: string;
+  url: string;
+  health?: ServiceHealthData;
+  isLoading: boolean;
+  error?: string;
 }
