@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { DataTable, Column, RowAction } from '@/components/admin/data-table';
 import { AdminContent } from '@/types/admin';
-import adminContentService from '@/services/admin-content';
+import adminContentService from '@/services/functions/admin-content';
 import { useToast } from '@/hooks/use-toast';
 import { Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import {

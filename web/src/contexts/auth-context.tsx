@@ -12,7 +12,7 @@ import {
   resetPassword as resetPasswordApi,
   signupUser,
   verifyAccount as verifyAccountApi,
-} from '@/services/auth';
+} from '@/services/functions/auth';
 import { clearUser, getUser, saveUser } from '@/lib/session-storage';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

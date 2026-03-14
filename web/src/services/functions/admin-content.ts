@@ -1,35 +1,23 @@
-import axios, { AxiosError } from 'axios';
-import {
+import { AxiosError } from 'axios';
+import { apiClient } from '../api/client';
+import { ENDPOINTS } from '../api/endpoints';
+import type {
   AdminContent,
+  ApiResponse,
+  BulkDeleteRequest,
+  CreateContentRequest,
   GetContentRequest,
   GetContentResponse,
-  CreateContentRequest,
-  UpdateContentRequest,
   PublishContentRequest,
-  BulkDeleteRequest,
-  ApiResponse,
-} from '@/types/admin';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
-
-// Create axios instance for admin requests
-const adminClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+  UpdateContentRequest,
+} from '../types';
 
 /**
  * Get all content with filters
  */
-export const getContent = async (
-  params: GetContentRequest
-): Promise<GetContentResponse> => {
+export async function getContent(params: GetContentRequest): Promise<GetContentResponse> {
   try {
-    const response = await adminClient.get<GetContentResponse>('/admin/content', {
-      params,
-    });
+    const response = await apiClient.get<GetContentResponse>(ENDPOINTS.ADMIN_CONTENT, { params });
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<GetContentResponse>;
@@ -40,18 +28,14 @@ export const getContent = async (
       }
     );
   }
-};
+}
 
 /**
  * Get single content
  */
-export const getContentById = async (
-  contentId: string
-): Promise<ApiResponse<{ content: AdminContent }>> => {
+export async function getContentById(contentId: string): Promise<ApiResponse<{ content: AdminContent }>> {
   try {
-    const response = await adminClient.get<ApiResponse<{ content: AdminContent }>>(
-      `/admin/content/${contentId}`
-    );
+    const response = await apiClient.get<ApiResponse<{ content: AdminContent }>>(ENDPOINTS.ADMIN_CONTENT_BY_ID(contentId));
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<ApiResponse<{ content: AdminContent }>>;
@@ -62,19 +46,14 @@ export const getContentById = async (
       }
     );
   }
-};
+}
 
 /**
  * Create new content
  */
-export const createContent = async (
-  data: CreateContentRequest
-): Promise<ApiResponse<{ content: AdminContent }>> => {
+export async function createContent(data: CreateContentRequest): Promise<ApiResponse<{ content: AdminContent }>> {
   try {
-    const response = await adminClient.post<ApiResponse<{ content: AdminContent }>>(
-      '/admin/content',
-      data
-    );
+    const response = await apiClient.post<ApiResponse<{ content: AdminContent }>>(ENDPOINTS.ADMIN_CONTENT, data);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<ApiResponse<{ content: AdminContent }>>;
@@ -85,19 +64,19 @@ export const createContent = async (
       }
     );
   }
-};
+}
 
 /**
  * Update content
  */
-export const updateContent = async (
+export async function updateContent(
   contentId: string,
-  data: UpdateContentRequest
-): Promise<ApiResponse<{ content: AdminContent }>> => {
+  data: UpdateContentRequest,
+): Promise<ApiResponse<{ content: AdminContent }>> {
   try {
-    const response = await adminClient.put<ApiResponse<{ content: AdminContent }>>(
-      `/admin/content/${contentId}`,
-      data
+    const response = await apiClient.put<ApiResponse<{ content: AdminContent }>>(
+      ENDPOINTS.ADMIN_CONTENT_BY_ID(contentId),
+      data,
     );
     return response.data;
   } catch (error) {
@@ -109,16 +88,14 @@ export const updateContent = async (
       }
     );
   }
-};
+}
 
 /**
  * Delete content
  */
-export const deleteContent = async (contentId: string): Promise<ApiResponse<null>> => {
+export async function deleteContent(contentId: string): Promise<ApiResponse<null>> {
   try {
-    const response = await adminClient.delete<ApiResponse<null>>(
-      `/admin/content/${contentId}`
-    );
+    const response = await apiClient.delete<ApiResponse<null>>(ENDPOINTS.ADMIN_CONTENT_BY_ID(contentId));
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<ApiResponse<null>>;
@@ -129,19 +106,19 @@ export const deleteContent = async (contentId: string): Promise<ApiResponse<null
       }
     );
   }
-};
+}
 
 /**
  * Publish/Unpublish content
  */
-export const publishContent = async (
+export async function publishContent(
   contentId: string,
-  data: PublishContentRequest
-): Promise<ApiResponse<{ content: AdminContent }>> => {
+  data: PublishContentRequest,
+): Promise<ApiResponse<{ content: AdminContent }>> {
   try {
-    const response = await adminClient.patch<ApiResponse<{ content: AdminContent }>>(
-      `/admin/content/${contentId}/publish`,
-      data
+    const response = await apiClient.patch<ApiResponse<{ content: AdminContent }>>(
+      ENDPOINTS.ADMIN_CONTENT_PUBLISH(contentId),
+      data,
     );
     return response.data;
   } catch (error) {
@@ -153,19 +130,14 @@ export const publishContent = async (
       }
     );
   }
-};
+}
 
 /**
  * Bulk delete content
  */
-export const bulkDeleteContent = async (
-  data: BulkDeleteRequest
-): Promise<ApiResponse<{ deletedCount: number }>> => {
+export async function bulkDeleteContent(data: BulkDeleteRequest): Promise<ApiResponse<{ deletedCount: number }>> {
   try {
-    const response = await adminClient.post<ApiResponse<{ deletedCount: number }>>(
-      '/admin/content/bulk-delete',
-      data
-    );
+    const response = await apiClient.post<ApiResponse<{ deletedCount: number }>>(ENDPOINTS.ADMIN_CONTENT_BULK_DELETE, data);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<ApiResponse<{ deletedCount: number }>>;
@@ -176,7 +148,7 @@ export const bulkDeleteContent = async (
       }
     );
   }
-};
+}
 
 export default {
   getContent,
@@ -187,3 +159,4 @@ export default {
   publishContent,
   bulkDeleteContent,
 };
+

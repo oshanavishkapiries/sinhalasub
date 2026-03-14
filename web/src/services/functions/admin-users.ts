@@ -1,5 +1,7 @@
 import axios, { AxiosError } from 'axios';
-import {
+import { originClient } from '../api/client';
+import { ORIGIN_ENDPOINTS } from '../api/endpoints';
+import type {
   AdminUser,
   BulkDeleteRequest,
   CreateUserRequest,
@@ -7,7 +9,7 @@ import {
   GetUsersResponse,
   UpdateUserRequest,
   UsersMeta,
-} from '@/types/admin';
+} from '../types';
 
 type BackendResponse<T> = {
   success: boolean;
@@ -29,19 +31,6 @@ type BackendUsersListData = {
   items: any[];
   meta: BackendUsersMeta;
 };
-
-const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api').replace(
-  /\/api\/?$/,
-  ''
-);
-
-const client = axios.create({
-  baseURL: API_ORIGIN,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
 
 const normalizeUser = (raw: any): AdminUser => {
   return {
@@ -69,7 +58,7 @@ const normalizeMeta = (raw: BackendUsersMeta): UsersMeta => {
   };
 };
 
-const toError = (error: unknown, fallback: string) => {
+const toErrorMessage = (error: unknown, fallback: string) => {
   if (!axios.isAxiosError(error)) {
     return fallback;
   }
@@ -77,9 +66,9 @@ const toError = (error: unknown, fallback: string) => {
   return data?.message || fallback;
 };
 
-export const getUsers = async (params: GetUsersRequest): Promise<GetUsersResponse> => {
+export async function getUsers(params: GetUsersRequest): Promise<GetUsersResponse> {
   try {
-    const response = await client.get<BackendResponse<BackendUsersListData>>('/users/', {
+    const response = await originClient.get<BackendResponse<BackendUsersListData>>(ORIGIN_ENDPOINTS.USERS, {
       params: {
         page: params.page,
         per_page: params.perPage,
@@ -109,13 +98,17 @@ export const getUsers = async (params: GetUsersRequest): Promise<GetUsersRespons
       },
     };
   } catch (error) {
-    return { success: false, message: 'Failed to fetch users', error: toError(error, 'Failed to fetch users') };
+    return {
+      success: false,
+      message: 'Failed to fetch users',
+      error: toErrorMessage(error, 'Failed to fetch users'),
+    };
   }
-};
+}
 
-export const getUser = async (userId: string): Promise<BackendResponse<AdminUser>> => {
+export async function getUser(userId: string): Promise<BackendResponse<AdminUser>> {
   try {
-    const response = await client.get<BackendResponse<any>>(`/users/${userId}`);
+    const response = await originClient.get<BackendResponse<any>>(ORIGIN_ENDPOINTS.USER_BY_ID(userId));
     if (!response.data.success || !response.data.data) {
       return response.data as any;
     }
@@ -129,18 +122,18 @@ export const getUser = async (userId: string): Promise<BackendResponse<AdminUser
       (axiosError.response?.data as any) || {
         success: false,
         message: 'Failed to fetch user',
-        error: toError(error, 'Failed to fetch user'),
+        error: toErrorMessage(error, 'Failed to fetch user'),
       }
     );
   }
-};
+}
 
-export const changeUserRole = async (
+export async function changeUserRole(
   userId: string,
-  role: 'platform-user' | 'moderator'
-): Promise<BackendResponse<AdminUser>> => {
+  role: 'platform-user' | 'moderator',
+): Promise<BackendResponse<AdminUser>> {
   try {
-    const response = await client.patch<BackendResponse<any>>(`/users/${userId}/role`, { role });
+    const response = await originClient.patch<BackendResponse<any>>(ORIGIN_ENDPOINTS.USER_ROLE(userId), { role });
     if (!response.data.success || !response.data.data) return response.data as any;
     return { ...response.data, data: normalizeUser(response.data.data) };
   } catch (error) {
@@ -149,17 +142,15 @@ export const changeUserRole = async (
       (axiosError.response?.data as any) || {
         success: false,
         message: 'Failed to update role',
-        error: toError(error, 'Failed to update role'),
+        error: toErrorMessage(error, 'Failed to update role'),
       }
     );
   }
-};
+}
 
-export const createUser = async (
-  data: CreateUserRequest
-): Promise<BackendResponse<AdminUser>> => {
+export async function createUser(data: CreateUserRequest): Promise<BackendResponse<AdminUser>> {
   try {
-    const response = await client.post<BackendResponse<any>>('/users/', {
+    const response = await originClient.post<BackendResponse<any>>(ORIGIN_ENDPOINTS.USERS, {
       username: data.username,
       email: data.email,
       password: data.password,
@@ -183,18 +174,15 @@ export const createUser = async (
       (axiosError.response?.data as any) || {
         success: false,
         message: 'Failed to create user',
-        error: toError(error, 'Failed to create user'),
+        error: toErrorMessage(error, 'Failed to create user'),
       }
     );
   }
-};
+}
 
-export const updateUser = async (
-  userId: string,
-  data: UpdateUserRequest
-): Promise<BackendResponse<AdminUser>> => {
+export async function updateUser(userId: string, data: UpdateUserRequest): Promise<BackendResponse<AdminUser>> {
   try {
-    const response = await client.put<BackendResponse<any>>(`/users/${userId}`, {
+    const response = await originClient.put<BackendResponse<any>>(ORIGIN_ENDPOINTS.USER_BY_ID(userId), {
       username: data.username,
       email: data.email,
       avatar: data.avatar,
@@ -218,15 +206,15 @@ export const updateUser = async (
       (axiosError.response?.data as any) || {
         success: false,
         message: 'Failed to update user',
-        error: toError(error, 'Failed to update user'),
+        error: toErrorMessage(error, 'Failed to update user'),
       }
     );
   }
-};
+}
 
-export const deleteUser = async (userId: string): Promise<BackendResponse<{ deleted: boolean }>> => {
+export async function deleteUser(userId: string): Promise<BackendResponse<{ deleted: boolean }>> {
   try {
-    const response = await client.delete<BackendResponse<{ deleted: boolean }>>(`/users/${userId}`);
+    const response = await originClient.delete<BackendResponse<{ deleted: boolean }>>(ORIGIN_ENDPOINTS.USER_BY_ID(userId));
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError;
@@ -234,18 +222,18 @@ export const deleteUser = async (userId: string): Promise<BackendResponse<{ dele
       (axiosError.response?.data as any) || {
         success: false,
         message: 'Failed to delete user',
-        error: toError(error, 'Failed to delete user'),
+        error: toErrorMessage(error, 'Failed to delete user'),
       }
     );
   }
-};
+}
 
-export const bulkDeleteUsers = async (data: BulkDeleteRequest) => {
+export async function bulkDeleteUsers(data: BulkDeleteRequest) {
   const results = await Promise.allSettled(data.ids.map((id) => deleteUser(id)));
   const deletedCount = results.filter((r) => r.status === 'fulfilled' && r.value.success).length;
   const failedCount = results.length - deletedCount;
   return { deletedCount, failedCount };
-};
+}
 
 export default {
   getUsers,
@@ -256,3 +244,4 @@ export default {
   changeUserRole,
   bulkDeleteUsers,
 };
+

@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { Header } from '@/components/header';
 import { ContentCard } from '@/components/content-card';
 import type { Content } from '@/types';
-import { useTVGenres, useLanguages, useDiscoverTV } from '@/services/hooks';
 import {
   Select,
   SelectContent,
@@ -25,18 +24,6 @@ export default function TvShowsPage() {
   const [selectedCategory, setSelectedCategory] = useState('popular');
   const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState('all_languages');
-
-  // Fetch genres and languages
-  const { data: genres = [] } = useTVGenres();
-  const { data: languages = [] } = useLanguages();
-
-  // Fetch TV shows based on filters
-  const languageToFetch = selectedLanguage === 'all_languages' ? '' : selectedLanguage;
-  const { data: tvShows = [], isLoading } = useDiscoverTV({
-    category: selectedCategory,
-    genres: selectedGenres,
-    language: languageToFetch,
-  });
 
   const toggleGenre = (genreId: number) => {
     setSelectedGenres(prev => 
@@ -68,17 +55,17 @@ export default function TvShowsPage() {
                     <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Select language" />
                     </SelectTrigger>
-                    <SelectContent>
+                    {/* <SelectContent>
                         <SelectItem value="all_languages">All Languages</SelectItem>
                         {languages.map(lang => (
                             <SelectItem key={lang.iso_639_1} value={lang.iso_639_1}>{lang.english_name}</SelectItem>
                         ))}
-                    </SelectContent>
+                    </SelectContent> */}
                 </Select>
             </div>
           </div>
           <div className="mb-8 flex flex-wrap gap-2">
-            {genres.map(genre => (
+            {/* {genres.map(genre => (
                 <Badge
                     key={genre.id}
                     variant={selectedGenres.includes(genre.id) ? 'default' : 'outline'}
@@ -87,10 +74,10 @@ export default function TvShowsPage() {
                 >
                     {genre.name}
                 </Badge>
-            ))}
+            ))} */}
           </div>
 
-          {isLoading ? (
+          {/* {isLoading ? (
             <p className="text-center">Loading TV shows...</p>
           ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
@@ -98,7 +85,7 @@ export default function TvShowsPage() {
                 <ContentCard key={item.id} item={item as Content} />
                 ))}
             </div>
-          )}
+          )} */}
         </div>
       </main>
     </div>

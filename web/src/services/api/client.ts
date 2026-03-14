@@ -1,8 +1,20 @@
-import axios from "axios";
-import { API_CONFIG } from "./endpoints";
+import axios, { AxiosError } from 'axios';
+import { API_CONFIG } from './endpoints';
 
-const apiClient = axios.create({
+export const apiClient = axios.create({
   baseURL: API_CONFIG.BASE_URL,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+export const originClient = axios.create({
+  baseURL: API_CONFIG.ORIGIN_URL,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 export async function fetchAPI<T>(
@@ -14,8 +26,9 @@ export async function fetchAPI<T>(
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<any>;
       const message =
-        error.response?.data?.message || error.message || "API request failed";
+        axiosError.response?.data?.message || axiosError.message || 'API request failed';
       console.error(`API Error [${endpoint}]:`, message);
       throw new Error(`Failed to fetch from ${endpoint}: ${message}`);
     }

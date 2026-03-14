@@ -6,7 +6,7 @@ import { DataTable, Column, RowAction } from '@/components/admin/data-table';
 import { Modal } from '@/components/admin/modal';
 import { UserForm, UserFormData } from '@/components/admin/users/user-form';
 import { AdminUser } from '@/types/admin';
-import adminUsersService from '@/services/admin-users';
+import adminUsersService from '@/services/functions/admin-users';
 import { useToast } from '@/hooks/use-toast';
 import { Edit, ToggleLeft, Trash2 } from 'lucide-react';
 import {

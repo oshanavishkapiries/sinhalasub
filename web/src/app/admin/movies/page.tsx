@@ -7,7 +7,7 @@ import { DataTable, Column, RowAction } from '@/components/admin/data-table';
 import { Modal } from '@/components/admin/modal';
 import { ContentForm } from '@/components/admin/content/content-form';
 import { AdminContent } from '@/types/admin';
-import adminContentService from '@/services/admin-content';
+import adminContentService from '@/services/functions/admin-content';
 import { useToast } from '@/hooks/use-toast';
 import { Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import {
