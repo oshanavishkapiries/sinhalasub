@@ -3,9 +3,9 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { AdminUser } from '@/types/admin';
-import { UserRole } from '@/types/auth';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/ui/password-input';
 import {
   Select,
   SelectContent,
@@ -14,38 +14,58 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+export type UserFormData = {
+  username: string;
+  email: string;
+  password?: string;
+  avatar?: string;
+  role?: 'platform-user' | 'moderator';
+};
+
 interface UserFormProps {
+  mode: 'create' | 'edit';
   user?: AdminUser;
-  onSubmit: (data: Partial<AdminUser>) => void;
+  onSubmit: (data: UserFormData) => void;
   isSubmitting?: boolean;
 }
 
-const ROLES = [
-  { value: UserRole.USER, label: 'User' },
-  { value: UserRole.MODERATOR, label: 'Moderator' },
-  { value: UserRole.ADMIN, label: 'Admin' },
-  { value: UserRole.SUPER_ADMIN, label: 'Super Admin' },
+const ROLE_OPTIONS: Array<{ value: 'platform-user' | 'moderator'; label: string }> = [
+  { value: 'platform-user', label: 'Platform User' },
+  { value: 'moderator', label: 'Moderator' },
 ];
 
-const STATUSES = ['active', 'inactive', 'banned'];
-
-export function UserForm({ user, onSubmit, isSubmitting = false }: UserFormProps) {
-  const { register, handleSubmit, setValue, watch } = useForm<Partial<AdminUser>>({
-    defaultValues: user || {
-      email: '',
-      name: '',
-      role: UserRole.USER,
-      status: 'active',
+export function UserForm({ mode, user, onSubmit }: UserFormProps) {
+  const { register, handleSubmit, setValue, watch } = useForm<UserFormData>({
+    defaultValues: {
+      username: user?.username || '',
+      email: user?.email || '',
+      avatar: user?.avatar || '',
+      role: user?.role === 'moderator' ? 'moderator' : 'platform-user',
+      password: '',
     },
   });
 
-  const role = watch('role');
-  const status = watch('status');
+  const role = watch('role') || 'platform-user';
+  const canEditRole = !user || user.role === 'platform-user' || user.role === 'moderator';
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <Label htmlFor="email" className="text-muted-foreground">Email</Label>
+        <Label htmlFor="username" className="text-muted-foreground">
+          Username
+        </Label>
+        <Input
+          id="username"
+          placeholder="username"
+          {...register('username', { required: 'Username is required' })}
+          className="bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 mt-1.5"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="email" className="text-muted-foreground">
+          Email
+        </Label>
         <Input
           id="email"
           type="email"
@@ -55,47 +75,67 @@ export function UserForm({ user, onSubmit, isSubmitting = false }: UserFormProps
         />
       </div>
 
+      {mode === 'create' && (
+        <div>
+          <Label htmlFor="password" className="text-muted-foreground">
+            Password
+          </Label>
+          <PasswordInput
+            id="password"
+            placeholder="Set a temporary password"
+            {...register('password', { required: 'Password is required' })}
+            className="bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 mt-1.5"
+          />
+        </div>
+      )}
+
       <div>
-        <Label htmlFor="name" className="text-muted-foreground">Name</Label>
+        <Label htmlFor="avatar" className="text-muted-foreground">
+          Avatar URL (optional)
+        </Label>
         <Input
-          id="name"
-          placeholder="Full name"
-          {...register('name', { required: 'Name is required' })}
+          id="avatar"
+          placeholder="https://..."
+          {...register('avatar')}
           className="bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 mt-1.5"
         />
       </div>
 
       <div>
-        <Label htmlFor="role" className="text-muted-foreground">Role</Label>
-        <Select value={role || UserRole.USER} onValueChange={(value) => setValue('role', value as UserRole)}>
-          <SelectTrigger id="role" className="bg-card border-border text-foreground focus:border-primary focus:ring-primary/20 mt-1.5">
+        <Label htmlFor="role" className="text-muted-foreground">
+          Role
+        </Label>
+        <Select
+          value={role}
+          onValueChange={(value) => setValue('role', value as any)}
+          disabled={!canEditRole}
+        >
+          <SelectTrigger
+            id="role"
+            className="bg-card border-border text-foreground focus:border-primary focus:ring-primary/20 mt-1.5"
+          >
             <SelectValue placeholder="Select a role" />
           </SelectTrigger>
           <SelectContent className="bg-card border-border text-foreground">
-            {ROLES.map((r) => (
-              <SelectItem key={r.value} value={r.value} className="hover:bg-white/10 focus:bg-white/10">
-                {r.label}
+            {ROLE_OPTIONS.map((opt) => (
+              <SelectItem
+                key={opt.value}
+                value={opt.value}
+                className="hover:bg-white/10 focus:bg-white/10"
+              >
+                {opt.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-      </div>
-
-      <div>
-        <Label htmlFor="status" className="text-muted-foreground">Status</Label>
-        <Select value={status || 'active'} onValueChange={(value) => setValue('status', value as any)}>
-          <SelectTrigger id="status" className="bg-card border-border text-foreground focus:border-primary focus:ring-primary/20 mt-1.5">
-            <SelectValue placeholder="Select a status" />
-          </SelectTrigger>
-          <SelectContent className="bg-card border-border text-foreground">
-            {STATUSES.map((s) => (
-              <SelectItem key={s} value={s} className="hover:bg-white/10 focus:bg-white/10">
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {!canEditRole && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            This user role cannot be changed from the admin panel.
+          </p>
+        )}
       </div>
     </form>
   );
 }
+
+export default UserForm;

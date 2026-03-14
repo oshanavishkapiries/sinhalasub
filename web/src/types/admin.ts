@@ -9,14 +9,15 @@ import { UserRole } from './auth';
  */
 export interface AdminUser {
   id: string;
+  username: string;
   email: string;
-  name: string;
-  role: UserRole;
-  status: 'active' | 'inactive' | 'banned';
+  role: string;
   avatar?: string;
+  isVerified: boolean;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  lastActivity?: string;
+  lastLoginAt?: string;
 }
 
 /**
@@ -24,41 +25,46 @@ export interface AdminUser {
  */
 export interface GetUsersRequest {
   page?: number;
-  limit?: number;
+  perPage?: number;
   search?: string;
-  role?: UserRole;
-  status?: 'active' | 'inactive' | 'banned';
-  sortBy?: 'name' | 'email' | 'createdAt' | 'lastActivity';
+  role?: string;
+  isActive?: boolean;
+  isVerified?: boolean;
+  sortBy?: 'created_at' | 'updated_at' | 'username' | 'email' | 'last_login_at';
   sortOrder?: 'asc' | 'desc';
+}
+
+export interface UsersMeta {
+  page: number;
+  perPage: number;
+  totalItems: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
 }
 
 export interface GetUsersResponse {
   success: boolean;
+  message?: string;
   data?: {
-    users: AdminUser[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
+    items: AdminUser[];
+    meta: UsersMeta;
   };
   error?: string;
 }
 
 export interface CreateUserRequest {
+  username: string;
   email: string;
   password: string;
-  name: string;
-  role: UserRole;
+  role?: 'platform-user' | 'moderator';
 }
 
 export interface UpdateUserRequest {
-  name?: string;
+  username?: string;
   email?: string;
-  role?: UserRole;
-}
-
-export interface UpdateUserStatusRequest {
-  status: 'active' | 'inactive' | 'banned';
+  avatar?: string;
+  role?: 'platform-user' | 'moderator';
 }
 
 export interface BulkDeleteRequest {

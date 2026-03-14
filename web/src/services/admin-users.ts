@@ -1,180 +1,250 @@
 import axios, { AxiosError } from 'axios';
 import {
   AdminUser,
+  BulkDeleteRequest,
+  CreateUserRequest,
   GetUsersRequest,
   GetUsersResponse,
-  CreateUserRequest,
   UpdateUserRequest,
-  UpdateUserStatusRequest,
-  BulkDeleteRequest,
-  ApiResponse,
+  UsersMeta,
 } from '@/types/admin';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+type BackendResponse<T> = {
+  success: boolean;
+  message: string;
+  data?: T;
+  error?: unknown;
+};
 
-// Create axios instance for admin requests
-const adminClient = axios.create({
-  baseURL: API_BASE_URL,
+type BackendUsersMeta = {
+  page: number;
+  per_page: number;
+  total_items: number;
+  total_pages: number;
+  has_next: boolean;
+  has_prev: boolean;
+};
+
+type BackendUsersListData = {
+  items: any[];
+  meta: BackendUsersMeta;
+};
+
+const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api').replace(
+  /\/api\/?$/,
+  ''
+);
+
+const client = axios.create({
+  baseURL: API_ORIGIN,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-/**
- * Get all users with filters
- */
-export const getUsers = async (
-  params: GetUsersRequest
-): Promise<GetUsersResponse> => {
+const normalizeUser = (raw: any): AdminUser => {
+  return {
+    id: String(raw?.id || ''),
+    username: raw?.username || '',
+    email: raw?.email || '',
+    role: raw?.role || '',
+    avatar: raw?.avatar || '',
+    isVerified: Boolean(raw?.is_verified),
+    isActive: Boolean(raw?.is_active),
+    createdAt: raw?.created_at || '',
+    updatedAt: raw?.updated_at || '',
+    lastLoginAt: raw?.last_login_at || undefined,
+  };
+};
+
+const normalizeMeta = (raw: BackendUsersMeta): UsersMeta => {
+  return {
+    page: raw.page,
+    perPage: raw.per_page,
+    totalItems: raw.total_items,
+    totalPages: raw.total_pages,
+    hasNext: raw.has_next,
+    hasPrev: raw.has_prev,
+  };
+};
+
+const toError = (error: unknown, fallback: string) => {
+  if (!axios.isAxiosError(error)) {
+    return fallback;
+  }
+  const data = error.response?.data as any;
+  return data?.message || fallback;
+};
+
+export const getUsers = async (params: GetUsersRequest): Promise<GetUsersResponse> => {
   try {
-    const response = await adminClient.get<GetUsersResponse>('/admin/users', {
-      params,
+    const response = await client.get<BackendResponse<BackendUsersListData>>('/users/', {
+      params: {
+        page: params.page,
+        per_page: params.perPage,
+        sort_by: params.sortBy,
+        sort_order: params.sortOrder,
+        search: params.search,
+        role: params.role,
+        is_active: params.isActive,
+        is_verified: params.isVerified,
+      },
     });
-    return response.data;
-  } catch (error) {
-    const axiosError = error as AxiosError<GetUsersResponse>;
-    return (
-      axiosError.response?.data || {
+
+    if (!response.data.success || !response.data.data) {
+      return {
         success: false,
-        error: 'Failed to fetch users',
-      }
-    );
+        message: response.data.message || 'Failed to fetch users',
+        error: typeof response.data.error === 'string' ? response.data.error : undefined,
+      };
+    }
+
+    return {
+      success: true,
+      message: response.data.message,
+      data: {
+        items: response.data.data.items.map(normalizeUser),
+        meta: normalizeMeta(response.data.data.meta),
+      },
+    };
+  } catch (error) {
+    return { success: false, message: 'Failed to fetch users', error: toError(error, 'Failed to fetch users') };
   }
 };
 
-/**
- * Get single user
- */
-export const getUser = async (userId: string): Promise<ApiResponse<{ user: AdminUser }>> => {
+export const getUser = async (userId: string): Promise<BackendResponse<AdminUser>> => {
   try {
-    const response = await adminClient.get<ApiResponse<{ user: AdminUser }>>(
-      `/admin/users/${userId}`
-    );
-    return response.data;
+    const response = await client.get<BackendResponse<any>>(`/users/${userId}`);
+    if (!response.data.success || !response.data.data) {
+      return response.data as any;
+    }
+    return {
+      ...response.data,
+      data: normalizeUser(response.data.data),
+    };
   } catch (error) {
-    const axiosError = error as AxiosError<ApiResponse<{ user: AdminUser }>>;
+    const axiosError = error as AxiosError;
     return (
-      axiosError.response?.data || {
+      (axiosError.response?.data as any) || {
         success: false,
-        error: 'Failed to fetch user',
+        message: 'Failed to fetch user',
+        error: toError(error, 'Failed to fetch user'),
       }
     );
   }
 };
 
-/**
- * Create new user
- */
+export const changeUserRole = async (
+  userId: string,
+  role: 'platform-user' | 'moderator'
+): Promise<BackendResponse<AdminUser>> => {
+  try {
+    const response = await client.patch<BackendResponse<any>>(`/users/${userId}/role`, { role });
+    if (!response.data.success || !response.data.data) return response.data as any;
+    return { ...response.data, data: normalizeUser(response.data.data) };
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    return (
+      (axiosError.response?.data as any) || {
+        success: false,
+        message: 'Failed to update role',
+        error: toError(error, 'Failed to update role'),
+      }
+    );
+  }
+};
+
 export const createUser = async (
   data: CreateUserRequest
-): Promise<ApiResponse<{ user: AdminUser }>> => {
+): Promise<BackendResponse<AdminUser>> => {
   try {
-    const response = await adminClient.post<ApiResponse<{ user: AdminUser }>>(
-      '/admin/users',
-      data
-    );
-    return response.data;
+    const response = await client.post<BackendResponse<any>>('/users/', {
+      username: data.username,
+      email: data.email,
+      password: data.password,
+    });
+
+    if (!response.data.success || !response.data.data) return response.data as any;
+
+    let user = normalizeUser(response.data.data);
+
+    if (data.role && data.role !== 'platform-user') {
+      const roleResp = await changeUserRole(user.id, data.role);
+      if (roleResp.success && roleResp.data) {
+        user = roleResp.data;
+      }
+    }
+
+    return { ...response.data, data: user };
   } catch (error) {
-    const axiosError = error as AxiosError<ApiResponse<{ user: AdminUser }>>;
+    const axiosError = error as AxiosError;
     return (
-      axiosError.response?.data || {
+      (axiosError.response?.data as any) || {
         success: false,
-        error: 'Failed to create user',
+        message: 'Failed to create user',
+        error: toError(error, 'Failed to create user'),
       }
     );
   }
 };
 
-/**
- * Update user
- */
 export const updateUser = async (
   userId: string,
   data: UpdateUserRequest
-): Promise<ApiResponse<{ user: AdminUser }>> => {
+): Promise<BackendResponse<AdminUser>> => {
   try {
-    const response = await adminClient.put<ApiResponse<{ user: AdminUser }>>(
-      `/admin/users/${userId}`,
-      data
-    );
-    return response.data;
+    const response = await client.put<BackendResponse<any>>(`/users/${userId}`, {
+      username: data.username,
+      email: data.email,
+      avatar: data.avatar,
+    });
+
+    if (!response.data.success || !response.data.data) return response.data as any;
+
+    let user = normalizeUser(response.data.data);
+
+    if (data.role) {
+      const roleResp = await changeUserRole(userId, data.role);
+      if (roleResp.success && roleResp.data) {
+        user = roleResp.data;
+      }
+    }
+
+    return { ...response.data, data: user };
   } catch (error) {
-    const axiosError = error as AxiosError<ApiResponse<{ user: AdminUser }>>;
+    const axiosError = error as AxiosError;
     return (
-      axiosError.response?.data || {
+      (axiosError.response?.data as any) || {
         success: false,
-        error: 'Failed to update user',
+        message: 'Failed to update user',
+        error: toError(error, 'Failed to update user'),
       }
     );
   }
 };
 
-/**
- * Delete user
- */
-export const deleteUser = async (userId: string): Promise<ApiResponse<null>> => {
+export const deleteUser = async (userId: string): Promise<BackendResponse<{ deleted: boolean }>> => {
   try {
-    const response = await adminClient.delete<ApiResponse<null>>(
-      `/admin/users/${userId}`
-    );
+    const response = await client.delete<BackendResponse<{ deleted: boolean }>>(`/users/${userId}`);
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError<ApiResponse<null>>;
+    const axiosError = error as AxiosError;
     return (
-      axiosError.response?.data || {
+      (axiosError.response?.data as any) || {
         success: false,
-        error: 'Failed to delete user',
+        message: 'Failed to delete user',
+        error: toError(error, 'Failed to delete user'),
       }
     );
   }
 };
 
-/**
- * Update user status
- */
-export const updateUserStatus = async (
-  userId: string,
-  data: UpdateUserStatusRequest
-): Promise<ApiResponse<{ user: AdminUser }>> => {
-  try {
-    const response = await adminClient.patch<ApiResponse<{ user: AdminUser }>>(
-      `/admin/users/${userId}/status`,
-      data
-    );
-    return response.data;
-  } catch (error) {
-    const axiosError = error as AxiosError<ApiResponse<{ user: AdminUser }>>;
-    return (
-      axiosError.response?.data || {
-        success: false,
-        error: 'Failed to update user status',
-      }
-    );
-  }
-};
-
-/**
- * Bulk delete users
- */
-export const bulkDeleteUsers = async (
-  data: BulkDeleteRequest
-): Promise<ApiResponse<{ deletedCount: number; skippedCount: number }>> => {
-  try {
-    const response = await adminClient.post<
-      ApiResponse<{ deletedCount: number; skippedCount: number }>
-    >('/admin/users/bulk-delete', data);
-    return response.data;
-  } catch (error) {
-    const axiosError = error as AxiosError<
-      ApiResponse<{ deletedCount: number; skippedCount: number }>
-    >;
-    return (
-      axiosError.response?.data || {
-        success: false,
-        error: 'Failed to bulk delete users',
-      }
-    );
-  }
+export const bulkDeleteUsers = async (data: BulkDeleteRequest) => {
+  const results = await Promise.allSettled(data.ids.map((id) => deleteUser(id)));
+  const deletedCount = results.filter((r) => r.status === 'fulfilled' && r.value.success).length;
+  const failedCount = results.length - deletedCount;
+  return { deletedCount, failedCount };
 };
 
 export default {
@@ -183,6 +253,6 @@ export default {
   createUser,
   updateUser,
   deleteUser,
-  updateUserStatus,
+  changeUserRole,
   bulkDeleteUsers,
 };

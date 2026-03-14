@@ -113,14 +113,17 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var req CreateUserRequest
 
-	if err := r.ParseForm(); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apiErr := response.BadRequestException("Invalid request body", err)
 		response.HandleError(w, apiErr)
 		return
 	}
 
-	// In a real application, you would parse JSON from r.Body
-	// This is simplified for demonstration
+	if strings.TrimSpace(req.Username) == "" || strings.TrimSpace(req.Email) == "" || strings.TrimSpace(req.Password) == "" {
+		apiErr := response.BadRequestException("username, email, and password are required", nil)
+		response.HandleError(w, apiErr)
+		return
+	}
 
 	user, err := h.userService.CreateUser(ctx, req.Username, req.Email, req.Password)
 	if err != nil {

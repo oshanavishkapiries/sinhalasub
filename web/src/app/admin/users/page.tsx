@@ -2,10 +2,9 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 import { DataTable, Column, RowAction } from '@/components/admin/data-table';
 import { Modal } from '@/components/admin/modal';
-import { UserForm } from '@/components/admin/users/user-form';
+import { UserForm, UserFormData } from '@/components/admin/users/user-form';
 import { AdminUser } from '@/types/admin';
 import adminUsersService from '@/services/admin-users';
 import { useToast } from '@/hooks/use-toast';
@@ -19,7 +18,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { UserRole } from '@/types/auth';
 import { useAdminTopbar } from '@/contexts/admin-topbar-context';
 
 export default function UsersPage() {
@@ -29,7 +27,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(25);
+  const [pageSize] = useState(10);
   const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -44,7 +42,7 @@ export default function UsersPage() {
   useEffect(() => {
     setSearch({
       value: searchQuery,
-      placeholder: 'Search by name or email...',
+      placeholder: 'Search by username or email...',
       onChange: (query) => {
         setSearchQuery(query);
         setPage(1);
@@ -72,17 +70,21 @@ export default function UsersPage() {
     try {
       const response = await adminUsersService.getUsers({
         page,
-        limit: pageSize,
+        perPage: pageSize,
         search: searchQuery || undefined,
+        sortBy: 'created_at',
+        sortOrder: 'desc',
       });
-      if (response.data) {
-        setUsers(response.data.users);
-        setTotal(response.data.total);
+      if (response.success && response.data) {
+        setUsers(response.data.items);
+        setTotal(response.data.meta.totalItems);
+      } else {
+        throw new Error(response.message || 'Failed to fetch users');
       }
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to fetch users',
+        description: error instanceof Error ? error.message : 'Failed to fetch users',
         variant: 'destructive',
       });
     } finally {
@@ -94,15 +96,16 @@ export default function UsersPage() {
     fetchUsers();
   }, [fetchUsers]);
 
-  const handleCreateUser = async (data: Partial<AdminUser>) => {
+  const handleCreateUser = async (data: UserFormData) => {
     setIsSubmitting(true);
     try {
-      await adminUsersService.createUser({
-        email: data.email!,
-        name: data.name!,
-        role: data.role || UserRole.USER,
-        password: 'TempPassword123!', // Default password for new users
+      const resp = await adminUsersService.createUser({
+        username: data.username,
+        email: data.email,
+        password: data.password || '',
+        role: data.role,
       });
+      if (!resp.success) throw new Error(resp.message || 'Failed to create user');
       toast({
         title: 'Success',
         description: 'User created successfully',
@@ -112,7 +115,7 @@ export default function UsersPage() {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to create user',
+        description: error instanceof Error ? error.message : 'Failed to create user',
         variant: 'destructive',
       });
     } finally {
@@ -120,15 +123,17 @@ export default function UsersPage() {
     }
   };
 
-  const handleUpdateUser = async (data: Partial<AdminUser>) => {
+  const handleUpdateUser = async (data: UserFormData) => {
     if (!selectedUser) return;
     setIsSubmitting(true);
     try {
-      await adminUsersService.updateUser(selectedUser.id, {
-        name: data.name,
+      const resp = await adminUsersService.updateUser(selectedUser.id, {
+        username: data.username,
         email: data.email,
+        avatar: data.avatar,
         role: data.role,
       });
+      if (!resp.success) throw new Error(resp.message || 'Failed to update user');
       toast({
         title: 'Success',
         description: 'User updated successfully',
@@ -139,7 +144,7 @@ export default function UsersPage() {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to update user',
+        description: error instanceof Error ? error.message : 'Failed to update user',
         variant: 'destructive',
       });
     } finally {
@@ -151,7 +156,8 @@ export default function UsersPage() {
     if (!userToDelete) return;
     setIsSubmitting(true);
     try {
-      await adminUsersService.deleteUser(userToDelete.id);
+      const resp = await adminUsersService.deleteUser(userToDelete.id);
+      if (!resp.success) throw new Error(resp.message || 'Failed to delete user');
       toast({
         title: 'Success',
         description: 'User deleted successfully',
@@ -162,7 +168,7 @@ export default function UsersPage() {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to delete user',
+        description: error instanceof Error ? error.message : 'Failed to delete user',
         variant: 'destructive',
       });
     } finally {
@@ -174,18 +180,21 @@ export default function UsersPage() {
     if (!confirm(`Delete ${ids.length} users?`)) return;
     setIsSubmitting(true);
     try {
-      await adminUsersService.bulkDeleteUsers({
+      const result = await adminUsersService.bulkDeleteUsers({
         ids: ids as string[],
       });
       toast({
         title: 'Success',
-        description: `${ids.length} users deleted successfully`,
+        description:
+          result.failedCount === 0
+            ? `${result.deletedCount} users deleted successfully`
+            : `${result.deletedCount} deleted, ${result.failedCount} failed`,
       });
       fetchUsers();
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to delete users',
+        description: error instanceof Error ? error.message : 'Failed to delete users',
         variant: 'destructive',
       });
     } finally {
@@ -201,25 +210,25 @@ export default function UsersPage() {
       render: (value) => <span className="text-xs font-mono text-muted-foreground">{value}</span>,
     },
     {
-      key: 'name',
-      label: 'Name',
+      key: 'username',
+      label: 'Username',
       sortable: true,
-      render: (value) => <span className="font-medium text-foreground">{value}</span>,
+      render: (value: string) => <span className="font-medium text-foreground">{value}</span>,
     },
     {
       key: 'email',
       label: 'Email',
       sortable: true,
-      render: (value) => <span className="text-muted-foreground">{value}</span>,
+      render: (value: string) => <span className="text-muted-foreground">{value}</span>,
     },
     {
       key: 'role',
       label: 'Role',
-      render: (value: UserRole) => (
+      render: (value: string) => (
         <Badge 
-          variant={value === UserRole.SUPER_ADMIN ? 'default' : 'secondary'}
+          variant={value === 'admin' ? 'default' : 'secondary'}
           className={
-            value === UserRole.SUPER_ADMIN 
+            value === 'admin' 
               ? 'bg-primary hover:bg-accent' 
               : 'bg-white/10 text-muted-foreground hover:bg-white/20'
           }
@@ -229,37 +238,37 @@ export default function UsersPage() {
       ),
     },
     {
-      key: 'status',
-      label: 'Status',
-      render: (value: string) => (
+      key: 'isVerified',
+      label: 'Verified',
+      render: (value: boolean) => (
         <Badge
-          variant={
-            value === 'active'
-              ? 'default'
-              : value === 'inactive'
-                ? 'secondary'
-                : 'destructive'
-          }
-          className={
-            value === 'active'
-              ? 'bg-green-600 hover:bg-green-700'
-              : value === 'inactive'
-                ? 'bg-gray-600 hover:bg-gray-700'
-                : 'bg-red-600 hover:bg-red-700'
-          }
+          variant={value ? 'default' : 'secondary'}
+          className={value ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'}
         >
-          {value}
+          {value ? 'yes' : 'no'}
+        </Badge>
+      ),
+    },
+    {
+      key: 'isActive',
+      label: 'Active',
+      render: (value: boolean) => (
+        <Badge
+          variant={value ? 'default' : 'secondary'}
+          className={value ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'}
+        >
+          {value ? 'yes' : 'no'}
         </Badge>
       ),
     },
     {
       key: 'createdAt',
-      label: 'Created At',
-      render: (value: string) => <span className="text-muted-foreground">{new Date(value).toLocaleDateString()}</span>,
+      label: 'Created',
+      render: (value: string) => <span className="text-muted-foreground">{value ? new Date(value).toLocaleDateString() : 'N/A'}</span>,
     },
     {
-      key: 'lastActivity',
-      label: 'Last Activity',
+      key: 'lastLoginAt',
+      label: 'Last Login',
       render: (value?: string) => <span className="text-muted-foreground">{value ? new Date(value).toLocaleDateString() : 'N/A'}</span>,
     },
   ];
@@ -271,6 +280,28 @@ export default function UsersPage() {
       onClick: (user) => {
         setSelectedUser(user);
         setIsDrawerOpen(true);
+      },
+    },
+    {
+      label: 'Toggle Role',
+      onClick: async (user) => {
+        if (user.role !== 'platform-user' && user.role !== 'moderator') return;
+        setIsSubmitting(true);
+        try {
+          const nextRole = user.role === 'platform-user' ? 'moderator' : 'platform-user';
+          const resp = await adminUsersService.changeUserRole(user.id, nextRole);
+          if (!resp.success) throw new Error(resp.message || 'Failed to update role');
+          toast({ title: 'Success', description: `Role updated to ${nextRole}` });
+          fetchUsers();
+        } catch (error) {
+          toast({
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'Failed to update role',
+            variant: 'destructive',
+          });
+        } finally {
+          setIsSubmitting(false);
+        }
       },
     },
     {
@@ -300,7 +331,7 @@ export default function UsersPage() {
         rowActions={rowActions}
         showSearch={false}
         searchValue={searchQuery}
-        searchPlaceholder="Search by name or email..."
+        searchPlaceholder="Search by username or email..."
         onBulkDelete={handleBulkDelete}
         isLoading={loading}
         pagination={{
@@ -325,6 +356,7 @@ export default function UsersPage() {
         submitLabel={selectedUser ? 'Update' : 'Create'}
       >
         <UserForm
+          mode={selectedUser ? 'edit' : 'create'}
           user={selectedUser}
           onSubmit={selectedUser ? handleUpdateUser : handleCreateUser}
           isSubmitting={isSubmitting}
@@ -336,7 +368,7 @@ export default function UsersPage() {
         <AlertDialogContent className="bg-card border-border text-foreground">
           <AlertDialogTitle className="text-xl font-semibold">Delete User</AlertDialogTitle>
           <AlertDialogDescription className="text-muted-foreground">
-            Are you sure you want to delete <span className="text-foreground font-medium">{userToDelete?.name}</span>? This action cannot be undone.
+            Are you sure you want to delete <span className="text-foreground font-medium">{userToDelete?.username}</span>? This action cannot be undone.
           </AlertDialogDescription>
           <div className="flex gap-3 justify-end mt-4">
             <AlertDialogCancel className="bg-transparent border-border text-foreground hover:bg-white/10">
