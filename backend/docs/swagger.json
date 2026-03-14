@@ -20,9 +20,9 @@
         "version": "1.0.0"
     },
     "host": "localhost:5001",
-    "basePath": "/",
+    "basePath": "/api",
     "paths": {
-        "/api/auth/forgot-password": {
+        "/auth/forgot-password": {
             "post": {
                 "description": "Reset password using a verification code",
                 "consumes": [
@@ -64,7 +64,7 @@
                 }
             }
         },
-        "/api/auth/forgot-password/request": {
+        "/auth/forgot-password/request": {
             "post": {
                 "description": "Send a password reset code to the user's email (always returns success)",
                 "consumes": [
@@ -99,7 +99,7 @@
                 }
             }
         },
-        "/api/auth/login": {
+        "/auth/login": {
             "post": {
                 "description": "Authenticate user and set access/refresh cookies",
                 "consumes": [
@@ -141,7 +141,7 @@
                 }
             }
         },
-        "/api/auth/logout": {
+        "/auth/logout": {
             "post": {
                 "description": "Logout the current user and clear cookies",
                 "consumes": [
@@ -165,7 +165,7 @@
                 }
             }
         },
-        "/api/auth/me": {
+        "/auth/me": {
             "get": {
                 "description": "Get the currently authenticated user (cookie-based)",
                 "consumes": [
@@ -196,7 +196,7 @@
                 }
             }
         },
-        "/api/auth/refresh": {
+        "/auth/refresh": {
             "post": {
                 "description": "Refresh access token using refresh cookie",
                 "consumes": [
@@ -227,7 +227,7 @@
                 }
             }
         },
-        "/api/auth/resend-verification": {
+        "/auth/resend-verification": {
             "post": {
                 "description": "Resend signup verification code to email (generic response)",
                 "consumes": [
@@ -262,7 +262,7 @@
                 }
             }
         },
-        "/api/auth/signup": {
+        "/auth/signup": {
             "post": {
                 "description": "Create a new user account and send a verification code",
                 "consumes": [
@@ -304,7 +304,7 @@
                 }
             }
         },
-        "/api/auth/verify": {
+        "/auth/verify": {
             "post": {
                 "description": "Verify a user account using a verification code",
                 "consumes": [

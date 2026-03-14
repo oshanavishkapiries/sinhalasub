@@ -30,49 +30,51 @@ func loadRoutes(container *config.Container) *chi.Mux {
 	if port == "" {
 		port = "5001"
 	}
-	swaggerURL := fmt.Sprintf("http://localhost:%s/swagger/doc.json", port)
+	swaggerURL := fmt.Sprintf("http://localhost:%s/api/swagger/doc.json", port)
 
-	// Swagger UI endpoints
-	swaggerHandler := httpSwagger.Handler(
-		httpSwagger.URL(swaggerURL),
-		httpSwagger.DocExpansion("none"),
-	)
-	router.Get("/swagger/*", swaggerHandler)
-	router.Get("/api/docs", swaggerHandler)
-	router.Get("/api/docs/*", swaggerHandler)
+	router.Route("/api", func(api chi.Router) {
+		// Swagger UI endpoints
+		swaggerHandler := httpSwagger.Handler(
+			httpSwagger.URL(swaggerURL),
+			httpSwagger.DocExpansion("none"),
+		)
+		api.Get("/swagger/*", swaggerHandler)
+		api.Get("/docs", swaggerHandler)
+		api.Get("/docs/*", swaggerHandler)
 
-	// Health check endpoint
-	healthHandler := container.HealthHandler()
-	router.Get("/health", healthHandler.Check)
+		// Health check endpoint
+		healthHandler := container.HealthHandler()
+		api.Get("/health", healthHandler.Check)
 
-	// Auth routes (public)
-	if authHandler := container.AuthHandler(); authHandler != nil {
-		router.Route("/api/auth", func(r chi.Router) {
-			r.Post("/signup", authHandler.Signup)
-			r.Post("/verify", authHandler.Verify)
-			r.Post("/resend-verification", authHandler.ResendVerification)
-			r.Post("/login", authHandler.Login)
-			r.Post("/refresh", authHandler.RefreshToken)
-			r.Post("/logout", authHandler.Logout)
-			r.Post("/forgot-password/request", authHandler.RequestPasswordReset)
-			r.Post("/forgot-password", authHandler.ForgotPassword)
-			r.Get("/me", authHandler.GetCurrentUser)
-		})
-	}
+		// Auth routes (public)
+		if authHandler := container.AuthHandler(); authHandler != nil {
+			api.Route("/auth", func(r chi.Router) {
+				r.Post("/signup", authHandler.Signup)
+				r.Post("/verify", authHandler.Verify)
+				r.Post("/resend-verification", authHandler.ResendVerification)
+				r.Post("/login", authHandler.Login)
+				r.Post("/refresh", authHandler.RefreshToken)
+				r.Post("/logout", authHandler.Logout)
+				r.Post("/forgot-password/request", authHandler.RequestPasswordReset)
+				r.Post("/forgot-password", authHandler.ForgotPassword)
+				r.Get("/me", authHandler.GetCurrentUser)
+			})
+		}
 
-	// User routes
-	if userHandler := container.UserHandler(); userHandler != nil {
-		router.Route("/users", func(r chi.Router) {
-			r.Use(customMiddleware.JWTMiddleware)
-			r.Use(customMiddleware.RequireRoles("admin", "moderator"))
-			r.Post("/", userHandler.Create)
-			r.Get("/", userHandler.List)
-			r.Get("/{id}", userHandler.GetByID)
-			r.Put("/{id}", userHandler.Update)
-			r.With(customMiddleware.RequireRoles("admin")).Patch("/{id}/role", userHandler.ChangeRole)
-			r.With(customMiddleware.RequireRoles("admin")).Delete("/{id}", userHandler.Delete)
-		})
-	}
+		// User routes
+		if userHandler := container.UserHandler(); userHandler != nil {
+			api.Route("/users", func(r chi.Router) {
+				r.Use(customMiddleware.JWTMiddleware)
+				r.Use(customMiddleware.RequireRoles("admin", "moderator"))
+				r.Post("/", userHandler.Create)
+				r.Get("/", userHandler.List)
+				r.Get("/{id}", userHandler.GetByID)
+				r.Put("/{id}", userHandler.Update)
+				r.With(customMiddleware.RequireRoles("admin")).Patch("/{id}/role", userHandler.ChangeRole)
+				r.With(customMiddleware.RequireRoles("admin")).Delete("/{id}", userHandler.Delete)
+			})
+		}
+	})
 
 	return router
 }

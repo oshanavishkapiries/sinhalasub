@@ -1,4 +1,4 @@
-basePath: /
+basePath: /api
 definitions:
   handler.ChangeUserRoleRequest:
     properties:
@@ -79,7 +79,7 @@ info:
   title: Sinhala Subtitle API
   version: 1.0.0
 paths:
-  /api/auth/forgot-password:
+  /auth/forgot-password:
     post:
       consumes:
       - application/json
@@ -107,7 +107,7 @@ paths:
       summary: Forgot Password
       tags:
       - Auth
-  /api/auth/forgot-password/request:
+  /auth/forgot-password/request:
     post:
       consumes:
       - application/json
@@ -131,7 +131,7 @@ paths:
       summary: Request Password Reset
       tags:
       - Auth
-  /api/auth/login:
+  /auth/login:
     post:
       consumes:
       - application/json
@@ -159,7 +159,7 @@ paths:
       summary: User Login
       tags:
       - Auth
-  /api/auth/logout:
+  /auth/logout:
     post:
       consumes:
       - application/json
@@ -175,7 +175,7 @@ paths:
       summary: User Logout
       tags:
       - Auth
-  /api/auth/me:
+  /auth/me:
     get:
       consumes:
       - application/json
@@ -196,7 +196,7 @@ paths:
       summary: Get Current User
       tags:
       - Auth
-  /api/auth/refresh:
+  /auth/refresh:
     post:
       consumes:
       - application/json
@@ -217,7 +217,7 @@ paths:
       summary: Refresh Access Token
       tags:
       - Auth
-  /api/auth/resend-verification:
+  /auth/resend-verification:
     post:
       consumes:
       - application/json
@@ -240,7 +240,7 @@ paths:
       summary: Resend Verification Code
       tags:
       - Auth
-  /api/auth/signup:
+  /auth/signup:
     post:
       consumes:
       - application/json
@@ -268,7 +268,7 @@ paths:
       summary: User Signup
       tags:
       - Auth
-  /api/auth/verify:
+  /auth/verify:
     post:
       consumes:
       - application/json

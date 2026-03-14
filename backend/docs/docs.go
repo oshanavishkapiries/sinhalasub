@@ -25,7 +25,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/auth/forgot-password": {
+        "/auth/forgot-password": {
             "post": {
                 "description": "Reset password using a verification code",
                 "consumes": [
@@ -67,7 +67,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/forgot-password/request": {
+        "/auth/forgot-password/request": {
             "post": {
                 "description": "Send a password reset code to the user's email (always returns success)",
                 "consumes": [
@@ -102,7 +102,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/login": {
+        "/auth/login": {
             "post": {
                 "description": "Authenticate user and set access/refresh cookies",
                 "consumes": [
@@ -144,7 +144,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/logout": {
+        "/auth/logout": {
             "post": {
                 "description": "Logout the current user and clear cookies",
                 "consumes": [
@@ -168,7 +168,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/me": {
+        "/auth/me": {
             "get": {
                 "description": "Get the currently authenticated user (cookie-based)",
                 "consumes": [
@@ -199,7 +199,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/refresh": {
+        "/auth/refresh": {
             "post": {
                 "description": "Refresh access token using refresh cookie",
                 "consumes": [
@@ -230,7 +230,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/resend-verification": {
+        "/auth/resend-verification": {
             "post": {
                 "description": "Resend signup verification code to email (generic response)",
                 "consumes": [
@@ -265,7 +265,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/signup": {
+        "/auth/signup": {
             "post": {
                 "description": "Create a new user account and send a verification code",
                 "consumes": [
@@ -307,7 +307,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/verify": {
+        "/auth/verify": {
             "post": {
                 "description": "Verify a user account using a verification code",
                 "consumes": [
@@ -843,7 +843,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0.0",
 	Host:             "localhost:5001",
-	BasePath:         "/",
+	BasePath:         "/api",
 	Schemes:          []string{"http", "https"},
 	Title:            "Sinhala Subtitle API",
 	Description:      "This is the API for Sinhala Subtitle Backend service",

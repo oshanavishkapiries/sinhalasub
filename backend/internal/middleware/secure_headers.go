@@ -13,7 +13,7 @@ func SecureHeadersMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 
 		// Swagger UI requires inline styles and scripts, so exclude it from strict CSP
-		if !strings.HasPrefix(r.URL.Path, "/swagger") && !strings.HasPrefix(r.URL.Path, "/api/docs") {
+		if !strings.HasPrefix(r.URL.Path, "/api/swagger") && !strings.HasPrefix(r.URL.Path, "/api/docs") {
 			w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'")
 		} else {
 			// Allow inline styles and scripts for Swagger UI, and connections to localhost
