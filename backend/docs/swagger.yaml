@@ -1,5 +1,228 @@
 basePath: /api
 definitions:
+  domain.AddCastRequest:
+    properties:
+      actor_image_url:
+        type: string
+      actor_name:
+        type: string
+      character_name:
+        type: string
+      tmdb_id:
+        type: integer
+    required:
+    - actor_name
+    - tmdb_id
+    type: object
+  domain.AddCategoryRequest:
+    properties:
+      category_id:
+        type: integer
+      category_name:
+        type: string
+    required:
+    - category_id
+    - category_name
+    type: object
+  domain.AddDownloadOptionRequest:
+    properties:
+      download_option:
+        type: string
+      download_option_type:
+        type: string
+      download_option_url:
+        type: string
+      file_size:
+        type: string
+      video_quality:
+        type: string
+    required:
+    - download_option
+    - download_option_url
+    type: object
+  domain.AddPlayerProviderRequest:
+    properties:
+      is_ads_available:
+        type: boolean
+      is_default:
+        type: boolean
+      player_provider:
+        type: string
+      player_provider_type:
+        type: string
+      player_provider_url:
+        type: string
+      video_quality:
+        type: string
+    required:
+    - player_provider
+    - player_provider_url
+    type: object
+  domain.AddSubtitleRequest:
+    properties:
+      language:
+        type: string
+      subtitle_author:
+        type: string
+      subtitle_url:
+        type: string
+    required:
+    - language
+    - subtitle_url
+    type: object
+  domain.BulkAddCastRequest:
+    properties:
+      cast:
+        items:
+          $ref: '#/definitions/domain.AddCastRequest'
+        type: array
+    required:
+    - cast
+    type: object
+  domain.BulkAddCategoriesRequest:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/domain.AddCategoryRequest'
+        type: array
+    required:
+    - categories
+    type: object
+  domain.BulkAddDownloadOptionsRequest:
+    properties:
+      downloads:
+        items:
+          $ref: '#/definitions/domain.AddDownloadOptionRequest'
+        type: array
+    required:
+    - downloads
+    type: object
+  domain.BulkAddPlayerProvidersRequest:
+    properties:
+      players:
+        items:
+          $ref: '#/definitions/domain.AddPlayerProviderRequest'
+        type: array
+    required:
+    - players
+    type: object
+  domain.BulkAddSubtitlesRequest:
+    properties:
+      subtitles:
+        items:
+          $ref: '#/definitions/domain.AddSubtitleRequest'
+        type: array
+    required:
+    - subtitles
+    type: object
+  domain.BulkCreateMoviesRequest:
+    properties:
+      movies:
+        items:
+          $ref: '#/definitions/domain.CreateMovieRequest'
+        type: array
+    required:
+    - movies
+    type: object
+  domain.CreateMovieRequest:
+    properties:
+      poster_url:
+        type: string
+      rating:
+        type: number
+      release_date:
+        type: string
+      slug:
+        type: string
+      title:
+        type: string
+    required:
+    - title
+    type: object
+  domain.CreateUpdateMovieDetailRequest:
+    properties:
+      adult:
+        type: boolean
+      backdrop_url:
+        type: string
+      country:
+        type: string
+      director:
+        type: string
+      duration:
+        type: integer
+      imdb_id:
+        type: string
+      language:
+        type: string
+      overview:
+        type: string
+      tmdb_id:
+        type: integer
+      trailer_url:
+        type: string
+    type: object
+  domain.UpdateCastRequest:
+    properties:
+      actor_image_url:
+        type: string
+      actor_name:
+        type: string
+      character_name:
+        type: string
+      tmdb_id:
+        type: integer
+    type: object
+  domain.UpdateDownloadOptionRequest:
+    properties:
+      download_option:
+        type: string
+      download_option_type:
+        type: string
+      download_option_url:
+        type: string
+      file_size:
+        type: string
+      video_quality:
+        type: string
+    type: object
+  domain.UpdateMovieRequest:
+    properties:
+      poster_url:
+        type: string
+      rating:
+        type: number
+      release_date:
+        type: string
+      slug:
+        type: string
+      title:
+        type: string
+    type: object
+  domain.UpdatePlayerProviderRequest:
+    properties:
+      is_ads_available:
+        type: boolean
+      is_default:
+        type: boolean
+      player_provider:
+        type: string
+      player_provider_type:
+        type: string
+      player_provider_url:
+        type: string
+      video_quality:
+        type: string
+    type: object
+  domain.UpdateSubtitleRequest:
+    properties:
+      language:
+        type: string
+      subtitle_author:
+        type: string
+      subtitle_url:
+        type: string
+    type: object
   handler.ChangeUserRoleRequest:
     properties:
       role:
@@ -79,7 +302,7 @@ info:
   title: Sinhala Subtitle API
   version: 1.0.0
 paths:
-  /auth/forgot-password:
+  /api/auth/forgot-password:
     post:
       consumes:
       - application/json
@@ -107,7 +330,7 @@ paths:
       summary: Forgot Password
       tags:
       - Auth
-  /auth/forgot-password/request:
+  /api/auth/forgot-password/request:
     post:
       consumes:
       - application/json
@@ -131,7 +354,7 @@ paths:
       summary: Request Password Reset
       tags:
       - Auth
-  /auth/login:
+  /api/auth/login:
     post:
       consumes:
       - application/json
@@ -159,7 +382,7 @@ paths:
       summary: User Login
       tags:
       - Auth
-  /auth/logout:
+  /api/auth/logout:
     post:
       consumes:
       - application/json
@@ -175,7 +398,7 @@ paths:
       summary: User Logout
       tags:
       - Auth
-  /auth/me:
+  /api/auth/me:
     get:
       consumes:
       - application/json
@@ -196,7 +419,7 @@ paths:
       summary: Get Current User
       tags:
       - Auth
-  /auth/refresh:
+  /api/auth/refresh:
     post:
       consumes:
       - application/json
@@ -217,7 +440,7 @@ paths:
       summary: Refresh Access Token
       tags:
       - Auth
-  /auth/resend-verification:
+  /api/auth/resend-verification:
     post:
       consumes:
       - application/json
@@ -240,7 +463,7 @@ paths:
       summary: Resend Verification Code
       tags:
       - Auth
-  /auth/signup:
+  /api/auth/signup:
     post:
       consumes:
       - application/json
@@ -268,7 +491,7 @@ paths:
       summary: User Signup
       tags:
       - Auth
-  /auth/verify:
+  /api/auth/verify:
     post:
       consumes:
       - application/json
@@ -296,6 +519,1256 @@ paths:
       summary: Verify Account
       tags:
       - Auth
+  /api/v1/cast/{id}:
+    delete:
+      description: Delete a cast member
+      parameters:
+      - description: Cast Member ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete Cast Member
+      tags:
+      - Cast
+    put:
+      consumes:
+      - application/json
+      description: Update an existing cast member
+      parameters:
+      - description: Cast Member ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated cast member details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateCastRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update Cast Member
+      tags:
+      - Cast
+  /api/v1/downloads/{id}:
+    delete:
+      description: Delete a download option
+      parameters:
+      - description: Download Option ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete Download Option
+      tags:
+      - Download Options
+    put:
+      consumes:
+      - application/json
+      description: Update an existing download option
+      parameters:
+      - description: Download Option ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated download option details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateDownloadOptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update Download Option
+      tags:
+      - Download Options
+  /api/v1/movies:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of movies with filtering and sorting
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Search by title
+        in: query
+        name: search
+        type: string
+      - description: Filter by slug
+        in: query
+        name: slug
+        type: string
+      - description: Minimum IMDB rating
+        in: query
+        name: rating_min
+        type: number
+      - description: Maximum IMDB rating
+        in: query
+        name: rating_max
+        type: number
+      - description: Filter by release year
+        in: query
+        name: release_year
+        type: integer
+      - default: release_date
+        description: Sort field (title, rating, release_date)
+        in: query
+        name: sort_by
+        type: string
+      - default: desc
+        description: asc or desc
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List Movies
+      tags:
+      - Movies
+    post:
+      consumes:
+      - application/json
+      description: Create a new movie (Admin/Moderator only)
+      parameters:
+      - description: Movie data
+        in: body
+        name: movie
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateMovieRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Create Movie
+      tags:
+      - Movies
+  /api/v1/movies/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a movie (Admin/Moderator only)
+      parameters:
+      - description: Movie ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Movie not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Delete Movie
+      tags:
+      - Movies
+    get:
+      consumes:
+      - application/json
+      description: Get a specific movie by its ID
+      parameters:
+      - description: Movie ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Movie not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Movie by ID
+      tags:
+      - Movies
+    put:
+      consumes:
+      - application/json
+      description: Update a movie (Admin/Moderator only)
+      parameters:
+      - description: Movie ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Movie data
+        in: body
+        name: movie
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateMovieRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Movie not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Update Movie
+      tags:
+      - Movies
+  /api/v1/movies/{movieId}/cast:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of cast members for a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List Cast Members
+      tags:
+      - Cast
+    post:
+      consumes:
+      - application/json
+      description: Add a new cast member to a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - description: Cast member details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AddCastRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add Cast Member
+      tags:
+      - Cast
+  /api/v1/movies/{movieId}/cast/bulk:
+    post:
+      consumes:
+      - application/json
+      description: Add multiple cast members to a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - description: Cast members array
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.BulkAddCastRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Bulk Add Cast Members
+      tags:
+      - Cast
+  /api/v1/movies/{movieId}/categories:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of categories for a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid movie ID
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List Movie Categories
+      tags:
+      - Movie Categories
+    post:
+      consumes:
+      - application/json
+      description: Add a category to a movie (Admin/Moderator only)
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - description: Category data
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AddCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Movie not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Add Category to Movie
+      tags:
+      - Movie Categories
+  /api/v1/movies/{movieId}/categories/{categoryId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a category from a movie (Admin/Moderator only)
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - description: Category ID
+        in: path
+        name: categoryId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Category not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Remove Category from Movie
+      tags:
+      - Movie Categories
+  /api/v1/movies/{movieId}/categories/bulk:
+    post:
+      consumes:
+      - application/json
+      description: Add multiple categories to a movie (Admin/Moderator only)
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - description: Categories data
+        in: body
+        name: categories
+        required: true
+        schema:
+          $ref: '#/definitions/domain.BulkAddCategoriesRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Movie not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Add Multiple Categories
+      tags:
+      - Movie Categories
+  /api/v1/movies/{movieId}/details:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information for a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Movie Details
+      tags:
+      - Movie Details
+    put:
+      consumes:
+      - application/json
+      description: Create or update detailed information for a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - description: Movie detail information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateUpdateMovieDetailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create or Update Movie Details
+      tags:
+      - Movie Details
+  /api/v1/movies/{movieId}/downloads:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of download options for a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by video quality
+        in: query
+        name: video_quality
+        type: string
+      - description: Filter by download type
+        in: query
+        name: download_option_type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List Download Options
+      tags:
+      - Download Options
+    post:
+      consumes:
+      - application/json
+      description: Add a new download option to a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - description: Download option details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AddDownloadOptionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add Download Option
+      tags:
+      - Download Options
+  /api/v1/movies/{movieId}/downloads/bulk:
+    post:
+      consumes:
+      - application/json
+      description: Add multiple download options to a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - description: Download options array
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.BulkAddDownloadOptionsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Bulk Add Download Options
+      tags:
+      - Download Options
+  /api/v1/movies/{movieId}/players:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of player providers for a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by video quality
+        in: query
+        name: video_quality
+        type: string
+      - description: Filter by default status
+        in: query
+        name: is_default
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List Player Providers
+      tags:
+      - Player Providers
+    post:
+      consumes:
+      - application/json
+      description: Add a new player provider to a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - description: Player provider details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AddPlayerProviderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add Player Provider
+      tags:
+      - Player Providers
+  /api/v1/movies/{movieId}/players/bulk:
+    post:
+      consumes:
+      - application/json
+      description: Add multiple player providers to a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - description: Player providers array
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.BulkAddPlayerProvidersRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Bulk Add Player Providers
+      tags:
+      - Player Providers
+  /api/v1/movies/{movieId}/subtitles:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of subtitles for a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by language
+        in: query
+        name: language
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List Subtitles
+      tags:
+      - Subtitles
+    post:
+      consumes:
+      - application/json
+      description: Add a new subtitle to a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - description: Subtitle details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AddSubtitleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add Subtitle
+      tags:
+      - Subtitles
+  /api/v1/movies/{movieId}/subtitles/bulk:
+    post:
+      consumes:
+      - application/json
+      description: Add multiple subtitles to a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - description: Subtitles array
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.BulkAddSubtitlesRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Bulk Add Subtitles
+      tags:
+      - Subtitles
+  /api/v1/movies/bulk:
+    post:
+      consumes:
+      - application/json
+      description: Create multiple movies at once (Admin/Moderator only)
+      parameters:
+      - description: Movies data
+        in: body
+        name: movies
+        required: true
+        schema:
+          $ref: '#/definitions/domain.BulkCreateMoviesRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Bulk Create Movies
+      tags:
+      - Movies
+  /api/v1/movies/slug/{slug}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific movie by its slug
+      parameters:
+      - description: Movie Slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Movie not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Movie by Slug
+      tags:
+      - Movies
+  /api/v1/players/{id}:
+    delete:
+      description: Delete a player provider
+      parameters:
+      - description: Player Provider ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete Player Provider
+      tags:
+      - Player Providers
+    put:
+      consumes:
+      - application/json
+      description: Update an existing player provider
+      parameters:
+      - description: Player Provider ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated player provider details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdatePlayerProviderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update Player Provider
+      tags:
+      - Player Providers
+  /api/v1/subtitles/{id}:
+    delete:
+      description: Delete a subtitle
+      parameters:
+      - description: Subtitle ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete Subtitle
+      tags:
+      - Subtitles
+    put:
+      consumes:
+      - application/json
+      description: Update an existing subtitle
+      parameters:
+      - description: Subtitle ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated subtitle details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateSubtitleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update Subtitle
+      tags:
+      - Subtitles
   /health:
     get:
       consumes:

@@ -59,7 +59,7 @@ type ResetPasswordRequest struct {
 // @Param request body SignupRequest true "User registration data"
 // @Success 201 {object} map[string]interface{} "Account created; verification required"
 // @Failure 409 {object} map[string]interface{} "Email/username already registered"
-// @Router /auth/signup [post]
+// @Router /api/auth/signup [post]
 func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -108,7 +108,7 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 // @Param request body VerifyRequest true "Verification data"
 // @Success 200 {object} map[string]interface{} "Account verified"
 // @Failure 401 {object} map[string]interface{} "Invalid code"
-// @Router /auth/verify [post]
+// @Router /api/auth/verify [post]
 func (h *AuthHandler) Verify(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -139,7 +139,7 @@ func (h *AuthHandler) Verify(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param request body ResendVerificationRequest true "Email address"
 // @Success 200 {object} map[string]interface{} "Verification code resent"
-// @Router /auth/resend-verification [post]
+// @Router /api/auth/resend-verification [post]
 func (h *AuthHandler) ResendVerification(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -167,7 +167,7 @@ func (h *AuthHandler) ResendVerification(w http.ResponseWriter, r *http.Request)
 // @Param request body LoginRequest true "Login credentials"
 // @Success 200 {object} map[string]interface{} "Login successful"
 // @Failure 401 {object} map[string]interface{} "Invalid credentials"
-// @Router /auth/login [post]
+// @Router /api/auth/login [post]
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -208,7 +208,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Success 200 {object} map[string]interface{} "Token refreshed successfully"
 // @Failure 401 {object} map[string]interface{} "Invalid refresh token"
-// @Router /auth/refresh [post]
+// @Router /api/auth/refresh [post]
 func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -238,7 +238,7 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} map[string]interface{} "Logout successful"
-// @Router /auth/logout [post]
+// @Router /api/auth/logout [post]
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -259,7 +259,7 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Success 200 {object} map[string]interface{} "User fetched successfully"
 // @Failure 401 {object} map[string]interface{} "Unauthorized"
-// @Router /auth/me [get]
+// @Router /api/auth/me [get]
 func (h *AuthHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -286,7 +286,7 @@ func (h *AuthHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param request body ForgotPasswordRequest true "Password reset request"
 // @Success 200 {object} map[string]interface{} "Reset code sent"
-// @Router /auth/forgot-password/request [post]
+// @Router /api/auth/forgot-password/request [post]
 func (h *AuthHandler) RequestPasswordReset(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -309,7 +309,7 @@ func (h *AuthHandler) RequestPasswordReset(w http.ResponseWriter, r *http.Reques
 // @Param request body ResetPasswordRequest true "Reset password data"
 // @Success 200 {object} map[string]interface{} "Password updated"
 // @Failure 401 {object} map[string]interface{} "Invalid code"
-// @Router /auth/forgot-password [post]
+// @Router /api/auth/forgot-password [post]
 func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 

@@ -74,6 +74,136 @@ func loadRoutes(container *config.Container) *chi.Mux {
 				r.With(customMiddleware.RequireRoles("admin")).Delete("/{id}", userHandler.Delete)
 			})
 		}
+
+		// Movie routes
+		if movieHandler := container.MovieHandler(); movieHandler != nil {
+			api.Route("/v1/movies", func(r chi.Router) {
+				// Public read endpoints
+				r.Get("/", movieHandler.List)
+				r.Get("/{id}", movieHandler.GetByID)
+				r.Get("/slug/{slug}", movieHandler.GetBySlug)
+
+				// Admin/Moderator write endpoints
+				r.Use(customMiddleware.JWTMiddleware)
+				r.Use(customMiddleware.RequireRoles("admin", "moderator"))
+				r.Post("/", movieHandler.Create)
+				r.Post("/bulk", movieHandler.BulkCreate)
+				r.Put("/{id}", movieHandler.Update)
+				r.Delete("/{id}", movieHandler.Delete)
+			})
+		}
+
+		// Movie Categories routes
+		if movieCategoryHandler := container.MovieCategoryHandler(); movieCategoryHandler != nil {
+			api.Route("/v1/movies/{movieId}/categories", func(r chi.Router) {
+				// Public read
+				r.Get("/", movieCategoryHandler.List)
+
+				// Admin/Moderator write
+				r.Use(customMiddleware.JWTMiddleware)
+				r.Use(customMiddleware.RequireRoles("admin", "moderator"))
+				r.Post("/", movieCategoryHandler.Add)
+				r.Post("/bulk", movieCategoryHandler.BulkAdd)
+				r.Delete("/{categoryId}", movieCategoryHandler.Delete)
+			})
+		}
+
+		// Cast routes
+		if castHandler := container.CastHandler(); castHandler != nil {
+			api.Route("/v1/movies/{movieId}/cast", func(r chi.Router) {
+				// Public read
+				r.Get("/", castHandler.List)
+
+				// Admin/Moderator write
+				r.Use(customMiddleware.JWTMiddleware)
+				r.Use(customMiddleware.RequireRoles("admin", "moderator"))
+				r.Post("/", castHandler.Create)
+				r.Post("/bulk", castHandler.BulkCreate)
+			})
+
+			api.Route("/v1/cast", func(r chi.Router) {
+				r.Use(customMiddleware.JWTMiddleware)
+				r.Use(customMiddleware.RequireRoles("admin", "moderator"))
+				r.Put("/{id}", castHandler.Update)
+				r.Delete("/{id}", castHandler.Delete)
+			})
+		}
+
+		// Movie Details routes
+		if movieDetailHandler := container.MovieDetailHandler(); movieDetailHandler != nil {
+			api.Route("/v1/movies/{movieId}/details", func(r chi.Router) {
+				// Public read
+				r.Get("/", movieDetailHandler.GetByMovieID)
+
+				// Admin/Moderator write
+				r.Use(customMiddleware.JWTMiddleware)
+				r.Use(customMiddleware.RequireRoles("admin", "moderator"))
+				r.Put("/", movieDetailHandler.CreateOrUpdate)
+			})
+		}
+
+		// Subtitles routes
+		if subtitleHandler := container.SubtitleHandler(); subtitleHandler != nil {
+			api.Route("/v1/movies/{movieId}/subtitles", func(r chi.Router) {
+				// Public read
+				r.Get("/", subtitleHandler.List)
+
+				// Admin/Moderator write
+				r.Use(customMiddleware.JWTMiddleware)
+				r.Use(customMiddleware.RequireRoles("admin", "moderator"))
+				r.Post("/", subtitleHandler.Create)
+				r.Post("/bulk", subtitleHandler.BulkCreate)
+			})
+
+			api.Route("/v1/subtitles", func(r chi.Router) {
+				r.Use(customMiddleware.JWTMiddleware)
+				r.Use(customMiddleware.RequireRoles("admin", "moderator"))
+				r.Put("/{id}", subtitleHandler.Update)
+				r.Delete("/{id}", subtitleHandler.Delete)
+			})
+		}
+
+		// Player Providers routes
+		if playerProviderHandler := container.PlayerProviderHandler(); playerProviderHandler != nil {
+			api.Route("/v1/movies/{movieId}/players", func(r chi.Router) {
+				// Public read
+				r.Get("/", playerProviderHandler.List)
+
+				// Admin/Moderator write
+				r.Use(customMiddleware.JWTMiddleware)
+				r.Use(customMiddleware.RequireRoles("admin", "moderator"))
+				r.Post("/", playerProviderHandler.Create)
+				r.Post("/bulk", playerProviderHandler.BulkCreate)
+			})
+
+			api.Route("/v1/players", func(r chi.Router) {
+				r.Use(customMiddleware.JWTMiddleware)
+				r.Use(customMiddleware.RequireRoles("admin", "moderator"))
+				r.Put("/{id}", playerProviderHandler.Update)
+				r.Delete("/{id}", playerProviderHandler.Delete)
+			})
+		}
+
+		// Download Options routes
+		if downloadOptionHandler := container.DownloadOptionHandler(); downloadOptionHandler != nil {
+			api.Route("/v1/movies/{movieId}/downloads", func(r chi.Router) {
+				// Public read
+				r.Get("/", downloadOptionHandler.List)
+
+				// Admin/Moderator write
+				r.Use(customMiddleware.JWTMiddleware)
+				r.Use(customMiddleware.RequireRoles("admin", "moderator"))
+				r.Post("/", downloadOptionHandler.Create)
+				r.Post("/bulk", downloadOptionHandler.BulkCreate)
+			})
+
+			api.Route("/v1/downloads", func(r chi.Router) {
+				r.Use(customMiddleware.JWTMiddleware)
+				r.Use(customMiddleware.RequireRoles("admin", "moderator"))
+				r.Put("/{id}", downloadOptionHandler.Update)
+				r.Delete("/{id}", downloadOptionHandler.Delete)
+			})
+		}
 	})
 
 	return router
