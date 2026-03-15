@@ -1,6 +1,6 @@
 basePath: /api
 definitions:
-  domain.AddCastRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCastRequest:
     properties:
       actor_image_url:
         type: string
@@ -14,7 +14,7 @@ definitions:
     - actor_name
     - tmdb_id
     type: object
-  domain.AddCategoryRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCategoryRequest:
     properties:
       category_id:
         type: integer
@@ -24,7 +24,7 @@ definitions:
     - category_id
     - category_name
     type: object
-  domain.AddDownloadOptionRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddDownloadOptionRequest:
     properties:
       download_option:
         type: string
@@ -40,7 +40,7 @@ definitions:
     - download_option
     - download_option_url
     type: object
-  domain.AddPlayerProviderRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddPlayerProviderRequest:
     properties:
       is_ads_available:
         type: boolean
@@ -58,7 +58,7 @@ definitions:
     - player_provider
     - player_provider_url
     type: object
-  domain.AddSubtitleRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddSubtitleRequest:
     properties:
       language:
         type: string
@@ -70,61 +70,61 @@ definitions:
     - language
     - subtitle_url
     type: object
-  domain.BulkAddCastRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddCastRequest:
     properties:
       cast:
         items:
-          $ref: '#/definitions/domain.AddCastRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCastRequest'
         type: array
     required:
     - cast
     type: object
-  domain.BulkAddCategoriesRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddCategoriesRequest:
     properties:
       categories:
         items:
-          $ref: '#/definitions/domain.AddCategoryRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCategoryRequest'
         type: array
     required:
     - categories
     type: object
-  domain.BulkAddDownloadOptionsRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddDownloadOptionsRequest:
     properties:
       downloads:
         items:
-          $ref: '#/definitions/domain.AddDownloadOptionRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddDownloadOptionRequest'
         type: array
     required:
     - downloads
     type: object
-  domain.BulkAddPlayerProvidersRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddPlayerProvidersRequest:
     properties:
       players:
         items:
-          $ref: '#/definitions/domain.AddPlayerProviderRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddPlayerProviderRequest'
         type: array
     required:
     - players
     type: object
-  domain.BulkAddSubtitlesRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddSubtitlesRequest:
     properties:
       subtitles:
         items:
-          $ref: '#/definitions/domain.AddSubtitleRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddSubtitleRequest'
         type: array
     required:
     - subtitles
     type: object
-  domain.BulkCreateMoviesRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkCreateMoviesRequest:
     properties:
       movies:
         items:
-          $ref: '#/definitions/domain.CreateMovieRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.CreateMovieRequest'
         type: array
     required:
     - movies
     type: object
-  domain.CreateMovieRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.CreateMovieRequest:
     properties:
       poster_url:
         type: string
@@ -139,7 +139,7 @@ definitions:
     required:
     - title
     type: object
-  domain.CreateUpdateMovieDetailRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.CreateUpdateMovieDetailRequest:
     properties:
       adult:
         type: boolean
@@ -162,7 +162,7 @@ definitions:
       trailer_url:
         type: string
     type: object
-  domain.UpdateCastRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateCastRequest:
     properties:
       actor_image_url:
         type: string
@@ -173,7 +173,7 @@ definitions:
       tmdb_id:
         type: integer
     type: object
-  domain.UpdateDownloadOptionRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateDownloadOptionRequest:
     properties:
       download_option:
         type: string
@@ -186,7 +186,7 @@ definitions:
       video_quality:
         type: string
     type: object
-  domain.UpdateMovieRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateMovieRequest:
     properties:
       poster_url:
         type: string
@@ -199,7 +199,7 @@ definitions:
       title:
         type: string
     type: object
-  domain.UpdatePlayerProviderRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdatePlayerProviderRequest:
     properties:
       is_ads_available:
         type: boolean
@@ -214,7 +214,7 @@ definitions:
       video_quality:
         type: string
     type: object
-  domain.UpdateSubtitleRequest:
+  github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateSubtitleRequest:
     properties:
       language:
         type: string
@@ -223,12 +223,12 @@ definitions:
       subtitle_url:
         type: string
     type: object
-  handler.ChangeUserRoleRequest:
+  internal_handler.ChangeUserRoleRequest:
     properties:
       role:
         type: string
     type: object
-  handler.CreateUserRequest:
+  internal_handler.CreateUserRequest:
     properties:
       email:
         type: string
@@ -237,24 +237,24 @@ definitions:
       username:
         type: string
     type: object
-  handler.ForgotPasswordRequest:
+  internal_handler.ForgotPasswordRequest:
     properties:
       email:
         type: string
     type: object
-  handler.LoginRequest:
+  internal_handler.LoginRequest:
     properties:
       email:
         type: string
       password:
         type: string
     type: object
-  handler.ResendVerificationRequest:
+  internal_handler.ResendVerificationRequest:
     properties:
       email:
         type: string
     type: object
-  handler.ResetPasswordRequest:
+  internal_handler.ResetPasswordRequest:
     properties:
       email:
         type: string
@@ -263,7 +263,7 @@ definitions:
       verification_code:
         type: string
     type: object
-  handler.SignupRequest:
+  internal_handler.SignupRequest:
     properties:
       email:
         type: string
@@ -272,7 +272,7 @@ definitions:
       username:
         type: string
     type: object
-  handler.UpdateUserRequest:
+  internal_handler.UpdateUserRequest:
     properties:
       avatar:
         type: string
@@ -281,7 +281,7 @@ definitions:
       username:
         type: string
     type: object
-  handler.VerifyRequest:
+  internal_handler.VerifyRequest:
     properties:
       email:
         type: string
@@ -313,7 +313,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.ResetPasswordRequest'
+          $ref: '#/definitions/internal_handler.ResetPasswordRequest'
       produces:
       - application/json
       responses:
@@ -342,7 +342,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.ForgotPasswordRequest'
+          $ref: '#/definitions/internal_handler.ForgotPasswordRequest'
       produces:
       - application/json
       responses:
@@ -365,7 +365,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.LoginRequest'
+          $ref: '#/definitions/internal_handler.LoginRequest'
       produces:
       - application/json
       responses:
@@ -451,7 +451,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.ResendVerificationRequest'
+          $ref: '#/definitions/internal_handler.ResendVerificationRequest'
       produces:
       - application/json
       responses:
@@ -474,7 +474,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.SignupRequest'
+          $ref: '#/definitions/internal_handler.SignupRequest'
       produces:
       - application/json
       responses:
@@ -502,7 +502,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.VerifyRequest'
+          $ref: '#/definitions/internal_handler.VerifyRequest'
       produces:
       - application/json
       responses:
@@ -561,7 +561,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.UpdateCastRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateCastRequest'
       produces:
       - application/json
       responses:
@@ -627,7 +627,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.UpdateDownloadOptionRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateDownloadOptionRequest'
       produces:
       - application/json
       responses:
@@ -718,7 +718,7 @@ paths:
         name: movie
         required: true
         schema:
-          $ref: '#/definitions/domain.CreateMovieRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.CreateMovieRequest'
       produces:
       - application/json
       responses:
@@ -824,7 +824,7 @@ paths:
         name: movie
         required: true
         schema:
-          $ref: '#/definitions/domain.UpdateMovieRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateMovieRequest'
       produces:
       - application/json
       responses:
@@ -905,7 +905,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.AddCastRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCastRequest'
       produces:
       - application/json
       responses:
@@ -945,7 +945,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.BulkAddCastRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddCastRequest'
       produces:
       - application/json
       responses:
@@ -1021,7 +1021,7 @@ paths:
         name: category
         required: true
         schema:
-          $ref: '#/definitions/domain.AddCategoryRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCategoryRequest'
       produces:
       - application/json
       responses:
@@ -1112,7 +1112,7 @@ paths:
         name: categories
         required: true
         schema:
-          $ref: '#/definitions/domain.BulkAddCategoriesRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddCategoriesRequest'
       produces:
       - application/json
       responses:
@@ -1193,7 +1193,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.CreateUpdateMovieDetailRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.CreateUpdateMovieDetailRequest'
       produces:
       - application/json
       responses:
@@ -1272,7 +1272,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.AddDownloadOptionRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddDownloadOptionRequest'
       produces:
       - application/json
       responses:
@@ -1312,7 +1312,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.BulkAddDownloadOptionsRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddDownloadOptionsRequest'
       produces:
       - application/json
       responses:
@@ -1391,7 +1391,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.AddPlayerProviderRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddPlayerProviderRequest'
       produces:
       - application/json
       responses:
@@ -1431,7 +1431,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.BulkAddPlayerProvidersRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddPlayerProvidersRequest'
       produces:
       - application/json
       responses:
@@ -1506,7 +1506,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.AddSubtitleRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddSubtitleRequest'
       produces:
       - application/json
       responses:
@@ -1546,7 +1546,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.BulkAddSubtitlesRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddSubtitlesRequest'
       produces:
       - application/json
       responses:
@@ -1581,7 +1581,7 @@ paths:
         name: movies
         required: true
         schema:
-          $ref: '#/definitions/domain.BulkCreateMoviesRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkCreateMoviesRequest'
       produces:
       - application/json
       responses:
@@ -1679,7 +1679,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.UpdatePlayerProviderRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdatePlayerProviderRequest'
       produces:
       - application/json
       responses:
@@ -1745,7 +1745,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.UpdateSubtitleRequest'
+          $ref: '#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateSubtitleRequest'
       produces:
       - application/json
       responses:
@@ -1862,7 +1862,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.CreateUserRequest'
+          $ref: '#/definitions/internal_handler.CreateUserRequest'
       produces:
       - application/json
       responses:
@@ -1962,7 +1962,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.UpdateUserRequest'
+          $ref: '#/definitions/internal_handler.UpdateUserRequest'
       produces:
       - application/json
       responses:
@@ -2005,7 +2005,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.ChangeUserRoleRequest'
+          $ref: '#/definitions/internal_handler.ChangeUserRoleRequest'
       produces:
       - application/json
       responses:

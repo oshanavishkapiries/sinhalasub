@@ -44,7 +44,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.ResetPasswordRequest"
+                            "$ref": "#/definitions/internal_handler.ResetPasswordRequest"
                         }
                     }
                 ],
@@ -86,7 +86,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.ForgotPasswordRequest"
+                            "$ref": "#/definitions/internal_handler.ForgotPasswordRequest"
                         }
                     }
                 ],
@@ -121,7 +121,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.LoginRequest"
+                            "$ref": "#/definitions/internal_handler.LoginRequest"
                         }
                     }
                 ],
@@ -249,7 +249,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.ResendVerificationRequest"
+                            "$ref": "#/definitions/internal_handler.ResendVerificationRequest"
                         }
                     }
                 ],
@@ -284,7 +284,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.SignupRequest"
+                            "$ref": "#/definitions/internal_handler.SignupRequest"
                         }
                     }
                 ],
@@ -326,7 +326,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.VerifyRequest"
+                            "$ref": "#/definitions/internal_handler.VerifyRequest"
                         }
                     }
                 ],
@@ -380,7 +380,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.UpdateCastRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateCastRequest"
                         }
                     }
                 ],
@@ -481,7 +481,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.UpdateDownloadOptionRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateDownloadOptionRequest"
                         }
                     }
                 ],
@@ -657,7 +657,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.CreateMovieRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.CreateMovieRequest"
                         }
                     }
                 ],
@@ -718,7 +718,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.BulkCreateMoviesRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkCreateMoviesRequest"
                         }
                     }
                 ],
@@ -864,7 +864,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.UpdateMovieRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateMovieRequest"
                         }
                     }
                 ],
@@ -1037,7 +1037,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.AddCastRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCastRequest"
                         }
                     }
                 ],
@@ -1098,7 +1098,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.BulkAddCastRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddCastRequest"
                         }
                     }
                 ],
@@ -1211,7 +1211,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.AddCategoryRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCategoryRequest"
                         }
                     }
                 ],
@@ -1286,7 +1286,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.BulkAddCategoriesRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddCategoriesRequest"
                         }
                     }
                 ],
@@ -1468,7 +1468,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.CreateUpdateMovieDetailRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.CreateUpdateMovieDetailRequest"
                         }
                     }
                 ],
@@ -1586,7 +1586,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.AddDownloadOptionRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddDownloadOptionRequest"
                         }
                     }
                 ],
@@ -1647,7 +1647,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.BulkAddDownloadOptionsRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddDownloadOptionsRequest"
                         }
                     }
                 ],
@@ -1765,7 +1765,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.AddPlayerProviderRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddPlayerProviderRequest"
                         }
                     }
                 ],
@@ -1826,7 +1826,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.BulkAddPlayerProvidersRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddPlayerProvidersRequest"
                         }
                     }
                 ],
@@ -1938,7 +1938,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.AddSubtitleRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddSubtitleRequest"
                         }
                     }
                 ],
@@ -1999,7 +1999,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.BulkAddSubtitlesRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddSubtitlesRequest"
                         }
                     }
                 ],
@@ -2060,7 +2060,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.UpdatePlayerProviderRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdatePlayerProviderRequest"
                         }
                     }
                 ],
@@ -2161,7 +2161,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.UpdateSubtitleRequest"
+                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateSubtitleRequest"
                         }
                     }
                 ],
@@ -2368,7 +2368,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.CreateUserRequest"
+                            "$ref": "#/definitions/internal_handler.CreateUserRequest"
                         }
                     }
                 ],
@@ -2469,7 +2469,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.UpdateUserRequest"
+                            "$ref": "#/definitions/internal_handler.UpdateUserRequest"
                         }
                     }
                 ],
@@ -2577,7 +2577,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.ChangeUserRoleRequest"
+                            "$ref": "#/definitions/internal_handler.ChangeUserRoleRequest"
                         }
                     }
                 ],
@@ -2615,7 +2615,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "domain.AddCastRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCastRequest": {
             "type": "object",
             "required": [
                 "actor_name",
@@ -2636,7 +2636,7 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.AddCategoryRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCategoryRequest": {
             "type": "object",
             "required": [
                 "category_id",
@@ -2651,7 +2651,7 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.AddDownloadOptionRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddDownloadOptionRequest": {
             "type": "object",
             "required": [
                 "download_option",
@@ -2675,7 +2675,7 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.AddPlayerProviderRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddPlayerProviderRequest": {
             "type": "object",
             "required": [
                 "player_provider",
@@ -2702,7 +2702,7 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.AddSubtitleRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddSubtitleRequest": {
             "type": "object",
             "required": [
                 "language",
@@ -2720,7 +2720,7 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.BulkAddCastRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddCastRequest": {
             "type": "object",
             "required": [
                 "cast"
@@ -2729,12 +2729,12 @@ const docTemplate = `{
                 "cast": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/domain.AddCastRequest"
+                        "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCastRequest"
                     }
                 }
             }
         },
-        "domain.BulkAddCategoriesRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddCategoriesRequest": {
             "type": "object",
             "required": [
                 "categories"
@@ -2743,12 +2743,12 @@ const docTemplate = `{
                 "categories": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/domain.AddCategoryRequest"
+                        "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCategoryRequest"
                     }
                 }
             }
         },
-        "domain.BulkAddDownloadOptionsRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddDownloadOptionsRequest": {
             "type": "object",
             "required": [
                 "downloads"
@@ -2757,12 +2757,12 @@ const docTemplate = `{
                 "downloads": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/domain.AddDownloadOptionRequest"
+                        "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddDownloadOptionRequest"
                     }
                 }
             }
         },
-        "domain.BulkAddPlayerProvidersRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddPlayerProvidersRequest": {
             "type": "object",
             "required": [
                 "players"
@@ -2771,12 +2771,12 @@ const docTemplate = `{
                 "players": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/domain.AddPlayerProviderRequest"
+                        "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddPlayerProviderRequest"
                     }
                 }
             }
         },
-        "domain.BulkAddSubtitlesRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddSubtitlesRequest": {
             "type": "object",
             "required": [
                 "subtitles"
@@ -2785,12 +2785,12 @@ const docTemplate = `{
                 "subtitles": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/domain.AddSubtitleRequest"
+                        "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddSubtitleRequest"
                     }
                 }
             }
         },
-        "domain.BulkCreateMoviesRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkCreateMoviesRequest": {
             "type": "object",
             "required": [
                 "movies"
@@ -2799,12 +2799,12 @@ const docTemplate = `{
                 "movies": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/domain.CreateMovieRequest"
+                        "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.CreateMovieRequest"
                     }
                 }
             }
         },
-        "domain.CreateMovieRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.CreateMovieRequest": {
             "type": "object",
             "required": [
                 "title"
@@ -2827,7 +2827,7 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.CreateUpdateMovieDetailRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.CreateUpdateMovieDetailRequest": {
             "type": "object",
             "properties": {
                 "adult": {
@@ -2862,7 +2862,7 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.UpdateCastRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateCastRequest": {
             "type": "object",
             "properties": {
                 "actor_image_url": {
@@ -2879,7 +2879,7 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.UpdateDownloadOptionRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateDownloadOptionRequest": {
             "type": "object",
             "properties": {
                 "download_option": {
@@ -2899,7 +2899,7 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.UpdateMovieRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateMovieRequest": {
             "type": "object",
             "properties": {
                 "poster_url": {
@@ -2919,7 +2919,7 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.UpdatePlayerProviderRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdatePlayerProviderRequest": {
             "type": "object",
             "properties": {
                 "is_ads_available": {
@@ -2942,7 +2942,7 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.UpdateSubtitleRequest": {
+        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateSubtitleRequest": {
             "type": "object",
             "properties": {
                 "language": {
@@ -2956,7 +2956,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.ChangeUserRoleRequest": {
+        "internal_handler.ChangeUserRoleRequest": {
             "type": "object",
             "properties": {
                 "role": {
@@ -2964,7 +2964,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.CreateUserRequest": {
+        "internal_handler.CreateUserRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -2978,7 +2978,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.ForgotPasswordRequest": {
+        "internal_handler.ForgotPasswordRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -2986,7 +2986,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.LoginRequest": {
+        "internal_handler.LoginRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -2997,7 +2997,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.ResendVerificationRequest": {
+        "internal_handler.ResendVerificationRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -3005,7 +3005,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.ResetPasswordRequest": {
+        "internal_handler.ResetPasswordRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -3019,7 +3019,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.SignupRequest": {
+        "internal_handler.SignupRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -3033,7 +3033,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.UpdateUserRequest": {
+        "internal_handler.UpdateUserRequest": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -3047,7 +3047,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.VerifyRequest": {
+        "internal_handler.VerifyRequest": {
             "type": "object",
             "properties": {
                 "email": {
