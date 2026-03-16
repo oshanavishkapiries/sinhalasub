@@ -32,7 +32,7 @@ func NewMovieDetailHandler(service *service.MovieDetailService) *MovieDetailHand
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/movies/{movieId}/details [get]
+// @Router /v1/movies/{movieId}/details [get]
 func (h *MovieDetailHandler) GetByMovieID(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)
@@ -66,7 +66,7 @@ func (h *MovieDetailHandler) GetByMovieID(w http.ResponseWriter, r *http.Request
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/movies/{movieId}/details [put]
+// @Router /v1/movies/{movieId}/details [put]
 func (h *MovieDetailHandler) CreateOrUpdate(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)

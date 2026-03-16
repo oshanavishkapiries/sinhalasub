@@ -24,7 +24,31 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/auth/forgot-password": {
+        "/health": {
+            "get": {
+                "description": "Get health status of the server with system metrics",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Health Check",
+                "responses": {
+                    "200": {
+                        "description": "Server health status",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/forgot-password": {
             "post": {
                 "description": "Reset password using a verification code",
                 "consumes": [
@@ -44,7 +68,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ResetPasswordRequest"
+                            "$ref": "#/definitions/handler.ResetPasswordRequest"
                         }
                     }
                 ],
@@ -66,7 +90,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/forgot-password/request": {
+        "/v1/auth/forgot-password/request": {
             "post": {
                 "description": "Send a password reset code to the user's email (always returns success)",
                 "consumes": [
@@ -86,7 +110,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ForgotPasswordRequest"
+                            "$ref": "#/definitions/handler.ForgotPasswordRequest"
                         }
                     }
                 ],
@@ -101,7 +125,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/login": {
+        "/v1/auth/login": {
             "post": {
                 "description": "Authenticate user and set access/refresh cookies",
                 "consumes": [
@@ -121,7 +145,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.LoginRequest"
+                            "$ref": "#/definitions/handler.LoginRequest"
                         }
                     }
                 ],
@@ -143,7 +167,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/logout": {
+        "/v1/auth/logout": {
             "post": {
                 "description": "Logout the current user and clear cookies",
                 "consumes": [
@@ -167,7 +191,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/me": {
+        "/v1/auth/me": {
             "get": {
                 "description": "Get the currently authenticated user (cookie-based)",
                 "consumes": [
@@ -198,7 +222,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/refresh": {
+        "/v1/auth/refresh": {
             "post": {
                 "description": "Refresh access token using refresh cookie",
                 "consumes": [
@@ -229,7 +253,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/resend-verification": {
+        "/v1/auth/resend-verification": {
             "post": {
                 "description": "Resend signup verification code to email (generic response)",
                 "consumes": [
@@ -249,7 +273,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ResendVerificationRequest"
+                            "$ref": "#/definitions/handler.ResendVerificationRequest"
                         }
                     }
                 ],
@@ -264,7 +288,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/signup": {
+        "/v1/auth/signup": {
             "post": {
                 "description": "Create a new user account and send a verification code",
                 "consumes": [
@@ -284,7 +308,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.SignupRequest"
+                            "$ref": "#/definitions/handler.SignupRequest"
                         }
                     }
                 ],
@@ -306,7 +330,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/verify": {
+        "/v1/auth/verify": {
             "post": {
                 "description": "Verify a user account using a verification code",
                 "consumes": [
@@ -326,7 +350,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.VerifyRequest"
+                            "$ref": "#/definitions/handler.VerifyRequest"
                         }
                     }
                 ],
@@ -348,7 +372,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/cast/{id}": {
+        "/v1/cast/{id}": {
             "put": {
                 "security": [
                     {
@@ -380,7 +404,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateCastRequest"
+                            "$ref": "#/definitions/domain.UpdateCastRequest"
                         }
                     }
                 ],
@@ -449,7 +473,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/downloads/{id}": {
+        "/v1/downloads/{id}": {
             "put": {
                 "security": [
                     {
@@ -481,7 +505,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateDownloadOptionRequest"
+                            "$ref": "#/definitions/domain.UpdateDownloadOptionRequest"
                         }
                     }
                 ],
@@ -550,7 +574,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies": {
+        "/v1/movies": {
             "get": {
                 "description": "Get paginated list of movies with filtering and sorting",
                 "consumes": [
@@ -657,7 +681,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.CreateMovieRequest"
+                            "$ref": "#/definitions/domain.CreateMovieRequest"
                         }
                     }
                 ],
@@ -693,7 +717,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/bulk": {
+        "/v1/movies/bulk": {
             "post": {
                 "security": [
                     {
@@ -718,7 +742,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkCreateMoviesRequest"
+                            "$ref": "#/definitions/domain.BulkCreateMoviesRequest"
                         }
                     }
                 ],
@@ -754,7 +778,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/slug/{slug}": {
+        "/v1/movies/slug/{slug}": {
             "get": {
                 "description": "Get a specific movie by its slug",
                 "consumes": [
@@ -794,7 +818,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/{id}": {
+        "/v1/movies/{id}": {
             "get": {
                 "description": "Get a specific movie by its ID",
                 "consumes": [
@@ -864,7 +888,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateMovieRequest"
+                            "$ref": "#/definitions/domain.UpdateMovieRequest"
                         }
                     }
                 ],
@@ -960,7 +984,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/{movieId}/cast": {
+        "/v1/movies/{movieId}/cast": {
             "get": {
                 "description": "Get paginated list of cast members for a movie",
                 "consumes": [
@@ -1037,7 +1061,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCastRequest"
+                            "$ref": "#/definitions/domain.AddCastRequest"
                         }
                     }
                 ],
@@ -1066,7 +1090,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/{movieId}/cast/bulk": {
+        "/v1/movies/{movieId}/cast/bulk": {
             "post": {
                 "security": [
                     {
@@ -1098,7 +1122,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddCastRequest"
+                            "$ref": "#/definitions/domain.BulkAddCastRequest"
                         }
                     }
                 ],
@@ -1127,7 +1151,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/{movieId}/categories": {
+        "/v1/movies/{movieId}/categories": {
             "get": {
                 "description": "Get paginated list of categories for a movie",
                 "consumes": [
@@ -1211,7 +1235,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCategoryRequest"
+                            "$ref": "#/definitions/domain.AddCategoryRequest"
                         }
                     }
                 ],
@@ -1254,7 +1278,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/{movieId}/categories/bulk": {
+        "/v1/movies/{movieId}/categories/bulk": {
             "post": {
                 "security": [
                     {
@@ -1286,7 +1310,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddCategoriesRequest"
+                            "$ref": "#/definitions/domain.BulkAddCategoriesRequest"
                         }
                     }
                 ],
@@ -1329,7 +1353,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/{movieId}/categories/{categoryId}": {
+        "/v1/movies/{movieId}/categories/{categoryId}": {
             "delete": {
                 "security": [
                     {
@@ -1391,7 +1415,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/{movieId}/details": {
+        "/v1/movies/{movieId}/details": {
             "get": {
                 "description": "Get detailed information for a movie",
                 "consumes": [
@@ -1468,7 +1492,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.CreateUpdateMovieDetailRequest"
+                            "$ref": "#/definitions/domain.CreateUpdateMovieDetailRequest"
                         }
                     }
                 ],
@@ -1497,7 +1521,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/{movieId}/downloads": {
+        "/v1/movies/{movieId}/downloads": {
             "get": {
                 "description": "Get paginated list of download options for a movie",
                 "consumes": [
@@ -1586,7 +1610,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddDownloadOptionRequest"
+                            "$ref": "#/definitions/domain.AddDownloadOptionRequest"
                         }
                     }
                 ],
@@ -1615,7 +1639,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/{movieId}/downloads/bulk": {
+        "/v1/movies/{movieId}/downloads/bulk": {
             "post": {
                 "security": [
                     {
@@ -1647,7 +1671,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddDownloadOptionsRequest"
+                            "$ref": "#/definitions/domain.BulkAddDownloadOptionsRequest"
                         }
                     }
                 ],
@@ -1676,7 +1700,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/{movieId}/players": {
+        "/v1/movies/{movieId}/players": {
             "get": {
                 "description": "Get paginated list of player providers for a movie",
                 "consumes": [
@@ -1765,7 +1789,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddPlayerProviderRequest"
+                            "$ref": "#/definitions/domain.AddPlayerProviderRequest"
                         }
                     }
                 ],
@@ -1794,7 +1818,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/{movieId}/players/bulk": {
+        "/v1/movies/{movieId}/players/bulk": {
             "post": {
                 "security": [
                     {
@@ -1826,7 +1850,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddPlayerProvidersRequest"
+                            "$ref": "#/definitions/domain.BulkAddPlayerProvidersRequest"
                         }
                     }
                 ],
@@ -1855,7 +1879,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/{movieId}/subtitles": {
+        "/v1/movies/{movieId}/subtitles": {
             "get": {
                 "description": "Get paginated list of subtitles for a movie",
                 "consumes": [
@@ -1938,7 +1962,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddSubtitleRequest"
+                            "$ref": "#/definitions/domain.AddSubtitleRequest"
                         }
                     }
                 ],
@@ -1967,7 +1991,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/{movieId}/subtitles/bulk": {
+        "/v1/movies/{movieId}/subtitles/bulk": {
             "post": {
                 "security": [
                     {
@@ -1999,7 +2023,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddSubtitlesRequest"
+                            "$ref": "#/definitions/domain.BulkAddSubtitlesRequest"
                         }
                     }
                 ],
@@ -2028,7 +2052,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/players/{id}": {
+        "/v1/players/{id}": {
             "put": {
                 "security": [
                     {
@@ -2060,7 +2084,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdatePlayerProviderRequest"
+                            "$ref": "#/definitions/domain.UpdatePlayerProviderRequest"
                         }
                     }
                 ],
@@ -2129,7 +2153,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/subtitles/{id}": {
+        "/v1/subtitles/{id}": {
             "put": {
                 "security": [
                     {
@@ -2161,7 +2185,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateSubtitleRequest"
+                            "$ref": "#/definitions/domain.UpdateSubtitleRequest"
                         }
                     }
                 ],
@@ -2230,31 +2254,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/health": {
-            "get": {
-                "description": "Get health status of the server with system metrics",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Health"
-                ],
-                "summary": "Health Check",
-                "responses": {
-                    "200": {
-                        "description": "Server health status",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/users/": {
+        "/v1/users/": {
             "get": {
                 "description": "List users with pagination and filters",
                 "consumes": [
@@ -2368,7 +2368,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.CreateUserRequest"
+                            "$ref": "#/definitions/handler.CreateUserRequest"
                         }
                     }
                 ],
@@ -2397,7 +2397,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}": {
+        "/v1/users/{id}": {
             "get": {
                 "description": "Get one user by id",
                 "consumes": [
@@ -2469,7 +2469,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.UpdateUserRequest"
+                            "$ref": "#/definitions/handler.UpdateUserRequest"
                         }
                     }
                 ],
@@ -2550,7 +2550,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}/role": {
+        "/v1/users/{id}/role": {
             "patch": {
                 "description": "Change user role between platform-user and moderator",
                 "consumes": [
@@ -2577,7 +2577,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ChangeUserRoleRequest"
+                            "$ref": "#/definitions/handler.ChangeUserRoleRequest"
                         }
                     }
                 ],
@@ -2615,7 +2615,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCastRequest": {
+        "domain.AddCastRequest": {
             "type": "object",
             "required": [
                 "actor_name",
@@ -2636,7 +2636,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCategoryRequest": {
+        "domain.AddCategoryRequest": {
             "type": "object",
             "required": [
                 "category_id",
@@ -2651,7 +2651,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddDownloadOptionRequest": {
+        "domain.AddDownloadOptionRequest": {
             "type": "object",
             "required": [
                 "download_option",
@@ -2675,7 +2675,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddPlayerProviderRequest": {
+        "domain.AddPlayerProviderRequest": {
             "type": "object",
             "required": [
                 "player_provider",
@@ -2702,7 +2702,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddSubtitleRequest": {
+        "domain.AddSubtitleRequest": {
             "type": "object",
             "required": [
                 "language",
@@ -2720,7 +2720,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddCastRequest": {
+        "domain.BulkAddCastRequest": {
             "type": "object",
             "required": [
                 "cast"
@@ -2729,12 +2729,12 @@ const docTemplate = `{
                 "cast": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCastRequest"
+                        "$ref": "#/definitions/domain.AddCastRequest"
                     }
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddCategoriesRequest": {
+        "domain.BulkAddCategoriesRequest": {
             "type": "object",
             "required": [
                 "categories"
@@ -2743,12 +2743,12 @@ const docTemplate = `{
                 "categories": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddCategoryRequest"
+                        "$ref": "#/definitions/domain.AddCategoryRequest"
                     }
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddDownloadOptionsRequest": {
+        "domain.BulkAddDownloadOptionsRequest": {
             "type": "object",
             "required": [
                 "downloads"
@@ -2757,12 +2757,12 @@ const docTemplate = `{
                 "downloads": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddDownloadOptionRequest"
+                        "$ref": "#/definitions/domain.AddDownloadOptionRequest"
                     }
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddPlayerProvidersRequest": {
+        "domain.BulkAddPlayerProvidersRequest": {
             "type": "object",
             "required": [
                 "players"
@@ -2771,12 +2771,12 @@ const docTemplate = `{
                 "players": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddPlayerProviderRequest"
+                        "$ref": "#/definitions/domain.AddPlayerProviderRequest"
                     }
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkAddSubtitlesRequest": {
+        "domain.BulkAddSubtitlesRequest": {
             "type": "object",
             "required": [
                 "subtitles"
@@ -2785,12 +2785,12 @@ const docTemplate = `{
                 "subtitles": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.AddSubtitleRequest"
+                        "$ref": "#/definitions/domain.AddSubtitleRequest"
                     }
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.BulkCreateMoviesRequest": {
+        "domain.BulkCreateMoviesRequest": {
             "type": "object",
             "required": [
                 "movies"
@@ -2799,12 +2799,12 @@ const docTemplate = `{
                 "movies": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.CreateMovieRequest"
+                        "$ref": "#/definitions/domain.CreateMovieRequest"
                     }
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.CreateMovieRequest": {
+        "domain.CreateMovieRequest": {
             "type": "object",
             "required": [
                 "title"
@@ -2827,7 +2827,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.CreateUpdateMovieDetailRequest": {
+        "domain.CreateUpdateMovieDetailRequest": {
             "type": "object",
             "properties": {
                 "adult": {
@@ -2862,7 +2862,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateCastRequest": {
+        "domain.UpdateCastRequest": {
             "type": "object",
             "properties": {
                 "actor_image_url": {
@@ -2879,7 +2879,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateDownloadOptionRequest": {
+        "domain.UpdateDownloadOptionRequest": {
             "type": "object",
             "properties": {
                 "download_option": {
@@ -2899,7 +2899,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateMovieRequest": {
+        "domain.UpdateMovieRequest": {
             "type": "object",
             "properties": {
                 "poster_url": {
@@ -2919,7 +2919,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdatePlayerProviderRequest": {
+        "domain.UpdatePlayerProviderRequest": {
             "type": "object",
             "properties": {
                 "is_ads_available": {
@@ -2942,7 +2942,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_oshanavishkapiries_sinhalasub_backend_internal_domain.UpdateSubtitleRequest": {
+        "domain.UpdateSubtitleRequest": {
             "type": "object",
             "properties": {
                 "language": {
@@ -2956,7 +2956,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.ChangeUserRoleRequest": {
+        "handler.ChangeUserRoleRequest": {
             "type": "object",
             "properties": {
                 "role": {
@@ -2964,7 +2964,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.CreateUserRequest": {
+        "handler.CreateUserRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -2978,7 +2978,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.ForgotPasswordRequest": {
+        "handler.ForgotPasswordRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -2986,7 +2986,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.LoginRequest": {
+        "handler.LoginRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -2997,7 +2997,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.ResendVerificationRequest": {
+        "handler.ResendVerificationRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -3005,7 +3005,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.ResetPasswordRequest": {
+        "handler.ResetPasswordRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -3019,7 +3019,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.SignupRequest": {
+        "handler.SignupRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -3033,7 +3033,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.UpdateUserRequest": {
+        "handler.UpdateUserRequest": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -3047,7 +3047,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.VerifyRequest": {
+        "handler.VerifyRequest": {
             "type": "object",
             "properties": {
                 "email": {

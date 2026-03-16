@@ -32,7 +32,7 @@ func NewCastHandler(service *service.CastService) *CastHandler {
 // @Param page query int false "Page number" default(1)
 // @Param limit query int false "Items per page" default(20)
 // @Success 200 {object} map[string]interface{}
-// @Router /api/v1/movies/{movieId}/cast [get]
+// @Router /v1/movies/{movieId}/cast [get]
 func (h *CastHandler) List(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)
@@ -81,7 +81,7 @@ func (h *CastHandler) List(w http.ResponseWriter, r *http.Request) {
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/movies/{movieId}/cast [post]
+// @Router /v1/movies/{movieId}/cast [post]
 func (h *CastHandler) Create(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)
@@ -122,7 +122,7 @@ func (h *CastHandler) Create(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/cast/{id} [put]
+// @Router /v1/cast/{id} [put]
 func (h *CastHandler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -159,7 +159,7 @@ func (h *CastHandler) Update(w http.ResponseWriter, r *http.Request) {
 // @Success 204
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/cast/{id} [delete]
+// @Router /v1/cast/{id} [delete]
 func (h *CastHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -192,7 +192,7 @@ func (h *CastHandler) Delete(w http.ResponseWriter, r *http.Request) {
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/movies/{movieId}/cast/bulk [post]
+// @Router /v1/movies/{movieId}/cast/bulk [post]
 func (h *CastHandler) BulkCreate(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)

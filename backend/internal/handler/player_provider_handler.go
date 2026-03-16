@@ -34,7 +34,7 @@ func NewPlayerProviderHandler(service *service.PlayerProviderService) *PlayerPro
 // @Param video_quality query string false "Filter by video quality"
 // @Param is_default query boolean false "Filter by default status"
 // @Success 200 {object} map[string]interface{}
-// @Router /api/v1/movies/{movieId}/players [get]
+// @Router /v1/movies/{movieId}/players [get]
 func (h *PlayerProviderHandler) List(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)
@@ -91,7 +91,7 @@ func (h *PlayerProviderHandler) List(w http.ResponseWriter, r *http.Request) {
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/movies/{movieId}/players [post]
+// @Router /v1/movies/{movieId}/players [post]
 func (h *PlayerProviderHandler) Create(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)
@@ -132,7 +132,7 @@ func (h *PlayerProviderHandler) Create(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/players/{id} [put]
+// @Router /v1/players/{id} [put]
 func (h *PlayerProviderHandler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -169,7 +169,7 @@ func (h *PlayerProviderHandler) Update(w http.ResponseWriter, r *http.Request) {
 // @Success 204
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/players/{id} [delete]
+// @Router /v1/players/{id} [delete]
 func (h *PlayerProviderHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -202,7 +202,7 @@ func (h *PlayerProviderHandler) Delete(w http.ResponseWriter, r *http.Request) {
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/movies/{movieId}/players/bulk [post]
+// @Router /v1/movies/{movieId}/players/bulk [post]
 func (h *PlayerProviderHandler) BulkCreate(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)

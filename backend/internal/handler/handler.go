@@ -108,7 +108,7 @@ type ChangeUserRoleRequest struct {
 // @Success 200 {object} map[string]interface{} "User created"
 // @Failure 400 {object} map[string]interface{} "Invalid request"
 // @Failure 500 {object} map[string]interface{} "Server error"
-// @Router /users/ [post]
+// @Router /v1/users/ [post]
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var req CreateUserRequest
@@ -145,7 +145,7 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} map[string]interface{} "User fetched"
 // @Failure 400 {object} map[string]interface{} "Invalid request"
 // @Failure 404 {object} map[string]interface{} "User not found"
-// @Router /users/{id} [get]
+// @Router /v1/users/{id} [get]
 func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := chi.URLParam(r, "id")
@@ -181,7 +181,7 @@ func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 // @Param is_verified query boolean false "Filter by verification status"
 // @Success 200 {object} map[string]interface{} "Users fetched"
 // @Failure 500 {object} map[string]interface{} "Server error"
-// @Router /users/ [get]
+// @Router /v1/users/ [get]
 func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -238,7 +238,7 @@ func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} map[string]interface{} "Invalid request"
 // @Failure 404 {object} map[string]interface{} "User not found"
 // @Failure 500 {object} map[string]interface{} "Server error"
-// @Router /users/{id} [put]
+// @Router /v1/users/{id} [put]
 func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := chi.URLParam(r, "id")
@@ -303,7 +303,7 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} map[string]interface{} "Invalid request"
 // @Failure 404 {object} map[string]interface{} "User not found"
 // @Failure 500 {object} map[string]interface{} "Server error"
-// @Router /users/{id}/role [patch]
+// @Router /v1/users/{id}/role [patch]
 func (h *UserHandler) ChangeRole(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := chi.URLParam(r, "id")
@@ -349,7 +349,7 @@ func (h *UserHandler) ChangeRole(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} map[string]interface{} "User deleted"
 // @Failure 400 {object} map[string]interface{} "Invalid request"
 // @Failure 500 {object} map[string]interface{} "Server error"
-// @Router /users/{id} [delete]
+// @Router /v1/users/{id} [delete]
 func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := chi.URLParam(r, "id")

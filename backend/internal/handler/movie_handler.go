@@ -38,7 +38,7 @@ func NewMovieHandler(service *service.MovieService) *MovieHandler {
 // @Param sort_by query string false "Sort field (title, rating, release_date)" default(release_date)
 // @Param sort_order query string false "asc or desc" default(desc)
 // @Success 200 {object} map[string]interface{}
-// @Router /api/v1/movies [get]
+// @Router /v1/movies [get]
 func (h *MovieHandler) List(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	if page < 1 {
@@ -113,7 +113,7 @@ func (h *MovieHandler) List(w http.ResponseWriter, r *http.Request) {
 // @Param id path int true "Movie ID"
 // @Success 200 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{} "Movie not found"
-// @Router /api/v1/movies/{id} [get]
+// @Router /v1/movies/{id} [get]
 func (h *MovieHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -144,7 +144,7 @@ func (h *MovieHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 // @Param slug path string true "Movie Slug"
 // @Success 200 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{} "Movie not found"
-// @Router /api/v1/movies/slug/{slug} [get]
+// @Router /v1/movies/slug/{slug} [get]
 func (h *MovieHandler) GetBySlug(w http.ResponseWriter, r *http.Request) {
 	slug := chi.URLParam(r, "slug")
 
@@ -173,7 +173,7 @@ func (h *MovieHandler) GetBySlug(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} map[string]interface{} "Invalid request"
 // @Failure 401 {object} map[string]interface{} "Unauthorized"
 // @Failure 403 {object} map[string]interface{} "Forbidden"
-// @Router /api/v1/movies [post]
+// @Router /v1/movies [post]
 func (h *MovieHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req domain.CreateMovieRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -210,7 +210,7 @@ func (h *MovieHandler) Create(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} map[string]interface{} "Unauthorized"
 // @Failure 403 {object} map[string]interface{} "Forbidden"
 // @Failure 404 {object} map[string]interface{} "Movie not found"
-// @Router /api/v1/movies/{id} [put]
+// @Router /v1/movies/{id} [put]
 func (h *MovieHandler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -250,7 +250,7 @@ func (h *MovieHandler) Update(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} map[string]interface{} "Unauthorized"
 // @Failure 403 {object} map[string]interface{} "Forbidden"
 // @Failure 404 {object} map[string]interface{} "Movie not found"
-// @Router /api/v1/movies/{id} [delete]
+// @Router /v1/movies/{id} [delete]
 func (h *MovieHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -283,7 +283,7 @@ func (h *MovieHandler) Delete(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} map[string]interface{} "Invalid request"
 // @Failure 401 {object} map[string]interface{} "Unauthorized"
 // @Failure 403 {object} map[string]interface{} "Forbidden"
-// @Router /api/v1/movies/bulk [post]
+// @Router /v1/movies/bulk [post]
 func (h *MovieHandler) BulkCreate(w http.ResponseWriter, r *http.Request) {
 	var req domain.BulkCreateMoviesRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

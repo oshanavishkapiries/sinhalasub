@@ -33,7 +33,7 @@ func NewSubtitleHandler(service *service.SubtitleService) *SubtitleHandler {
 // @Param limit query int false "Items per page" default(20)
 // @Param language query string false "Filter by language"
 // @Success 200 {object} map[string]interface{}
-// @Router /api/v1/movies/{movieId}/subtitles [get]
+// @Router /v1/movies/{movieId}/subtitles [get]
 func (h *SubtitleHandler) List(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)
@@ -84,7 +84,7 @@ func (h *SubtitleHandler) List(w http.ResponseWriter, r *http.Request) {
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/movies/{movieId}/subtitles [post]
+// @Router /v1/movies/{movieId}/subtitles [post]
 func (h *SubtitleHandler) Create(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)
@@ -125,7 +125,7 @@ func (h *SubtitleHandler) Create(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/subtitles/{id} [put]
+// @Router /v1/subtitles/{id} [put]
 func (h *SubtitleHandler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -162,7 +162,7 @@ func (h *SubtitleHandler) Update(w http.ResponseWriter, r *http.Request) {
 // @Success 204
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/subtitles/{id} [delete]
+// @Router /v1/subtitles/{id} [delete]
 func (h *SubtitleHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -195,7 +195,7 @@ func (h *SubtitleHandler) Delete(w http.ResponseWriter, r *http.Request) {
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/movies/{movieId}/subtitles/bulk [post]
+// @Router /v1/movies/{movieId}/subtitles/bulk [post]
 func (h *SubtitleHandler) BulkCreate(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)

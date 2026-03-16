@@ -34,7 +34,7 @@ func NewDownloadOptionHandler(service *service.DownloadOptionService) *DownloadO
 // @Param video_quality query string false "Filter by video quality"
 // @Param download_option_type query string false "Filter by download type"
 // @Success 200 {object} map[string]interface{}
-// @Router /api/v1/movies/{movieId}/downloads [get]
+// @Router /v1/movies/{movieId}/downloads [get]
 func (h *DownloadOptionHandler) List(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)
@@ -86,7 +86,7 @@ func (h *DownloadOptionHandler) List(w http.ResponseWriter, r *http.Request) {
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/movies/{movieId}/downloads [post]
+// @Router /v1/movies/{movieId}/downloads [post]
 func (h *DownloadOptionHandler) Create(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)
@@ -127,7 +127,7 @@ func (h *DownloadOptionHandler) Create(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/downloads/{id} [put]
+// @Router /v1/downloads/{id} [put]
 func (h *DownloadOptionHandler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -164,7 +164,7 @@ func (h *DownloadOptionHandler) Update(w http.ResponseWriter, r *http.Request) {
 // @Success 204
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/downloads/{id} [delete]
+// @Router /v1/downloads/{id} [delete]
 func (h *DownloadOptionHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -197,7 +197,7 @@ func (h *DownloadOptionHandler) Delete(w http.ResponseWriter, r *http.Request) {
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
-// @Router /api/v1/movies/{movieId}/downloads/bulk [post]
+// @Router /v1/movies/{movieId}/downloads/bulk [post]
 func (h *DownloadOptionHandler) BulkCreate(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)

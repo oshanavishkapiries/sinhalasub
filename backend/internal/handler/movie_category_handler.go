@@ -33,7 +33,7 @@ func NewMovieCategoryHandler(service *service.MovieCategoryService) *MovieCatego
 // @Param limit query int false "Items per page" default(20)
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{} "Invalid movie ID"
-// @Router /api/v1/movies/{movieId}/categories [get]
+// @Router /v1/movies/{movieId}/categories [get]
 func (h *MovieCategoryHandler) List(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)
@@ -84,7 +84,7 @@ func (h *MovieCategoryHandler) List(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} map[string]interface{} "Unauthorized"
 // @Failure 403 {object} map[string]interface{} "Forbidden"
 // @Failure 404 {object} map[string]interface{} "Movie not found"
-// @Router /api/v1/movies/{movieId}/categories [post]
+// @Router /v1/movies/{movieId}/categories [post]
 func (h *MovieCategoryHandler) Add(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)
@@ -126,7 +126,7 @@ func (h *MovieCategoryHandler) Add(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} map[string]interface{} "Unauthorized"
 // @Failure 403 {object} map[string]interface{} "Forbidden"
 // @Failure 404 {object} map[string]interface{} "Category not found"
-// @Router /api/v1/movies/{movieId}/categories/{categoryId} [delete]
+// @Router /v1/movies/{movieId}/categories/{categoryId} [delete]
 func (h *MovieCategoryHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)
@@ -168,7 +168,7 @@ func (h *MovieCategoryHandler) Delete(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} map[string]interface{} "Unauthorized"
 // @Failure 403 {object} map[string]interface{} "Forbidden"
 // @Failure 404 {object} map[string]interface{} "Movie not found"
-// @Router /api/v1/movies/{movieId}/categories/bulk [post]
+// @Router /v1/movies/{movieId}/categories/bulk [post]
 func (h *MovieCategoryHandler) BulkAdd(w http.ResponseWriter, r *http.Request) {
 	movieIDStr := chi.URLParam(r, "movieId")
 	movieID, err := strconv.Atoi(movieIDStr)
