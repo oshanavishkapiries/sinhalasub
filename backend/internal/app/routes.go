@@ -22,15 +22,16 @@ func loadRoutes(container *config.Container) *chi.Mux {
 	setupUtilityRoutes(router, container)
 
 	// Register API routes
-	router.Route("/api/v1", func(v1 chi.Router) {
+	router.Route("/api", func(r chi.Router) {
 		// Auth routes
-		registerAuthRoutes(v1, container)
+		registerAuthRoutes(r, container)
 
 		// User management routes
-		registerUserRoutes(v1, container)
+		registerUserRoutes(r, container)
 
-		// Movie routes
-		registerMovieRoutes(v1, container)
+		r.Route("/v1", func(v1 chi.Router) {
+			registerMovieRoutes(v1, container)
+		})
 	})
 
 	return router
