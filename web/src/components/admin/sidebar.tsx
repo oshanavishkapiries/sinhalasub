@@ -89,7 +89,7 @@ export function AdminSidebar() {
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-border" />
               <DropdownMenuItem asChild className="cursor-pointer hover:bg-white/10 focus:bg-white/10">
-                <Link href="/admin/movies?create=1">Movie</Link>
+                <Link href="/admin/movies/create">Movie</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-border" />
               <DropdownMenuItem asChild className="cursor-pointer hover:bg-white/10 focus:bg-white/10">
@@ -158,7 +158,7 @@ export function AdminSidebar() {
                 <Link href="/admin/users?create=1" onClick={toggle}>User</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="cursor-pointer hover:bg-white/10 focus:bg-white/10">
-                <Link href="/admin/movies?create=1" onClick={toggle}>Movie</Link>
+                <Link href="/admin/movies/create" onClick={toggle}>Movie</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-border" />
               <DropdownMenuItem asChild className="cursor-pointer hover:bg-white/10 focus:bg-white/10">

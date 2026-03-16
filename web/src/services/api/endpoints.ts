@@ -29,6 +29,12 @@ export const ENDPOINTS = {
   USERS: '/users/',
   USER_BY_ID: (id: string) => `/users/${id}`,
   USER_ROLE: (id: string) => `/users/${id}/role`,
+
+  // Admin Content
+  ADMIN_CONTENT: '/admin/content',
+  ADMIN_CONTENT_BY_ID: (id: string) => `/admin/content/${id}`,
+  ADMIN_CONTENT_PUBLISH: (id: string) => `/admin/content/${id}/publish`,
+  ADMIN_CONTENT_BULK_DELETE: '/admin/content/bulk-delete',
 };
 
 /**
@@ -39,4 +45,5 @@ export const QUERY_KEYS = {
   // Auth/admin
   AUTH_ME: ['auth', 'me'] as const,
   ADMIN_USERS: (params: Record<string, unknown>) => ['admin', 'users', params] as const,
+  ADMIN_CONTENT: (params: Record<string, unknown>) => ['admin', 'content', params] as const,
 };
