@@ -70,7 +70,7 @@ export async function createUpdateMovieDetails(
   data: CreateUpdateMovieDetailRequest
 ): Promise<MovieOperationResponse> {
   try {
-    const response = await apiClient.post<MovieOperationResponse>(
+    const response = await apiClient.put<MovieOperationResponse>(
       ENDPOINTS.MOVIE_DETAILS(movieId),
       data
     );

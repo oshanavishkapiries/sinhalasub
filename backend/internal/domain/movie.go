@@ -17,22 +17,22 @@ type Movie struct {
 
 // CreateMovieRequest represents the request to create a movie
 type CreateMovieRequest struct {
-	Title       string     `json:"title" binding:"required"`
-	Slug        string     `json:"slug"`
-	Rating      *float32   `json:"rating"`
-	ReleaseDate *time.Time `json:"release_date"`
-	PosterURL   string     `json:"poster_url"`
-	Overview    string     `json:"overview"`
+	Title       string   `json:"title" binding:"required"`
+	Slug        string   `json:"slug"`
+	Rating      *float32 `json:"rating"`
+	ReleaseDate string   `json:"release_date"`
+	PosterURL   string   `json:"poster_url"`
+	Overview    string   `json:"overview"`
 }
 
 // UpdateMovieRequest represents the request to update a movie
 type UpdateMovieRequest struct {
-	Title       string     `json:"title"`
-	Slug        string     `json:"slug"`
-	Rating      *float32   `json:"rating"`
-	ReleaseDate *time.Time `json:"release_date"`
-	PosterURL   string     `json:"poster_url"`
-	Overview    string     `json:"overview"`
+	Title       string   `json:"title"`
+	Slug        string   `json:"slug"`
+	Rating      *float32 `json:"rating"`
+	ReleaseDate string   `json:"release_date"`
+	PosterURL   string   `json:"poster_url"`
+	Overview    string   `json:"overview"`
 }
 
 // BulkCreateMoviesRequest represents bulk create request

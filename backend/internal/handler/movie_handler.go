@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/domain"
@@ -186,6 +187,15 @@ func (h *MovieHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Convert release_date string to time.Time if provided
+	if req.ReleaseDate != "" {
+		_, err := time.Parse("2006-01-02", req.ReleaseDate)
+		if err != nil {
+			response.BadRequest(w, "Invalid release_date format. Use YYYY-MM-DD")
+			return
+		}
+	}
+
 	movie, err := h.service.Create(&req)
 	if err != nil {
 		response.InternalServerError(w, "Failed to create movie")
@@ -223,6 +233,15 @@ func (h *MovieHandler) Update(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		response.BadRequest(w, "Invalid request body")
 		return
+	}
+
+	// Validate release_date format if provided
+	if req.ReleaseDate != "" {
+		_, err := time.Parse("2006-01-02", req.ReleaseDate)
+		if err != nil {
+			response.BadRequest(w, "Invalid release_date format. Use YYYY-MM-DD")
+			return
+		}
 	}
 
 	movie, err := h.service.Update(id, &req)

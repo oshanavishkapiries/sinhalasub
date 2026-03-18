@@ -3,6 +3,7 @@ package service
 import (
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/domain"
 	"github.com/oshanavishkapiries/sinhalasub/backend/internal/repository"
@@ -43,10 +44,22 @@ func (s *MovieService) GenerateSlug(title string) string {
 
 // Create creates a new movie
 func (s *MovieService) Create(req *domain.CreateMovieRequest) (*domain.Movie, error) {
+	// Parse release_date string to time.Time
+	var releaseDate *time.Time
+	if req.ReleaseDate != "" {
+		t, err := time.Parse("2006-01-02", req.ReleaseDate)
+		if err != nil {
+			// If parsing fails, just skip it
+			releaseDate = nil
+		} else {
+			releaseDate = &t
+		}
+	}
+
 	movie := &domain.Movie{
 		Title:       req.Title,
 		Rating:      req.Rating,
-		ReleaseDate: req.ReleaseDate,
+		ReleaseDate: releaseDate,
 		PosterURL:   req.PosterURL,
 		Overview:    req.Overview,
 	}
@@ -97,10 +110,22 @@ func (s *MovieService) List(page, limit int, filters map[string]interface{}) ([]
 
 // Update updates a movie
 func (s *MovieService) Update(id int, req *domain.UpdateMovieRequest) (*domain.Movie, error) {
+	// Parse release_date string to time.Time
+	var releaseDate *time.Time
+	if req.ReleaseDate != "" {
+		t, err := time.Parse("2006-01-02", req.ReleaseDate)
+		if err != nil {
+			// If parsing fails, just skip it
+			releaseDate = nil
+		} else {
+			releaseDate = &t
+		}
+	}
+
 	movie := &domain.Movie{
 		Title:       req.Title,
 		Rating:      req.Rating,
-		ReleaseDate: req.ReleaseDate,
+		ReleaseDate: releaseDate,
 		PosterURL:   req.PosterURL,
 		Overview:    req.Overview,
 	}
@@ -154,10 +179,22 @@ func (s *MovieService) BulkCreate(reqs []*domain.CreateMovieRequest) ([]*domain.
 	movies := make([]*domain.Movie, 0)
 
 	for _, req := range reqs {
+		// Parse release_date string to time.Time
+		var releaseDate *time.Time
+		if req.ReleaseDate != "" {
+			t, err := time.Parse("2006-01-02", req.ReleaseDate)
+			if err != nil {
+				// If parsing fails, just skip it
+				releaseDate = nil
+			} else {
+				releaseDate = &t
+			}
+		}
+
 		movie := &domain.Movie{
 			Title:       req.Title,
 			Rating:      req.Rating,
-			ReleaseDate: req.ReleaseDate,
+			ReleaseDate: releaseDate,
 			PosterURL:   req.PosterURL,
 			Overview:    req.Overview,
 		}
