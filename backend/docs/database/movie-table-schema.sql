@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS movies (
                                       rating DECIMAL(3, 1),
                                       release_date DATE,
                                       poster_url TEXT,
+                                      overview TEXT,
                                       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                                       updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

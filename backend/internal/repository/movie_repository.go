@@ -22,12 +22,12 @@ func NewMovieRepository(db *sql.DB) *MovieRepository {
 // Create creates a new movie
 func (r *MovieRepository) Create(movie *domain.Movie) error {
 	query := `
-		INSERT INTO movies (title, slug, rating, release_date, poster_url, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+		INSERT INTO movies (title, slug, rating, release_date, poster_url, overview, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
 		RETURNING id, created_at, updated_at
 	`
 
-	err := r.db.QueryRow(query, movie.Title, movie.Slug, movie.Rating, movie.ReleaseDate, movie.PosterURL).
+	err := r.db.QueryRow(query, movie.Title, movie.Slug, movie.Rating, movie.ReleaseDate, movie.PosterURL, movie.Overview).
 		Scan(&movie.ID, &movie.CreatedAt, &movie.UpdatedAt)
 
 	if err != nil {
@@ -43,14 +43,14 @@ func (r *MovieRepository) Create(movie *domain.Movie) error {
 // GetByID retrieves a movie by ID
 func (r *MovieRepository) GetByID(id int) (*domain.Movie, error) {
 	query := `
-		SELECT id, title, slug, rating, release_date, poster_url, created_at, updated_at
+		SELECT id, title, slug, rating, release_date, poster_url, overview, created_at, updated_at
 		FROM movies
 		WHERE id = $1
 	`
 
 	movie := &domain.Movie{}
 	err := r.db.QueryRow(query, id).
-		Scan(&movie.ID, &movie.Title, &movie.Slug, &movie.Rating, &movie.ReleaseDate, &movie.PosterURL, &movie.CreatedAt, &movie.UpdatedAt)
+		Scan(&movie.ID, &movie.Title, &movie.Slug, &movie.Rating, &movie.ReleaseDate, &movie.PosterURL, &movie.Overview, &movie.CreatedAt, &movie.UpdatedAt)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -65,14 +65,14 @@ func (r *MovieRepository) GetByID(id int) (*domain.Movie, error) {
 // GetBySlug retrieves a movie by slug
 func (r *MovieRepository) GetBySlug(slug string) (*domain.Movie, error) {
 	query := `
-		SELECT id, title, slug, rating, release_date, poster_url, created_at, updated_at
+		SELECT id, title, slug, rating, release_date, poster_url, overview, created_at, updated_at
 		FROM movies
 		WHERE slug = $1
 	`
 
 	movie := &domain.Movie{}
 	err := r.db.QueryRow(query, slug).
-		Scan(&movie.ID, &movie.Title, &movie.Slug, &movie.Rating, &movie.ReleaseDate, &movie.PosterURL, &movie.CreatedAt, &movie.UpdatedAt)
+		Scan(&movie.ID, &movie.Title, &movie.Slug, &movie.Rating, &movie.ReleaseDate, &movie.PosterURL, &movie.Overview, &movie.CreatedAt, &movie.UpdatedAt)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -153,7 +153,7 @@ func (r *MovieRepository) List(page, limit int, filters map[string]interface{}) 
 	args = append(args, limit, offset)
 
 	query := fmt.Sprintf(`
-		SELECT id, title, slug, rating, release_date, poster_url, created_at, updated_at
+		SELECT id, title, slug, rating, release_date, poster_url, overview, created_at, updated_at
 		FROM movies
 		%s
 		ORDER BY %s %s
@@ -169,7 +169,7 @@ func (r *MovieRepository) List(page, limit int, filters map[string]interface{}) 
 	movies := make([]*domain.Movie, 0)
 	for rows.Next() {
 		movie := &domain.Movie{}
-		err := rows.Scan(&movie.ID, &movie.Title, &movie.Slug, &movie.Rating, &movie.ReleaseDate, &movie.PosterURL, &movie.CreatedAt, &movie.UpdatedAt)
+		err := rows.Scan(&movie.ID, &movie.Title, &movie.Slug, &movie.Rating, &movie.ReleaseDate, &movie.PosterURL, &movie.Overview, &movie.CreatedAt, &movie.UpdatedAt)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -188,12 +188,13 @@ func (r *MovieRepository) Update(id int, movie *domain.Movie) error {
 			rating = COALESCE($3, rating),
 			release_date = COALESCE($4, release_date),
 			poster_url = COALESCE(NULLIF($5, ''), poster_url),
+			overview = COALESCE(NULLIF($6, ''), overview),
 			updated_at = NOW()
-		WHERE id = $6
+		WHERE id = $7
 		RETURNING id, created_at, updated_at
 	`
 
-	err := r.db.QueryRow(query, movie.Title, movie.Slug, movie.Rating, movie.ReleaseDate, movie.PosterURL, id).
+	err := r.db.QueryRow(query, movie.Title, movie.Slug, movie.Rating, movie.ReleaseDate, movie.PosterURL, movie.Overview, id).
 		Scan(&movie.ID, &movie.CreatedAt, &movie.UpdatedAt)
 
 	if err != nil {
@@ -240,12 +241,12 @@ func (r *MovieRepository) BulkCreate(movies []*domain.Movie) error {
 
 	for _, movie := range movies {
 		query := `
-			INSERT INTO movies (title, slug, rating, release_date, poster_url, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+			INSERT INTO movies (title, slug, rating, release_date, poster_url, overview, created_at, updated_at)
+			VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
 			RETURNING id, created_at, updated_at
 		`
 
-		err := tx.QueryRow(query, movie.Title, movie.Slug, movie.Rating, movie.ReleaseDate, movie.PosterURL).
+		err := tx.QueryRow(query, movie.Title, movie.Slug, movie.Rating, movie.ReleaseDate, movie.PosterURL, movie.Overview).
 			Scan(&movie.ID, &movie.CreatedAt, &movie.UpdatedAt)
 
 		if err != nil {

@@ -48,6 +48,7 @@ func (s *MovieService) Create(req *domain.CreateMovieRequest) (*domain.Movie, er
 		Rating:      req.Rating,
 		ReleaseDate: req.ReleaseDate,
 		PosterURL:   req.PosterURL,
+		Overview:    req.Overview,
 	}
 
 	// Generate slug if not provided
@@ -101,6 +102,7 @@ func (s *MovieService) Update(id int, req *domain.UpdateMovieRequest) (*domain.M
 		Rating:      req.Rating,
 		ReleaseDate: req.ReleaseDate,
 		PosterURL:   req.PosterURL,
+		Overview:    req.Overview,
 	}
 
 	// Generate new slug if provided
@@ -157,6 +159,7 @@ func (s *MovieService) BulkCreate(reqs []*domain.CreateMovieRequest) ([]*domain.
 			Rating:      req.Rating,
 			ReleaseDate: req.ReleaseDate,
 			PosterURL:   req.PosterURL,
+			Overview:    req.Overview,
 		}
 
 		// Generate slug if not provided

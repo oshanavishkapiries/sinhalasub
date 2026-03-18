@@ -6,6 +6,7 @@ slug : string (unique)
 rating : float (imdb)
 release_date : date
 poster_url : string
+overview : string
 created_at : timestamp
 updated_at : timestamp
 

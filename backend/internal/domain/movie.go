@@ -10,6 +10,7 @@ type Movie struct {
 	Rating      *float32   `json:"rating"`
 	ReleaseDate *time.Time `json:"release_date"`
 	PosterURL   string     `json:"poster_url"`
+	Overview    string     `json:"overview"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
 }
@@ -21,6 +22,7 @@ type CreateMovieRequest struct {
 	Rating      *float32   `json:"rating"`
 	ReleaseDate *time.Time `json:"release_date"`
 	PosterURL   string     `json:"poster_url"`
+	Overview    string     `json:"overview"`
 }
 
 // UpdateMovieRequest represents the request to update a movie
@@ -30,6 +32,7 @@ type UpdateMovieRequest struct {
 	Rating      *float32   `json:"rating"`
 	ReleaseDate *time.Time `json:"release_date"`
 	PosterURL   string     `json:"poster_url"`
+	Overview    string     `json:"overview"`
 }
 
 // BulkCreateMoviesRequest represents bulk create request
