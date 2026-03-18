@@ -1,9 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMovieFormStore, MovieFormData } from '@/stores/movie-form-store';
 import { useToast } from '@/hooks/use-toast';
+import {
+  useCreateMovieMutation,
+  useCreateUpdateMovieDetailsMutation,
+  useBulkAddCastMutation,
+  useBulkAddCategoriesMutation,
+  useBulkAddPlayerProvidersMutation,
+  useBulkAddSubtitlesMutation,
+  useBulkAddDownloadOptionsMutation,
+} from '@/services/hooks/useMovies';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -852,8 +861,30 @@ export default function CreateMovieForm() {
   const { validateAll, getData, reset } = useMovieFormStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [totalSteps] = useState(8);
 
-  const handlePublish = () => {
+  // Initialize all mutations
+  const createMovieMutation = useCreateMovieMutation();
+  const updateDetailsMutation = useCreateUpdateMovieDetailsMutation();
+  const addCastMutation = useBulkAddCastMutation();
+  const addCategoriesMutation = useBulkAddCategoriesMutation();
+  const addPlayersMutation = useBulkAddPlayerProvidersMutation();
+  const addSubtitlesMutation = useBulkAddSubtitlesMutation();
+  const addDownloadsMutation = useBulkAddDownloadOptionsMutation();
+
+  /**
+   * Update step counter and display progress
+   */
+  const updateStep = useCallback((step: number, stepName: string) => {
+    setCurrentStep(step);
+    console.log(`Step ${step}/${totalSteps}: ${stepName}`);
+  }, [totalSteps]);
+
+  /**
+   * Main publish handler with sequential API calls
+   */
+  const handlePublish = async () => {
     const isValid = validateAll();
     if (!isValid) {
       toast({
@@ -864,14 +895,215 @@ export default function CreateMovieForm() {
       return;
     }
 
-    setIsSubmitting(true);
-    const data = getData();
-    console.log('Publishing movie with data:', data);
-    toast({
-      title: 'Published',
-      description: 'Movie data logged to console',
-    });
-    setIsSubmitting(false);
+    try {
+      setIsSubmitting(true);
+      setCurrentStep(0);
+      const formData = getData();
+
+      // STEP 1: Create base movie
+      updateStep(1, 'Creating movie...');
+      const movieResponse = await createMovieMutation.mutateAsync({
+        title: formData.movie.title,
+        slug: formData.movie.slug,
+        poster_url: formData.movie.poster_url,
+        rating: formData.movie.rating,
+        release_date: formData.movie.release_date,
+        overview: formData.movieDetails.overview,
+      });
+
+      if (!movieResponse.success || !movieResponse.data?.id) {
+        throw new Error(movieResponse.error || 'Failed to create movie');
+      }
+
+      const movieId = movieResponse.data.id;
+      console.log('✅ Movie created:', movieId);
+      toast({
+        title: 'Progress',
+        description: `(1/8) Movie created successfully`,
+      });
+
+      // STEP 2: Create/Update movie details
+      updateStep(2, 'Updating movie details...');
+      const detailsResponse = await updateDetailsMutation.mutateAsync({
+        movieId,
+        data: {
+          overview: formData.movieDetails.overview,
+          director: formData.movieDetails.director,
+          language: formData.movieDetails.language,
+          country: formData.movieDetails.country,
+          duration: formData.movieDetails.duration,
+          imdb_id: formData.movieDetails.imdb_id,
+          tmdb_id: formData.movieDetails.tmdb_id,
+          backdrop_url: formData.movieDetails.backdrop_url,
+          trailer_url: formData.movieDetails.trailer_url,
+          adult: formData.movieDetails.adult,
+        },
+      });
+
+      if (!detailsResponse.success) {
+        console.warn('⚠️ Failed to update details, continuing...', detailsResponse.error);
+      } else {
+        console.log('✅ Movie details updated');
+      }
+      toast({
+        title: 'Progress',
+        description: `(2/8) Movie details updated`,
+      });
+
+      // STEP 3: Add categories
+      updateStep(3, 'Adding categories...');
+      if (formData.category.length > 0) {
+        const categoriesResponse = await addCategoriesMutation.mutateAsync({
+          movieId,
+          data: {
+            categories: formData.category.map((cat) => ({
+              category_id: cat.category_id,
+              category_name: cat.category_name,
+            })),
+          },
+        });
+
+        if (!categoriesResponse.success) {
+          console.warn('⚠️ Failed to add categories, continuing...', categoriesResponse.error);
+        } else {
+          console.log('✅ Categories added');
+        }
+      }
+      toast({
+        title: 'Progress',
+        description: `(3/8) Categories added`,
+      });
+
+      // STEP 4: Add cast
+      updateStep(4, 'Adding cast members...');
+      if (formData.cast.length > 0) {
+        const castResponse = await addCastMutation.mutateAsync({
+          movieId,
+          data: {
+            cast: formData.cast.map((actor) => ({
+              actor_name: actor.actor_name,
+              character_name: actor.character_name,
+              actor_image_url: actor.actor_image_url,
+              tmdb_id: actor.tmdb_id,
+            })),
+          },
+        });
+
+        if (!castResponse.success) {
+          console.warn('⚠️ Failed to add cast, continuing...', castResponse.error);
+        } else {
+          console.log('✅ Cast members added');
+        }
+      }
+      toast({
+        title: 'Progress',
+        description: `(4/8) Cast members added`,
+      });
+
+      // STEP 5: Add player providers
+      updateStep(5, 'Adding streaming providers...');
+      if (formData.playerProviders.length > 0) {
+        const playersResponse = await addPlayersMutation.mutateAsync({
+          movieId,
+          data: {
+            providers: formData.playerProviders.map((provider) => ({
+              player_provider: provider.player_provider,
+              player_provider_url: provider.player_provider_url,
+              player_provider_type: provider.player_provider_type,
+              video_quality: provider.video_quality,
+              is_default: provider.is_default,
+              is_ads_available: provider.is_ads_available,
+            })),
+          },
+        });
+
+        if (!playersResponse.success) {
+          console.warn('⚠️ Failed to add players, continuing...', playersResponse.error);
+        } else {
+          console.log('✅ Player providers added');
+        }
+      }
+      toast({
+        title: 'Progress',
+        description: `(5/8) Streaming providers added`,
+      });
+
+      // STEP 6: Add subtitles
+      updateStep(6, 'Adding subtitles...');
+      if (formData.subtitles.length > 0) {
+        const subtitlesResponse = await addSubtitlesMutation.mutateAsync({
+          movieId,
+          data: {
+            subtitles: formData.subtitles.map((sub) => ({
+              language: sub.language,
+              subtitle_url: sub.subtitle_url,
+              subtitle_author: sub.subtitle_author,
+            })),
+          },
+        });
+
+        if (!subtitlesResponse.success) {
+          console.warn('⚠️ Failed to add subtitles, continuing...', subtitlesResponse.error);
+        } else {
+          console.log('✅ Subtitles added');
+        }
+      }
+      toast({
+        title: 'Progress',
+        description: `(6/8) Subtitles added`,
+      });
+
+      // STEP 7: Add download options
+      updateStep(7, 'Adding download options...');
+      if (formData.downloadLinks.length > 0) {
+        const downloadsResponse = await addDownloadsMutation.mutateAsync({
+          movieId,
+          data: {
+            downloads: formData.downloadLinks.map((link) => ({
+              download_option: link.download_option,
+              download_option_type: link.download_option_type,
+              download_option_url: link.download_option_url,
+              video_quality: link.video_quality,
+              file_size: link.file_size,
+            })),
+          },
+        });
+
+        if (!downloadsResponse.success) {
+          console.warn('⚠️ Failed to add downloads, continuing...', downloadsResponse.error);
+        } else {
+          console.log('✅ Download options added');
+        }
+      }
+      toast({
+        title: 'Progress',
+        description: `(7/8) Download options added`,
+      });
+
+      // STEP 8: Complete
+      updateStep(8, 'Finalizing...');
+      reset();
+      setCurrentStep(totalSteps);
+
+      toast({
+        title: '🎉 Success!',
+        description: `Movie "${formData.movie.title}" created successfully with ID: ${movieId}`,
+      });
+
+      // Navigate after short delay
+      setTimeout(() => {
+        router.push('/admin/movies');
+      }, 1000);
+    } catch (error) {
+      console.error('❌ Error publishing movie:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to create movie',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -888,16 +1120,18 @@ export default function CreateMovieForm() {
               <Film className="h-8 w-8" />
               Create New Movie
             </h1>
-            <p className="text-muted-foreground mt-1">Add a new movie to the system</p>
+            <p className="text-muted-foreground mt-1">
+              {isSubmitting ? `Creating movie... (Step ${currentStep}/${totalSteps})` : 'Add a new movie to the system'}
+            </p>
           </div>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" onClick={() => setPreviewOpen(true)}>
+          <Button variant="outline" onClick={() => setPreviewOpen(true)} disabled={isSubmitting}>
             <Eye className="h-4 w-4 mr-2" />
             Preview
           </Button>
           <Button onClick={handlePublish} disabled={isSubmitting}>
-            {isSubmitting ? 'Publishing...' : 'Publish'}
+            {isSubmitting ? `Publishing... (${currentStep}/${totalSteps})` : 'Publish'}
           </Button>
         </div>
       </div>
