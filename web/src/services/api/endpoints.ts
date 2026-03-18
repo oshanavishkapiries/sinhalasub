@@ -15,20 +15,20 @@ export const ENDPOINTS = {
   HEALTH_CHECK: '/health',
 
   // Auth (cookie-based)
-  AUTH_LOGIN: '/auth/login',
-  AUTH_SIGNUP: '/auth/signup',
-  AUTH_VERIFY: '/auth/verify',
-  AUTH_RESEND_VERIFICATION: '/auth/resend-verification',
-  AUTH_ME: '/auth/me',
-  AUTH_REFRESH: '/auth/refresh',
-  AUTH_LOGOUT: '/auth/logout',
-  AUTH_FORGOT_PASSWORD_REQUEST: '/auth/forgot-password/request',
-  AUTH_FORGOT_PASSWORD_RESET: '/auth/forgot-password',
+  AUTH_LOGIN: '/v1/auth/login',
+  AUTH_SIGNUP: '/v1/auth/signup',
+  AUTH_VERIFY: '/v1/auth/verify',
+  AUTH_RESEND_VERIFICATION: '/v1/auth/resend-verification',
+  AUTH_ME: '/v1/auth/me',
+  AUTH_REFRESH: '/v1/auth/refresh',
+  AUTH_LOGOUT: '/v1/auth/logout',
+  AUTH_FORGOT_PASSWORD_REQUEST: '/v1/auth/forgot-password/request',
+  AUTH_FORGOT_PASSWORD_RESET: '/v1/auth/forgot-password',
 
   // Users (under `/api`)
-  USERS: '/users/',
-  USER_BY_ID: (id: string) => `/users/${id}`,
-  USER_ROLE: (id: string) => `/users/${id}/role`,
+  USERS: '/v1/users/',
+  USER_BY_ID: (id: string) => `/v1/users/${id}`,
+  USER_ROLE: (id: string) => `/v1/users/${id}/role`,
 
   // Admin Content
   ADMIN_CONTENT: '/admin/content',
@@ -37,32 +37,32 @@ export const ENDPOINTS = {
   ADMIN_CONTENT_BULK_DELETE: '/admin/content/bulk-delete',
 
   // Movies
-  MOVIES: '/movies',
-  MOVIES_CREATE: '/movies',
-  MOVIES_BULK_CREATE: '/movies/bulk',
+  MOVIES: '/v1/movies',
+  MOVIES_CREATE: '/v1/movies',
+  MOVIES_BULK_CREATE: '/v1/movies/bulk',
   
   // Movie Details
-  MOVIE_DETAILS: (movieId: number) => `/movies/${movieId}/details`,
+  MOVIE_DETAILS: (movieId: number) => `/v1/movies/${movieId}/details`,
   
   // Movie Cast
-  MOVIE_CAST: (movieId: number) => `/movies/${movieId}/cast`,
-  MOVIE_CAST_BULK: (movieId: number) => `/movies/${movieId}/cast/bulk`,
+  MOVIE_CAST: (movieId: number) => `/v1/movies/${movieId}/cast`,
+  MOVIE_CAST_BULK: (movieId: number) => `/v1/movies/${movieId}/cast/bulk`,
   
   // Movie Categories
-  MOVIE_CATEGORIES: (movieId: number) => `/movies/${movieId}/categories`,
-  MOVIE_CATEGORIES_BULK: (movieId: number) => `/movies/${movieId}/categories/bulk`,
+  MOVIE_CATEGORIES: (movieId: number) => `/v1/movies/${movieId}/categories`,
+  MOVIE_CATEGORIES_BULK: (movieId: number) => `/v1/movies/${movieId}/categories/bulk`,
   
   // Movie Players/Streaming
-  MOVIE_PLAYERS: (movieId: number) => `/movies/${movieId}/players`,
-  MOVIE_PLAYERS_BULK: (movieId: number) => `/movies/${movieId}/players/bulk`,
+  MOVIE_PLAYERS: (movieId: number) => `/v1/movies/${movieId}/players`,
+  MOVIE_PLAYERS_BULK: (movieId: number) => `/v1/movies/${movieId}/players/bulk`,
   
   // Movie Subtitles
-  MOVIE_SUBTITLES: (movieId: number) => `/movies/${movieId}/subtitles`,
-  MOVIE_SUBTITLES_BULK: (movieId: number) => `/movies/${movieId}/subtitles/bulk`,
+  MOVIE_SUBTITLES: (movieId: number) => `/v1/movies/${movieId}/subtitles`,
+  MOVIE_SUBTITLES_BULK: (movieId: number) => `/v1/movies/${movieId}/subtitles/bulk`,
   
   // Movie Downloads
-  MOVIE_DOWNLOADS: (movieId: number) => `/movies/${movieId}/downloads`,
-  MOVIE_DOWNLOADS_BULK: (movieId: number) => `/movies/${movieId}/downloads/bulk`,
+  MOVIE_DOWNLOADS: (movieId: number) => `/v1/movies/${movieId}/downloads`,
+  MOVIE_DOWNLOADS_BULK: (movieId: number) => `/v1/movies/${movieId}/downloads/bulk`,
 };
 
 /**

@@ -40,8 +40,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, Trash2, Film, Eye, ImageIcon } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Film, Eye, ImageIcon, Download } from 'lucide-react';
 import Link from 'next/link';
+import { PopulateTMDBDialog } from './populate-tmdb-dialog';
+import type { TMDBMovieData } from '@/types/tmdb';
 
 function MovieBasicSection() {
   const { data, setMovieField, errors } = useMovieFormStore();
@@ -858,9 +860,22 @@ function PreviewContent() {
 export default function CreateMovieForm() {
   const router = useRouter();
   const { toast } = useToast();
-  const { validateAll, getData, reset } = useMovieFormStore();
+  const {
+    validateAll,
+    getData,
+    reset,
+    setMovieField,
+    setMovieDetailsField,
+    addCast,
+    removeCast,
+    updateCast,
+    addCategory,
+    removeCategory,
+    updateCategory,
+  } = useMovieFormStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [populateOpen, setPopulateOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [totalSteps] = useState(8);
 
@@ -880,6 +895,82 @@ export default function CreateMovieForm() {
     setCurrentStep(step);
     console.log(`Step ${step}/${totalSteps}: ${stepName}`);
   }, [totalSteps]);
+
+  /**
+   * Handle TMDB data population
+   */
+  const handlePopulateTMDB = useCallback(
+    (tmdbData: TMDBMovieData) => {
+      try {
+        // Set basic movie info
+        setMovieField('title', tmdbData.movie.title);
+        setMovieField('slug', tmdbData.movie.slug || '');
+        setMovieField('poster_url', tmdbData.movie.poster_url);
+        setMovieField('rating', tmdbData.movie.rating);
+        setMovieField('release_date', tmdbData.movie.release_date);
+
+        // Set movie details
+        setMovieDetailsField('overview', tmdbData.movieDetails.overview);
+        setMovieDetailsField('director', tmdbData.movieDetails.director);
+        setMovieDetailsField('language', tmdbData.movieDetails.language);
+        setMovieDetailsField('country', tmdbData.movieDetails.country);
+        setMovieDetailsField('duration', tmdbData.movieDetails.duration);
+        setMovieDetailsField('imdb_id', tmdbData.movieDetails.imdb_id);
+        setMovieDetailsField('tmdb_id', tmdbData.movieDetails.tmdb_id);
+        setMovieDetailsField('backdrop_url', tmdbData.movieDetails.backdrop_url);
+        setMovieDetailsField('trailer_url', tmdbData.movieDetails.trailer_url);
+        setMovieDetailsField('adult', tmdbData.movieDetails.adult);
+
+        // Set categories
+        const currentData = getData();
+        // Remove existing categories
+        for (let i = currentData.category.length - 1; i >= 0; i--) {
+          removeCategory(i);
+        }
+        // Add new categories
+        tmdbData.categories.forEach((category) => {
+          addCategory();
+        });
+        // Update newly added categories
+        tmdbData.categories.forEach((category, index) => {
+          updateCategory(index, 'category_id', category.category_id);
+          updateCategory(index, 'category_name', category.category_name);
+        });
+
+        // Clear existing cast and add new cast members
+        // Remove existing cast
+        for (let i = currentData.cast.length - 1; i >= 0; i--) {
+          removeCast(i);
+        }
+
+        // Add new cast members
+        tmdbData.cast.forEach((actor) => {
+          addCast();
+        });
+
+        // Update newly added cast
+        tmdbData.cast.forEach((actor, index) => {
+          updateCast(index, 'actor_name', actor.actor_name);
+          updateCast(index, 'character_name', actor.character_name);
+          updateCast(index, 'actor_image_url', actor.actor_image_url);
+          updateCast(index, 'tmdb_id', actor.tmdb_id);
+        });
+
+        toast({
+          title: '✅ Data Populated',
+          description: `Loaded "${tmdbData.movie.title}" with ${tmdbData.categories.length} genres and ${tmdbData.cast.length} cast members`,
+        });
+      } catch (error) {
+        console.error('Error populating form:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to populate form data',
+          variant: 'destructive',
+        });
+      }
+    },
+    [setMovieField, setMovieDetailsField, addCategory, updateCategory, removeCategory, addCast, removeCast, updateCast, getData, toast]
+  );
 
   /**
    * Main publish handler with sequential API calls
@@ -1126,6 +1217,15 @@ export default function CreateMovieForm() {
           </div>
         </div>
         <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={() => setPopulateOpen(true)}
+            disabled={isSubmitting}
+            className="bg-blue-950 hover:bg-blue-900 border-blue-800"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Populate from TMDB
+          </Button>
           <Button variant="outline" onClick={() => setPreviewOpen(true)} disabled={isSubmitting}>
             <Eye className="h-4 w-4 mr-2" />
             Preview
@@ -1187,6 +1287,12 @@ export default function CreateMovieForm() {
           <PreviewContent />
         </DialogContent>
       </Dialog>
+
+      <PopulateTMDBDialog
+        open={populateOpen}
+        onOpenChange={setPopulateOpen}
+        onPopulate={handlePopulateTMDB}
+      />
     </div>
   );
 }
