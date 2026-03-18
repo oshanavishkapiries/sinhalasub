@@ -13,11 +13,28 @@ import {
 import Link from "next/link";
 import { useAuth, useAuthRole } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export function UserNav() {
   const { user, logout, isAuthenticated } = useAuth();
   const { isAdmin } = useAuthRole();
   const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // During hydration, render a consistent placeholder to avoid mismatch
+  if (!isMounted) {
+    return (
+      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+        <Avatar className="h-8 w-8">
+          <AvatarFallback>...</AvatarFallback>
+        </Avatar>
+      </Button>
+    );
+  }
 
   if (!isAuthenticated || !user) {
     return (
