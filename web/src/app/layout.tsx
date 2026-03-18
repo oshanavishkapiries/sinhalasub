@@ -33,6 +33,7 @@ export default function RootLayout({
         className={cn(
           "font-body antialiased min-h-screen bg-background flex flex-col",
         )}
+        suppressHydrationWarning={true}
       >
         <QueryProviders>
           <LayoutClient>{children}</LayoutClient>
